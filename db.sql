@@ -1,3 +1,6 @@
+-- this file is used to document development of the PostgreSQL database
+-- developed by 1928864
+
 -- creates discusison database, ensures it has been created, and connecting to it
 CREATE DATABASE discussion;
 \l
