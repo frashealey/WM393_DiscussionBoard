@@ -16,5 +16,11 @@ SELECT ('$2a$08$ISFEqiuO1MhI1gETCdcj8OjsBjQUhEY6u/6sZ8Xnr3qZ60ZnfCTze' = Crypt('
 
 
 -- uni_user relation
-CREATE TABLE uni_user (id CHAR(8) PRIMARY KEY CHECK (id ~* '^u[0-9]{7}$'), pw TEXT NOT NULL, fname BYTEA NOT NULL, lname BYTEA NOT NULL, email BYTEA NOT NULL CHECK (Encode(Decrypt(email, 'discKey192', 'bf'), 'escape')::VARCHAR ~* '^[A-Za-z0-9._-]+@warwick.ac.uk$'), istutor BYTEA NOT NULL);
-
+CREATE TABLE uni_user (
+    id CHAR(8) PRIMARY KEY CHECK (id ~ '^u[0-9]{7}$'),
+    pw TEXT NOT NULL,
+    fname BYTEA NOT NULL,
+    lname BYTEA NOT NULL,
+    email BYTEA CHECK (Encode(Decrypt(email, 'discKey192', 'bf'), 'escape')::VARCHAR ~ '^[A-Za-z0-9\._-]+\@warwick\.ac\.uk$'),
+    utype BYTEA NOT NULL CHECK (Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) IN ('s', 't'))
+);
