@@ -29,34 +29,23 @@ CREATE TABLE link_user (
     CONSTRAINT not_equal CHECK (lnk_tut_id != lnk_stu_id),
     PRIMARY KEY (lnk_tut_id, lnk_stu_id)
 );
-
 -- trigger to check user role
 CREATE OR REPLACE FUNCTION func_link_role_check() RETURNS trigger AS
 $$
-DECLARE
-tutor_type CHAR(1);
-student_type CHAR(1);
-BEGIN
--- IF ((SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=lnk_tut_id)!='t')
--- THEN RAISE EXCEPTION 'Tutor user must be type tutor';
--- ELSEIF ((SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=lnk_stu_id)!='s'))
--- THEN RAISE EXCEPTION 'Student user must be type student';
+    DECLARE
+        tutor_type CHAR(1);
+        student_type CHAR(1);
+    BEGIN
+        tutor_type = (SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.lnk_tut_id);
+        student_type = (SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.lnk_stu_id);
 
--- tutor_type = (SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user INNER JOIN link_user ON uni_user.id=link_user.lnk_tut_id WHERE uni_user.id=NEW.lnk_tut_id);
-tutor_type = (SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.lnk_tut_id);
+        IF (tutor_type != 't')
+            THEN RAISE EXCEPTION 'Tutor user must be type tutor';
+        ELSEIF (student_type != 's')
+            THEN RAISE EXCEPTION 'Student user must be type student';
+        END IF;
 
-RAISE NOTICE '%', tutor_type; 
-
-RETURN NEW;
-END;
+        RETURN NEW;
+    END;
 $$ LANGUAGE 'plpgsql';
 CREATE TRIGGER trig_link_role_check AFTER INSERT OR UPDATE OR DELETE ON link_user FOR EACH ROW EXECUTE PROCEDURE func_link_role_check();
-
-INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES ('u2139948', 'u1827746');
-
-TRUNCATE TABLE link_user;
-DROP TRIGGER trig_link_role_check ON link_user; DROP FUNCTION func_link_role_check;
-
--- -- these need to be in a function
--- CONSTRAINT role_check_tutor CHECK ((SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=lnk_tut_id)=='t'),
--- CONSTRAINT role_check_student CHECK ((SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=lnk_stu_id)=='s'),

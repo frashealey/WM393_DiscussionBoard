@@ -19,3 +19,17 @@ INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u2139948', Cr
 INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u2139948', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('John', 'discKey192', 'bf'), Encrypt('Smith', 'discKey192', 'bf'), Encrypt('john.smith@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('t', 'discKey192', 'bf'));
 -- reset after testing
 TRUNCATE TABLE uni_user;
+
+-- unit test 2 - verifying link_user constraints/functions
+-- 2.1 - null lnk_tut_id
+INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES (NULL, 'u2139948');
+-- 2.2 - null lnk_stu_id
+INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES ('u1827746', NULL);
+-- 2.3 - invalid (lnk_tut_id = lnk_stu_id)
+INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES ('u1827746', 'u1827746');
+-- 2.4 - invalid (student as tutor & tutor as student)
+INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES ('u1827746', 'u2139948');
+-- 2.5 - valid record
+INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES ('u2139948', 'u1827746');
+-- reset after testing
+TRUNCATE TABLE link_user;
