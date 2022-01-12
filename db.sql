@@ -95,3 +95,19 @@ CREATE TABLE topic (
     top_desc VARCHAR(200) NOT NULL,
     top_datetime TIMESTAMP NOT NULL DEFAULT Now()
 );
+-- inserting example topic
+INSERT INTO topic (top_dis, top_title, top_desc, top_datetime)
+VALUES
+    (1, 'Example topic 1', 'Lorem ipsum dolor sit amet', Now());
+
+-- response
+CREATE TABLE response (
+    res_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    res_user CHAR(8) NOT NULL REFERENCES uni_user(id),
+    res_top INTEGER NOT NULL REFERENCES topic(top_id),
+    res_title VARCHAR(100) NOT NULL,
+    res_text VARCHAR(3000) NOT NULL,
+    res_datetime TIMESTAMP NOT NULL DEFAULT Now(),
+    replyto INTEGER REFERENCES response(res_id),
+    pinned BOOLEAN NOT NULL DEFAULT false
+);

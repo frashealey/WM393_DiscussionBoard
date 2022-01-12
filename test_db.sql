@@ -85,3 +85,34 @@ INSERT INTO topic (top_dis, top_title, top_desc, top_datetime) VALUES (1, 'Examp
 -- reset after testing
 ALTER SEQUENCE topic_top_id_seq RESTART;
 TRUNCATE TABLE topic;
+
+-- unit test 5 - verifying response constraints
+-- setup - inserting valid response (to reply to)
+INSERT INTO response (res_user, res_top, res_title, res_text) VALUES ('u1827746', 1, 'Example response 1', 'Ut enim ad minim veniam');
+-- 5.1 - null res_id
+INSERT INTO response (res_id, res_user, res_top, res_title, res_text, res_datetime, replyto, pinned) VALUES (NULL, 'u1827746', 1, 'Example response 1', 'Excepteur sint occaecat cupidatat non proident', Now(), 1, true);
+-- 5.2 - null res_user
+INSERT INTO response (res_user, res_top, res_title, res_text, res_datetime, replyto, pinned) VALUES (NULL, 1, 'Example response 1', 'Excepteur sint occaecat cupidatat non proident', Now(), 1, true);
+-- 5.3 - undefined res_user (not present in uni_user)
+INSERT INTO response (res_user, res_top, res_title, res_text, res_datetime, replyto, pinned) VALUES ('u0000000', 1, 'Example response 1', 'Excepteur sint occaecat cupidatat non proident', Now(), 1, true);
+-- 5.4 - null res_top
+INSERT INTO response (res_user, res_top, res_title, res_text, res_datetime, replyto, pinned) VALUES ('u1827746', NULL, 'Example response 1', 'Excepteur sint occaecat cupidatat non proident', Now(), 1, true);
+-- 5.5 - undefined res_top (not present in topic)
+INSERT INTO response (res_user, res_top, res_title, res_text, res_datetime, replyto, pinned) VALUES ('u1827746', 99, 'Example response 1', 'Excepteur sint occaecat cupidatat non proident', Now(), 1, true);
+-- 5.6 - null res_title
+INSERT INTO response (res_user, res_top, res_title, res_text, res_datetime, replyto, pinned) VALUES ('u1827746', 1, NULL, 'Excepteur sint occaecat cupidatat non proident', Now(), 1, true);
+-- 5.7 - too-long res_title
+INSERT INTO response (res_user, res_top, res_title, res_text, res_datetime, replyto, pinned) VALUES ('u1827746', 1, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'Excepteur sint occaecat cupidatat non proident', Now(), 1, true);
+-- 5.8 - null res_text
+INSERT INTO response (res_user, res_top, res_title, res_text, res_datetime, replyto, pinned) VALUES ('u1827746', 1, 'Example response 1', NULL, Now(), 1, true);
+-- 5.9 - null res_datetime
+INSERT INTO response (res_user, res_top, res_title, res_text, res_datetime, replyto, pinned) VALUES ('u1827746', 1, 'Example response 1', 'Excepteur sint occaecat cupidatat non proident', NULL, 1, true);
+-- 5.10 - undefined replyto (not present in response)
+INSERT INTO response (res_user, res_top, res_title, res_text, res_datetime, replyto, pinned) VALUES ('u1827746', 1, 'Example response 1', 'Excepteur sint occaecat cupidatat non proident', Now(), 99, true);
+-- 5.11 - null pinned
+INSERT INTO response (res_user, res_top, res_title, res_text, res_datetime, replyto, pinned) VALUES ('u1827746', 1, 'Example response 1', 'Excepteur sint occaecat cupidatat non proident', Now(), 1, NULL);
+-- 5.12 - valid record
+INSERT INTO response (res_user, res_top, res_title, res_text, res_datetime, replyto, pinned) VALUES ('u1827746', 1, 'Example response 1', 'Excepteur sint occaecat cupidatat non proident', Now(), 1, true);
+-- reset after testing
+ALTER SEQUENCE response_res_id_seq RESTART;
+TRUNCATE TABLE response;
