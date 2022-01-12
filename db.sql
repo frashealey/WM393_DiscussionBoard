@@ -2,9 +2,9 @@
 -- developed by 1928864
 
 -- creates discusison database, ensures it has been created, and connects to it
-CREATE DATABASE discussion;
+CREATE DATABASE discussionboard;
 \l
-\c discussion
+\c discussionboard
 
 -- creates pgcrypto extension, used for encrypting/decrypting sensitive data
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
@@ -34,7 +34,7 @@ CREATE TABLE link_user (
     PRIMARY KEY (lnk_tut_id, lnk_stu_id)
 );
 -- trigger to disallow incorrect user types
-CREATE OR REPLACE FUNCTION func_link_type_check() RETURNS trigger AS
+CREATE OR REPLACE FUNCTION func_link_user_type() RETURNS trigger AS
 $$
     DECLARE
         tutor_type CHAR(1);
@@ -52,22 +52,22 @@ $$
         RETURN NEW;
     END;
 $$ LANGUAGE 'plpgsql';
-CREATE TRIGGER trig_link_type_check AFTER INSERT OR UPDATE OR DELETE ON link_user FOR EACH ROW EXECUTE PROCEDURE func_link_type_check();
+CREATE OR REPLACE TRIGGER trig_link_user_type AFTER INSERT OR UPDATE OR DELETE ON link_user FOR EACH ROW EXECUTE PROCEDURE func_link_user_type();
 -- inserting example entries into link user
 INSERT INTO link_user (lnk_tut_id, lnk_stu_id)
 VALUES
     ('u2139948', 'u1827746');
 
--- discussion board
--- (function to enforce 1 non-archived board to be outlined in js)
+-- discussion
+-- (enforcement of 1 non-archived board per tutor to be outlined in js)
 CREATE TABLE discussion (
     dis_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    dis_owner CHAR(8) REFERENCES uni_user(id),
+    dis_owner CHAR(8) NOT NULL REFERENCES uni_user(id),
     dis_title VARCHAR(50) NOT NULL,
-    archived BOOLEAN NOT NULL DEFAULT false
+    archive BOOLEAN NOT NULL DEFAULT false
 );
 -- trigger to ensure only tutors own discussion boards
-CREATE OR REPLACE FUNCTION func_discussion_type_check() RETURNS trigger AS
+CREATE OR REPLACE FUNCTION func_discussion_user_type() RETURNS trigger AS
 $$
     DECLARE
         user_type CHAR(1);
@@ -81,11 +81,8 @@ $$
         RETURN NEW;
     END;
 $$ LANGUAGE 'plpgsql';
-CREATE TRIGGER trig_discussion_type_check AFTER INSERT OR UPDATE OR DELETE ON discussion FOR EACH ROW EXECUTE PROCEDURE func_discussion_type_check();
-
-INSERT INTO discussion (dis_owner, dis_title, archived)
+CREATE OR REPLACE TRIGGER trig_discussion_user_type AFTER INSERT OR UPDATE OR DELETE ON discussion FOR EACH ROW EXECUTE PROCEDURE func_discussion_user_type();
+-- inserting example discussion board
+INSERT INTO discussion (dis_owner, dis_title, archive)
 VALUES
     ('u2139948', 'Example discussion board', false);
-INSERT INTO discussion (dis_owner, dis_title, archived)
-VALUES
-    ('u1827746', 'Example discussion board', false);

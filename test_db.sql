@@ -43,4 +43,22 @@ TRUNCATE TABLE link_user;
 TRUNCATE TABLE uni_user;
 
 -- unit test 3 - verifying discussion constraints
--- 
+-- 3.1 - null dis_id
+INSERT INTO discussion (dis_id, dis_owner, dis_title, archive) VALUES (NULL, 'u2139948', 'Example discussion board', false);
+-- 3.2 - null dis_owner
+INSERT INTO discussion (dis_owner, dis_title, archive) VALUES (NULL, 'Example discussion board', false);
+-- 3.3 - undefined dis_owner (not present in uni_user)
+INSERT INTO discussion (dis_owner, dis_title, archive) VALUES ('u0000000', 'Example discussion board', false);
+-- 3.4 - null dis_title
+INSERT INTO discussion (dis_owner, dis_title, archive) VALUES ('u2139948', NULL, false);
+-- 3.5 - too-long dis_title
+INSERT INTO discussion (dis_owner, dis_title, archive) VALUES ('u2139948', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', false);
+-- 3.6 - null archive
+INSERT INTO discussion (dis_owner, dis_title, archive) VALUES ('u2139948', 'Example discussion board', NULL);
+-- 3.7 - invalid (student owns discussion board)
+INSERT INTO discussion (dis_owner, dis_title, archive) VALUES ('u1827746', 'Example discussion board', false);
+-- 3.8 - valid record
+INSERT INTO discussion (dis_owner, dis_title, archive) VALUES ('u2139948', 'Example discussion board', false);
+-- reset after testing
+ALTER SEQUENCE discussion_dis_id_seq RESTART;
+TRUNCATE TABLE discussion;
