@@ -20,7 +20,7 @@ INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u2139948', Cr
 -- reset after testing
 TRUNCATE TABLE uni_user;
 
--- unit test 2 - verifying link_user constraints/functions
+-- unit test 2 - verifying link_user constraints
 -- setup - inserting example users into uni_user
 INSERT INTO uni_user (id, pw, fname, lname, email, utype)
 VALUES
@@ -62,3 +62,26 @@ INSERT INTO discussion (dis_owner, dis_title, archive) VALUES ('u2139948', 'Exam
 -- reset after testing
 ALTER SEQUENCE discussion_dis_id_seq RESTART;
 TRUNCATE TABLE discussion;
+
+-- unit test 4 - verifying topic constraints
+-- 4.1 - null top_id
+INSERT INTO topic (top_id, top_dis, top_title, top_desc, top_datetime) VALUES (NULL, 1, 'Example topic 1', 'Lorem ipsum dolor sit amet', Now());
+-- 4.2 - null top_dis
+INSERT INTO topic (top_dis, top_title, top_desc, top_datetime) VALUES (NULL, 'Example topic 1', 'Lorem ipsum dolor sit amet', Now());
+-- 4.3 - undefined top_dis (not present in discussion)
+INSERT INTO topic (top_dis, top_title, top_desc, top_datetime) VALUES (99, 'Example topic 1', 'Lorem ipsum dolor sit amet', Now());
+-- 4.4 - null top_title
+INSERT INTO topic (top_dis, top_title, top_desc, top_datetime) VALUES (1, NULL, 'Lorem ipsum dolor sit amet', Now());
+-- 4.5 - too-long top_title
+INSERT INTO topic (top_dis, top_title, top_desc, top_datetime) VALUES (1, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'Lorem ipsum dolor sit amet', Now());
+-- 4.6 - null top_desc
+INSERT INTO topic (top_dis, top_title, top_desc, top_datetime) VALUES (1, 'Example topic 1', NULL, Now());
+-- 4.7 - too-long top_desc
+INSERT INTO topic (top_dis, top_title, top_desc, top_datetime) VALUES (1, 'Example topic 1', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', Now());
+-- 4.8 - null top_datetime
+INSERT INTO topic (top_dis, top_title, top_desc, top_datetime) VALUES (1, 'Example topic 1', 'Lorem ipsum dolor sit amet', NULL);
+-- 4.9 - valid record
+INSERT INTO topic (top_dis, top_title, top_desc, top_datetime) VALUES (1, 'Example topic 1', 'Lorem ipsum dolor sit amet', Now());
+-- reset after testing
+ALTER SEQUENCE topic_top_id_seq RESTART;
+TRUNCATE TABLE topic;

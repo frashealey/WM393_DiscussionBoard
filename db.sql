@@ -53,7 +53,7 @@ $$
     END;
 $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE TRIGGER trig_link_user_type AFTER INSERT OR UPDATE OR DELETE ON link_user FOR EACH ROW EXECUTE PROCEDURE func_link_user_type();
--- inserting example entries into link user
+-- inserting example entries into link_user
 INSERT INTO link_user (lnk_tut_id, lnk_stu_id)
 VALUES
     ('u2139948', 'u1827746');
@@ -86,3 +86,12 @@ CREATE OR REPLACE TRIGGER trig_discussion_user_type AFTER INSERT OR UPDATE OR DE
 INSERT INTO discussion (dis_owner, dis_title, archive)
 VALUES
     ('u2139948', 'Example discussion board', false);
+
+-- topic
+CREATE TABLE topic (
+    top_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    top_dis INTEGER NOT NULL REFERENCES discussion(dis_id),
+    top_title VARCHAR(100) NOT NULL,
+    top_desc VARCHAR(200) NOT NULL,
+    top_datetime TIMESTAMP NOT NULL DEFAULT Now()
+);
