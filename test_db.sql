@@ -116,3 +116,6 @@ INSERT INTO response (res_user, res_top, res_title, res_text, res_datetime, repl
 -- reset after testing
 ALTER SEQUENCE response_res_id_seq RESTART;
 TRUNCATE TABLE response;
+
+-- unit test 6 - verifying like constraints
+-- 6.1 - null

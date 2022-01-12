@@ -111,3 +111,17 @@ CREATE TABLE response (
     replyto INTEGER REFERENCES response(res_id),
     pinned BOOLEAN NOT NULL DEFAULT false
 );
+-- inserting example responses
+INSERT INTO response (res_user, res_top, res_title, res_text)
+VALUES
+    ('u1827746', 1, 'Example response 1', 'Ut enim ad minim veniam');
+INSERT INTO response (res_user, res_top, res_title, res_text, res_datetime, replyto, pinned)
+VALUES
+    ('u1827746', 1, 'Example response 1', 'Excepteur sint occaecat cupidatat non proident', Now(), 1, true);
+
+-- like
+CREATE TABLE like (
+    lke_user CHAR(8) NOT NULL REFERENCES uni_user(id),
+    lke_res INTEGER NOT NULL REFERENCES response(res_id),
+    PRIMARY KEY (lke_user, lke_res)
+);
