@@ -1,4 +1,4 @@
--- this file is used to document development of the PostgreSQL database
+-- this file is used to setup and document development of the PostgreSQL database
 -- developed by 1928864
 
 -- creates discusison database, ensures it has been created, and connects to it
@@ -18,13 +18,6 @@ CREATE TABLE uni_user (
     email BYTEA NOT NULL CHECK (Encode(Decrypt(email, 'discKey192', 'bf'), 'escape')::VARCHAR ~ '^[A-Za-z0-9\._-]+\@warwick\.ac\.uk$'),
     utype BYTEA NOT NULL CHECK (Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) IN ('s', 't'))
 );
--- inserting example users into uni_user
-INSERT INTO uni_user (id, pw, fname, lname, email, utype)
-VALUES
-    ('u2139948', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('John', 'discKey192', 'bf'), Encrypt('Smith', 'discKey192', 'bf'), Encrypt('john.smith@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('t', 'discKey192', 'bf'));
-INSERT INTO uni_user (id, pw, fname, lname, email, utype)
-VALUES
-    ('u1827746', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('Jerry', 'discKey192', 'bf'), Encrypt('Seinfeld', 'discKey192', 'bf'), Encrypt('jerry.seinfeld@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('s', 'discKey192', 'bf'));
 
 -- link_user
 CREATE TABLE link_user (
@@ -33,7 +26,7 @@ CREATE TABLE link_user (
     CONSTRAINT not_equal CHECK (lnk_tut_id != lnk_stu_id),
     PRIMARY KEY (lnk_tut_id, lnk_stu_id)
 );
--- trigger to disallow incorrect user types
+-- trigger to stop incorrect user types
 CREATE OR REPLACE FUNCTION func_link_user_type() RETURNS trigger AS
 $$
     DECLARE
@@ -53,10 +46,6 @@ $$
     END;
 $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE TRIGGER trig_link_user_type AFTER INSERT OR UPDATE OR DELETE ON link_user FOR EACH ROW EXECUTE PROCEDURE func_link_user_type();
--- inserting example entries into link_user
-INSERT INTO link_user (lnk_tut_id, lnk_stu_id)
-VALUES
-    ('u2139948', 'u1827746');
 
 -- discussion
 -- (enforcement of 1 non-archived board per tutor to be outlined in js)
@@ -82,10 +71,6 @@ $$
     END;
 $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE TRIGGER trig_discussion_user_type AFTER INSERT OR UPDATE OR DELETE ON discussion FOR EACH ROW EXECUTE PROCEDURE func_discussion_user_type();
--- inserting example discussion board
-INSERT INTO discussion (dis_owner, dis_title, archive)
-VALUES
-    ('u2139948', 'Example discussion board', false);
 
 -- topic
 CREATE TABLE topic (
@@ -95,10 +80,6 @@ CREATE TABLE topic (
     top_desc VARCHAR(200) NOT NULL,
     top_datetime TIMESTAMP NOT NULL DEFAULT Now()
 );
--- inserting example topic
-INSERT INTO topic (top_dis, top_title, top_desc, top_datetime)
-VALUES
-    (1, 'Example topic 1', 'Lorem ipsum dolor sit amet', Now());
 
 -- response
 CREATE TABLE response (
@@ -111,13 +92,6 @@ CREATE TABLE response (
     replyto INTEGER REFERENCES response(res_id),
     pinned BOOLEAN NOT NULL DEFAULT false
 );
--- inserting example responses
-INSERT INTO response (res_user, res_top, res_title, res_text)
-VALUES
-    ('u1827746', 1, 'Example response 1', 'Ut enim ad minim veniam');
-INSERT INTO response (res_user, res_top, res_title, res_text, res_datetime, replyto, pinned)
-VALUES
-    ('u1827746', 1, 'Example response 1', 'Excepteur sint occaecat cupidatat non proident', Now(), 1, true);
 
 -- liked
 CREATE TABLE liked (
