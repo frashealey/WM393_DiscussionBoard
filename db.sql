@@ -15,8 +15,8 @@ CREATE TABLE uni_user (
     pw TEXT NOT NULL,
     fname BYTEA NOT NULL,
     lname BYTEA NOT NULL,
-    email BYTEA NOT NULL CHECK (Encode(Decrypt(email, 'discKey192', 'bf'), 'escape')::VARCHAR ~ '^[A-Za-z0-9\._-]+\@warwick\.ac\.uk$'),
-    utype BYTEA NOT NULL CHECK (Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) IN ('s', 't'))
+    email BYTEA NOT NULL CHECK (pgp_sym_decrypt(email, 'discKey192', 'cipher-algo=bf') ~ '^[A-Za-z0-9\._-]+\@warwick\.ac\.uk$'),
+    utype BYTEA NOT NULL CHECK (pgp_sym_decrypt(utype, 'discKey192', 'cipher-algo=bf') IN ('s', 't'))
 );
 
 -- link_user

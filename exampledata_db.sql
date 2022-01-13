@@ -5,10 +5,10 @@
 -- uni_user
 INSERT INTO uni_user (id, pw, fname, lname, email, utype)
 VALUES
-    ('u2139948', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('John', 'discKey192', 'bf'), Encrypt('Smith', 'discKey192', 'bf'), Encrypt('john.smith@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('t', 'discKey192', 'bf'));
+    ('u2139948', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('John', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('Smith', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('john.smith@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('t', 'discKey192', 'cipher-algo=bf'));
 INSERT INTO uni_user (id, pw, fname, lname, email, utype)
 VALUES
-    ('u1827746', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('Jerry', 'discKey192', 'bf'), Encrypt('Seinfeld', 'discKey192', 'bf'), Encrypt('jerry.seinfeld@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('s', 'discKey192', 'bf'));
+    ('u1827746', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('Jerry', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('Seinfeld', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('jerry.seinfeld@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('s', 'discKey192', 'cipher-algo=bf'));
 -- link_user
 INSERT INTO link_user (lnk_tut_id, lnk_stu_id)
 VALUES
