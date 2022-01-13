@@ -138,3 +138,14 @@ CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON response EXECU
 -- liked
 CREATE OR REPLACE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON liked FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
 CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON liked EXECUTE PROCEDURE func_db_auditor();
+
+-- creating users, connection pools
+CREATE ROLE reguser;
+
+-- add reguser permissions here
+
+-- prevents creating relations
+REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+-- pools
+CREATE ROLE pool1 LOGIN PASSWORD 'pool1pass';
+GRANT reguser TO pool1;
