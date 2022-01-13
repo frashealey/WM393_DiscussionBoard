@@ -117,5 +117,16 @@ INSERT INTO response (res_user, res_top, res_title, res_text, res_datetime, repl
 ALTER SEQUENCE response_res_id_seq RESTART;
 TRUNCATE TABLE response;
 
--- unit test 6 - verifying like constraints
--- 6.1 - null
+-- unit test 6 - verifying liked constraints
+-- 6.1 - null lke_user
+INSERT INTO liked (lke_user, lke_res) VALUES (NULL, 1);
+-- 6.2 - undefined lke_user (not present in uni_user)
+INSERT INTO liked (lke_user, lke_res) VALUES ('u0000000', 1);
+-- 6.3 - null lke_res
+INSERT INTO liked (lke_user, lke_res) VALUES ('u1827746', NULL);
+-- 6.4 - undefined lke_res (not present in response)
+INSERT INTO liked (lke_user, lke_res) VALUES ('u1827746', 99);
+-- 6.5 - valid record
+INSERT INTO liked (lke_user, lke_res) VALUES ('u1827746', 1);
+-- reset after testing
+TRUNCATE TABLE liked;

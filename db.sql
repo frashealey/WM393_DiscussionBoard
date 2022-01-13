@@ -119,8 +119,8 @@ INSERT INTO response (res_user, res_top, res_title, res_text, res_datetime, repl
 VALUES
     ('u1827746', 1, 'Example response 1', 'Excepteur sint occaecat cupidatat non proident', Now(), 1, true);
 
--- like
-CREATE TABLE like (
+-- liked
+CREATE TABLE liked (
     lke_user CHAR(8) NOT NULL REFERENCES uni_user(id),
     lke_res INTEGER NOT NULL REFERENCES response(res_id),
     PRIMARY KEY (lke_user, lke_res)
