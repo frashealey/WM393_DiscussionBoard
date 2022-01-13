@@ -125,3 +125,42 @@ CREATE TABLE liked (
     lke_res INTEGER NOT NULL REFERENCES response(res_id),
     PRIMARY KEY (lke_user, lke_res)
 );
+
+-- db_audit
+CREATE TABLE db_audit (
+    aud_time TIMESTAMP NOT NULL DEFAULT Now(),
+    aud_user BYTEA NOT NULL,
+    aud_table BYTEA NOT NULL,
+    aud_action VARCHAR(8) NOT NULL CHECK (aud_action IN ('INSERT', 'UPDATE', 'DELETE', 'TRUNCATE')),
+    old_data VARCHAR,
+    new_data VARCHAR,
+    PRIMARY KEY (aud_time, aud_user, aud_table)
+);
+-- auditing trigger
+CREATE OR REPLACE FUNCTION func_db_auditor() RETURNS trigger AS
+$$
+BEGIN
+INSERT INTO db_audit (aud_time, aud_user, aud_table, aud_action, old_data, new_data)
+VALUES
+    (Now(), Encrypt(current_user::BYTEA, 'discKey192', 'bf'), Encrypt(TG_TABLE_NAME::BYTEA, 'discKey192', 'bf'), TG_OP, OLD::VARCHAR, NEW::VARCHAR);
+RETURN NEW;
+END;
+$$ LANGUAGE 'plpgsql';
+-- uni_user
+CREATE OR REPLACE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON uni_user FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
+CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON uni_user EXECUTE PROCEDURE func_db_auditor();
+-- link_user
+CREATE OR REPLACE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON link_user FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
+CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON link_user EXECUTE PROCEDURE func_db_auditor();
+-- discussion
+CREATE OR REPLACE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON discussion FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
+CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON discussion EXECUTE PROCEDURE func_db_auditor();
+-- topic
+CREATE OR REPLACE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON topic FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
+CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON topic EXECUTE PROCEDURE func_db_auditor();
+-- response
+CREATE OR REPLACE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON response FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
+CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON response EXECUTE PROCEDURE func_db_auditor();
+-- liked
+CREATE OR REPLACE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON liked FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
+CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON liked EXECUTE PROCEDURE func_db_auditor();
