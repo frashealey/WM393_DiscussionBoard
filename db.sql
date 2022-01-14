@@ -15,8 +15,8 @@ CREATE TABLE uni_user (
     pw TEXT NOT NULL,
     fname BYTEA NOT NULL,
     lname BYTEA NOT NULL,
-    email BYTEA NOT NULL CHECK (Encode(Decrypt(email, 'discKey192', 'bf'), 'escape')::VARCHAR ~ '^[A-Za-z0-9\._-]+\@warwick\.ac\.uk$'),
-    utype BYTEA NOT NULL CHECK (Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) IN ('s', 't'))
+    email BYTEA NOT NULL CHECK (pgp_sym_decrypt(email, 'discKey192', 'cipher-algo=bf') ~ '^[A-Za-z0-9\._-]+\@warwick\.ac\.uk$'),
+    utype BYTEA NOT NULL CHECK (pgp_sym_decrypt(utype, 'discKey192', 'cipher-algo=bf') IN ('s', 't'))
 );
 
 -- link_user
@@ -33,8 +33,10 @@ $$
         tutor_type CHAR(1);
         student_type CHAR(1);
     BEGIN
-        tutor_type = (SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.lnk_tut_id);
-        student_type = (SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.lnk_stu_id);
+        -- tutor_type = (SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.lnk_tut_id);
+        -- student_type = (SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.lnk_stu_id);
+        tutor_type = (SELECT pgp_sym_decrypt(utype, 'discKey192', 'cipher-algo=bf') as utype FROM uni_user WHERE id=NEW.lnk_tut_id);
+        student_type = (SELECT pgp_sym_decrypt(utype, 'discKey192', 'cipher-algo=bf') as utype FROM uni_user WHERE id=NEW.lnk_stu_id);
 
         IF (tutor_type != 't')
             THEN RAISE EXCEPTION 'Tutor user must be type tutor';
@@ -61,7 +63,8 @@ $$
     DECLARE
         user_type CHAR(1);
     BEGIN
-        user_type = (SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.dis_owner);
+        -- user_type = (SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.dis_owner);
+        user_type = (SELECT pgp_sym_decrypt(utype, 'discKey192', 'cipher-algo=bf') as utype FROM uni_user WHERE id=NEW.dis_owner);
 
         IF (user_type != 't')
             THEN RAISE EXCEPTION 'User must be tutor to own discussion board';
@@ -101,14 +104,17 @@ CREATE TABLE liked (
 );
 
 -- db_audit
+-- PRIMARY KEY (aud_time, aud_user, aud_table) is not possible due to multiple inserts
+-- PRIMARY KEY (aud_time, aud_user, aud_table, new_data) is not possible as delete operations would have null new_data
+-- PRIMARY KEY (aud_time, aud_user, aud_table, old_data) is not possible for the same reasoning for inserts and old_data
 CREATE TABLE db_audit (
+    aud_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     aud_time TIMESTAMP NOT NULL DEFAULT Now(),
     aud_user BYTEA NOT NULL,
     aud_table BYTEA NOT NULL,
     aud_action VARCHAR(8) NOT NULL CHECK (aud_action IN ('INSERT', 'UPDATE', 'DELETE', 'TRUNCATE')),
     old_data VARCHAR,
-    new_data VARCHAR,
-    PRIMARY KEY (aud_time, aud_user, aud_table)
+    new_data VARCHAR
 );
 -- auditing trigger
 CREATE OR REPLACE FUNCTION func_db_auditor() RETURNS trigger AS
@@ -138,3 +144,19 @@ CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON response EXECU
 -- liked
 CREATE OR REPLACE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON liked FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
 CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON liked EXECUTE PROCEDURE func_db_auditor();
+
+-- creating regular (university, non-admin) role
+CREATE ROLE reguser;
+-- permissions
+GRANT SELECT, INSERT, UPDATE(pw, fname, lname, email, utype) ON uni_user TO reguser;
+GRANT SELECT, INSERT, UPDATE(dis_title, archived), DELETE ON discussion TO reguser;
+GRANT SELECT, INSERT, UPDATE(top_title, top_desc), DELETE ON topic TO reguser;
+GRANT SELECT, INSERT, UPDATE(res_title, res_text, pinned) ON response TO reguser;
+GRANT SELECT, INSERT, DELETE ON liked TO reguser;
+GRANT INSERT ON db_audit TO reguser;
+GRANT EXECUTE ON FUNCTION func_db_auditor TO specialist_group;
+-- prevents creating relations
+REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+-- pools
+CREATE ROLE pool1 LOGIN PASSWORD 'pool1pass';
+GRANT reguser TO pool1;
