@@ -145,14 +145,16 @@ CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON response EXECU
 CREATE OR REPLACE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON liked FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
 CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON liked EXECUTE PROCEDURE func_db_auditor();
 
-
-
-
--- creating users, connection pools
+-- creating regular (university, non-admin) role
 CREATE ROLE reguser;
-
--- add reguser permissions here
-
+-- permissions
+GRANT SELECT, INSERT, UPDATE(pw, fname, lname, email, utype) ON uni_user TO reguser;
+GRANT SELECT, INSERT, UPDATE(dis_title, archived), DELETE ON discussion TO reguser;
+GRANT SELECT, INSERT, UPDATE(top_title, top_desc), DELETE ON topic TO reguser;
+GRANT SELECT, INSERT, UPDATE(res_title, res_text, pinned) ON response TO reguser;
+GRANT SELECT, INSERT, DELETE ON liked TO reguser;
+GRANT INSERT ON db_audit TO reguser;
+GRANT EXECUTE ON FUNCTION func_db_auditor TO specialist_group;
 -- prevents creating relations
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 -- pools
