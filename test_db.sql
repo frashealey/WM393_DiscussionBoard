@@ -4,31 +4,35 @@
 
 -- unit test 1 - verifying uni_user constraints
 -- 1.1 - null id
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES (NULL, Crypt('testPass123', gen_salt('bf', 8)), Encrypt('George', 'discKey192', 'bf'), Encrypt('Jones', 'discKey192', 'bf'), Encrypt('george.jones@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('t', 'discKey192', 'bf'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES (NULL, Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('George', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('Jones', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('t', 'discKey192', 'cipher-algo=bf'));
 -- 1.2 - invalid id
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u00000', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('George', 'discKey192', 'bf'), Encrypt('Jones', 'discKey192', 'bf'), Encrypt('george.jones@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('t', 'discKey192', 'bf'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u00000', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('George', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('Jones', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('t', 'discKey192', 'cipher-algo=bf'));
 -- 1.3 - null fname
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), NULL, Encrypt('Jones', 'discKey192', 'bf'), Encrypt('george.jones@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('t', 'discKey192', 'bf'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), NULL, pgp_sym_encrypt('Jones', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('t', 'discKey192', 'cipher-algo=bf'));
 -- 1.4 - null lname
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('George', 'discKey192', 'bf'), NULL, Encrypt('george.jones@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('t', 'discKey192', 'bf'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('George', 'discKey192', 'cipher-algo=bf'), NULL, pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('t', 'discKey192', 'cipher-algo=bf'));
 -- 1.5 - null email
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('George', 'discKey192', 'bf'), Encrypt('Jones', 'discKey192', 'bf'), NULL, Encrypt('t', 'discKey192', 'bf'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('George', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('Jones', 'discKey192', 'cipher-algo=bf'), NULL, pgp_sym_encrypt('t', 'discKey192', 'cipher-algo=bf'));
 -- 1.6 - invalid email
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('George', 'discKey192', 'bf'), Encrypt('Jones', 'discKey192', 'bf'), Encrypt('george.jones@gmail.com', 'discKey192', 'bf'), Encrypt('t', 'discKey192', 'bf'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('George', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('Jones', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('george.jones@gmail.com', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('t', 'discKey192', 'cipher-algo=bf'));
 -- 1.7 - null utype
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('George', 'discKey192', 'bf'), Encrypt('Jones', 'discKey192', 'bf'), Encrypt('george.jones@warwick.ac.uk', 'discKey192', 'bf'), NULL);
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('George', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('Jones', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), NULL);
 -- 1.8 - invalid utype
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('George', 'discKey192', 'bf'), Encrypt('Jones', 'discKey192', 'bf'), Encrypt('george.jones@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('x', 'discKey192', 'bf'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('George', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('Jones', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('x', 'discKey192', 'cipher-algo=bf'));
 -- 1.9 - valid record
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('George', 'discKey192', 'bf'), Encrypt('Jones', 'discKey192', 'bf'), Encrypt('george.jones@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('t', 'discKey192', 'bf'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('George', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('Jones', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('t', 'discKey192', 'cipher-algo=bf'));
 -- verify and reset after testing
 SELECT id FROM uni_user;
 TRUNCATE TABLE liked, response, topic, discussion, link_user, uni_user;
+TRUNCATE TABLE db_audit;
+ALTER SEQUENCE db_audit_aud_id_seq RESTART;
 
 -- unit test 2 - verifying link_user constraints
 -- setup - inserting example users into uni_user
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('George', 'discKey192', 'bf'), Encrypt('Jones', 'discKey192', 'bf'), Encrypt('george.jones@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('t', 'discKey192', 'bf'));
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u8857462', Crypt('testPass456', gen_salt('bf', 8)), Encrypt('Paul', 'discKey192', 'bf'), Encrypt('McDonald', 'discKey192', 'bf'), Encrypt('paul.McDonald@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('s', 'discKey192', 'bf'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype)
+VALUES
+    ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('George', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('Jones', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('t', 'discKey192', 'cipher-algo=bf')),
+    ('u8857462', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('Paul', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('McDonald', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('paul.mcdonald@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('s', 'discKey192', 'cipher-algo=bf'));
 -- 2.1 - null lnk_tut_id
 INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES (NULL, 'u8857462');
 -- 2.2 - null lnk_stu_id
@@ -42,11 +46,15 @@ INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES ('u1987465', 'u8857462');
 -- verify and reset after testing
 SELECT lnk_tut_id, lnk_stu_id FROM link_user;
 TRUNCATE TABLE liked, response, topic, discussion, link_user, uni_user;
+TRUNCATE TABLE db_audit;
+ALTER SEQUENCE db_audit_aud_id_seq RESTART;
 
 -- unit test 3 - verifying discussion constraints
 -- setup - inserting example users into uni_user, and adding their links
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('George', 'discKey192', 'bf'), Encrypt('Jones', 'discKey192', 'bf'), Encrypt('george.jones@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('t', 'discKey192', 'bf'));
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u8857462', Crypt('testPass456', gen_salt('bf', 8)), Encrypt('Paul', 'discKey192', 'bf'), Encrypt('McDonald', 'discKey192', 'bf'), Encrypt('paul.McDonald@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('s', 'discKey192', 'bf'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype)
+VALUES
+    ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('George', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('Jones', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('t', 'discKey192', 'cipher-algo=bf')),
+    ('u8857462', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('Paul', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('McDonald', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('paul.mcdonald@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('s', 'discKey192', 'cipher-algo=bf'));
 INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES ('u1987465', 'u8857462');
 -- 3.1 - null dis_id
 INSERT INTO discussion (dis_id, dis_owner, dis_title, archive) VALUES (NULL, 'u1987465', 'Example discussion board', false);
@@ -68,11 +76,15 @@ INSERT INTO discussion (dis_owner, dis_title, archive) VALUES ('u1987465', 'Exam
 SELECT dis_id, dis_owner, dis_title, archive FROM discussion;
 ALTER SEQUENCE discussion_dis_id_seq RESTART;
 TRUNCATE TABLE liked, response, topic, discussion, link_user, uni_user;
+TRUNCATE TABLE db_audit;
+ALTER SEQUENCE db_audit_aud_id_seq RESTART;
 
 -- unit test 4 - verifying topic constraints
 -- setup - inserting example users, links, and discussion
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('George', 'discKey192', 'bf'), Encrypt('Jones', 'discKey192', 'bf'), Encrypt('george.jones@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('t', 'discKey192', 'bf'));
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u8857462', Crypt('testPass456', gen_salt('bf', 8)), Encrypt('Paul', 'discKey192', 'bf'), Encrypt('McDonald', 'discKey192', 'bf'), Encrypt('paul.McDonald@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('s', 'discKey192', 'bf'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype)
+VALUES
+    ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('George', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('Jones', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('t', 'discKey192', 'cipher-algo=bf')),
+    ('u8857462', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('Paul', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('McDonald', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('paul.mcdonald@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('s', 'discKey192', 'cipher-algo=bf'));
 INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES ('u1987465', 'u8857462');
 INSERT INTO discussion (dis_owner, dis_title, archive) VALUES ('u1987465', 'Example discussion board', false);
 -- 4.1 - null top_id
@@ -98,11 +110,15 @@ SELECT top_id, top_title, top_desc, top_datetime FROM topic;
 ALTER SEQUENCE topic_top_id_seq RESTART;
 ALTER SEQUENCE discussion_dis_id_seq RESTART;
 TRUNCATE TABLE liked, response, topic, discussion, link_user, uni_user;
+TRUNCATE TABLE db_audit;
+ALTER SEQUENCE db_audit_aud_id_seq RESTART;
 
 -- unit test 5 - verifying response constraints
 -- setup - inserting example users, links, discussion, topic, and valid response (to reply to)
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('George', 'discKey192', 'bf'), Encrypt('Jones', 'discKey192', 'bf'), Encrypt('george.jones@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('t', 'discKey192', 'bf'));
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u8857462', Crypt('testPass456', gen_salt('bf', 8)), Encrypt('Paul', 'discKey192', 'bf'), Encrypt('McDonald', 'discKey192', 'bf'), Encrypt('paul.McDonald@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('s', 'discKey192', 'bf'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype)
+VALUES
+    ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('George', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('Jones', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('t', 'discKey192', 'cipher-algo=bf')),
+    ('u8857462', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('Paul', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('McDonald', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('paul.mcdonald@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('s', 'discKey192', 'cipher-algo=bf'));
 INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES ('u1987465', 'u8857462');
 INSERT INTO discussion (dis_owner, dis_title, archive) VALUES ('u1987465', 'Example discussion board', false);
 INSERT INTO topic (top_dis, top_title, top_desc, top_datetime) VALUES (1, 'Example topic 1', 'Lorem ipsum dolor sit amet', Now());
@@ -137,11 +153,15 @@ ALTER SEQUENCE topic_top_id_seq RESTART;
 ALTER SEQUENCE discussion_dis_id_seq RESTART;
 ALTER SEQUENCE response_res_id_seq RESTART;
 TRUNCATE TABLE liked, response, topic, discussion, link_user, uni_user;
+TRUNCATE TABLE db_audit;
+ALTER SEQUENCE db_audit_aud_id_seq RESTART;
 
 -- unit test 6 - verifying liked constraints
 -- setup - inserting example users, links, discussion, topic, and valid response (to reply to)
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), Encrypt('George', 'discKey192', 'bf'), Encrypt('Jones', 'discKey192', 'bf'), Encrypt('george.jones@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('t', 'discKey192', 'bf'));
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u8857462', Crypt('testPass456', gen_salt('bf', 8)), Encrypt('Paul', 'discKey192', 'bf'), Encrypt('McDonald', 'discKey192', 'bf'), Encrypt('paul.McDonald@warwick.ac.uk', 'discKey192', 'bf'), Encrypt('s', 'discKey192', 'bf'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype)
+VALUES
+    ('u1987465', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('George', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('Jones', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('t', 'discKey192', 'cipher-algo=bf')),
+    ('u8857462', Crypt('testPass123', gen_salt('bf', 8)), pgp_sym_encrypt('Paul', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('McDonald', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('paul.mcdonald@warwick.ac.uk', 'discKey192', 'cipher-algo=bf'), pgp_sym_encrypt('s', 'discKey192', 'cipher-algo=bf'));
 INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES ('u1987465', 'u8857462');
 INSERT INTO discussion (dis_owner, dis_title, archive) VALUES ('u1987465', 'Example discussion board', false);
 INSERT INTO topic (top_dis, top_title, top_desc, top_datetime) VALUES (1, 'Example topic 1', 'Lorem ipsum dolor sit amet', Now());
@@ -162,3 +182,5 @@ ALTER SEQUENCE topic_top_id_seq RESTART;
 ALTER SEQUENCE discussion_dis_id_seq RESTART;
 ALTER SEQUENCE response_res_id_seq RESTART;
 TRUNCATE TABLE liked, response, topic, discussion, link_user, uni_user;
+TRUNCATE TABLE db_audit;
+ALTER SEQUENCE db_audit_aud_id_seq RESTART;
