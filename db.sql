@@ -154,7 +154,7 @@ GRANT SELECT, INSERT, UPDATE(top_title, top_desc), DELETE ON topic TO reguser;
 GRANT SELECT, INSERT, UPDATE(res_title, res_text, pinned) ON response TO reguser;
 GRANT SELECT, INSERT, DELETE ON liked TO reguser;
 GRANT INSERT ON db_audit TO reguser;
-GRANT EXECUTE ON FUNCTION func_db_auditor TO specialist_group;
+GRANT EXECUTE ON FUNCTION func_db_auditor TO reguser;
 -- prevents creating relations
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 -- pools
