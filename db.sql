@@ -33,8 +33,6 @@ $$
         tutor_type CHAR(1);
         student_type CHAR(1);
     BEGIN
-        -- tutor_type = (SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.lnk_tut_id);
-        -- student_type = (SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.lnk_stu_id);
         tutor_type = (SELECT pgp_sym_decrypt(utype, 'discKey192', 'cipher-algo=bf') as utype FROM uni_user WHERE id=NEW.lnk_tut_id);
         student_type = (SELECT pgp_sym_decrypt(utype, 'discKey192', 'cipher-algo=bf') as utype FROM uni_user WHERE id=NEW.lnk_stu_id);
 
@@ -63,7 +61,6 @@ $$
     DECLARE
         user_type CHAR(1);
     BEGIN
-        -- user_type = (SELECT Encode(Decrypt(utype, 'discKey192', 'bf'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.dis_owner);
         user_type = (SELECT pgp_sym_decrypt(utype, 'discKey192', 'cipher-algo=bf') as utype FROM uni_user WHERE id=NEW.dis_owner);
 
         IF (user_type != 't')
