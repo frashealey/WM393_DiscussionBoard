@@ -8,7 +8,7 @@ const express = require("express"),
       path = require("path"),
     //   { Pool } = require("pg"),
       hostname = "localhost",
-      port = 3000,
+      port = process.env.PORT || 3000,
     //   dbCreds = {
     //                 user: "pool1",
     //                 host: "localhost",
@@ -30,6 +30,6 @@ server.get("/", async (req, res) => {
 });
 
 // server.listen(process.env.PORT || 3000, hostname, () => {
-server.listen(process.env.PORT || 3000, () => {
+server.listen(port, () => {
     console.log(`Server running at http://${hostname}:${port}`);
 });
