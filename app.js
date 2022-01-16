@@ -29,6 +29,7 @@ server.get("/", async (req, res) => {
     res.render("home");
 });
 
-server.listen(process.env.PORT || 3000, hostname, () => {
+// server.listen(process.env.PORT || 3000, hostname, () => {
+server.listen(process.env.PORT || 3000, () => {
     console.log(`Server running at http://${hostname}:${port}`);
 });
