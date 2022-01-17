@@ -15,8 +15,8 @@ CREATE TABLE uni_user (
     pw TEXT NOT NULL,
     fname BYTEA NOT NULL,
     lname BYTEA NOT NULL,
-    email BYTEA NOT NULL CHECK (pgp_sym_decrypt(email, 'discKey192', 'cipher-algo=aes256') ~ '^[A-Za-z0-9\._-]+\@warwick\.ac\.uk$'),
-    utype BYTEA NOT NULL CHECK (pgp_sym_decrypt(utype, 'discKey192', 'cipher-algo=aes256') IN ('s', 't'))
+    email BYTEA NOT NULL CHECK (pgp_sym_decrypt(email, 'discussKey192192', 'cipher-algo=aes128') ~ '^[A-Za-z0-9\._-]+\@warwick\.ac\.uk$'),
+    utype BYTEA NOT NULL CHECK (pgp_sym_decrypt(utype, 'discussKey192192', 'cipher-algo=aes128') IN ('s', 't'))
 );
 
 -- link_user
@@ -33,8 +33,8 @@ $$
         tutor_type CHAR(1);
         student_type CHAR(1);
     BEGIN
-        tutor_type = (SELECT pgp_sym_decrypt(utype, 'discKey192', 'cipher-algo=aes256') as utype FROM uni_user WHERE id=NEW.lnk_tut_id);
-        student_type = (SELECT pgp_sym_decrypt(utype, 'discKey192', 'cipher-algo=aes256') as utype FROM uni_user WHERE id=NEW.lnk_stu_id);
+        tutor_type = (SELECT pgp_sym_decrypt(utype, 'discussKey192192', 'cipher-algo=aes128') as utype FROM uni_user WHERE id=NEW.lnk_tut_id);
+        student_type = (SELECT pgp_sym_decrypt(utype, 'discussKey192192', 'cipher-algo=aes128') as utype FROM uni_user WHERE id=NEW.lnk_stu_id);
 
         IF (tutor_type != 't')
             THEN RAISE EXCEPTION 'Tutor user must be type tutor';
@@ -61,7 +61,7 @@ $$
     DECLARE
         user_type CHAR(1);
     BEGIN
-        user_type = (SELECT pgp_sym_decrypt(utype, 'discKey192', 'cipher-algo=aes256') as utype FROM uni_user WHERE id=NEW.dis_owner);
+        user_type = (SELECT pgp_sym_decrypt(utype, 'discussKey192192', 'cipher-algo=aes128') as utype FROM uni_user WHERE id=NEW.dis_owner);
 
         IF (user_type != 't')
             THEN RAISE EXCEPTION 'User must be tutor to own discussion board';
@@ -119,7 +119,7 @@ $$
 BEGIN
 INSERT INTO db_audit (aud_time, aud_user, aud_table, aud_action, old_data, new_data)
 VALUES
-    (Now(), pgp_sym_encrypt(current_user, 'discKey192', 'cipher-algo=aes256'), pgp_sym_encrypt(TG_TABLE_NAME, 'discKey192', 'cipher-algo=aes256'), TG_OP, OLD::VARCHAR, NEW::VARCHAR);
+    (Now(), pgp_sym_encrypt(current_user, 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt(TG_TABLE_NAME, 'discussKey192192', 'cipher-algo=aes128'), TG_OP, OLD::VARCHAR, NEW::VARCHAR);
 RETURN NEW;
 END;
 $$ LANGUAGE 'plpgsql';
