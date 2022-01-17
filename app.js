@@ -26,11 +26,17 @@ server.get("/", async (req, res) => {
     // res.statusCode = 200;
     // res.writeHead(200, {"Content-Type": "text/html"});
     const testResults = await pool1.query("SELECT id, pw, fname, lname, utype FROM uni_user;");
-    const hash1 = await bcrypt.hashSync("testPass123", bcrypt.genSaltSync(8));
-    // var decipher = crypto.createDecipheriv("bf-cbc", "discKey192");
-        // dec = Buffer.concat([decipher.update(testResults.rows[0].fname) , decipher.final()]);
-    console.log(hash1);
-    console.log(testResults.rows[0].pw);
+    // const hash1 = await bcrypt.hashSync("testPass123", bcrypt.genSaltSync(8));
+    // const result = await bcrypt.compare("testPass123", hash1);
+
+    const cipher = await crypto.createCipheriv("aes256", "discKey192discKey192discKey19219", "0000000000000000");
+    const encryptedData = cipher.update("testEncrypt", "utf8", "base64") + cipher.final("base64");
+    const decipher = await crypto.createDecipheriv("aes256", "discKey192discKey192discKey19219", "0000000000000000");
+    const decryptedData = decipher.update(encryptedData, "base64", "utf8") + decipher.final("utf8");
+    console.log(encryptedData);
+    console.log(decryptedData);
+
+    // console.log(testResults.rows);
     res.render("home");
 });
 
