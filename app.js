@@ -15,6 +15,7 @@ const express = require("express"),
         database: "discussionboard"
       }),
       crypto = require("crypto"),
+      bcrypt = require("bcrypt"),
       port = process.env.PORT || 3000,
       server = express();
 // set view engine to ejs
@@ -24,10 +25,12 @@ server.use(express.static(path.join(__dirname, "public")));
 server.get("/", async (req, res) => {
     // res.statusCode = 200;
     // res.writeHead(200, {"Content-Type": "text/html"});
-    const testResults = await pool1.query("SELECT id, fname, lname, utype FROM uni_user;");
+    const testResults = await pool1.query("SELECT id, pw, fname, lname, utype FROM uni_user;");
+    const hash1 = await bcrypt.hashSync("testPass123", bcrypt.genSaltSync(8));
     // var decipher = crypto.createDecipheriv("bf-cbc", "discKey192");
         // dec = Buffer.concat([decipher.update(testResults.rows[0].fname) , decipher.final()]);
-    console.log(testResults.rows);
+    console.log(hash1);
+    console.log(testResults.rows[0].pw);
     res.render("home");
 });
 
