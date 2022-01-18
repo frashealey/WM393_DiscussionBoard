@@ -1,0 +1,61 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+}
+body {
+    display: flex;
+    flex-direction: column;
+}
+header, footer {
+    background-color: #552D62;
+    text-align: left;
+}
+main {
+    flex: 1 0 auto;
+}
+footer {
+    flex-shrink: 0;
+    /* padding: 15px 20px 15px 20px; */
+}
+
+#toolbar {
+    vertical-align: middle;
+    float: right;
+    padding: 12px 10px 12px 10px;   /* find correct way to vertical align div? */
+}
+/* .icon {
+    vertical-align: middle;
+} */
+
+.headertext {
+    color: #ffffff;
+}
+h1.headertext {
+    font-family: "Lato", Arial, sans-serif;
+    display:inline-block;
+    padding: 15px 20px 15px 20px;
+}
+
+.footertext {
+    color: #ffffff;
+}
+p {
+    font-family: "Lato", Arial, sans-serif;
+}
+p.footertext {
+    font-size: 11pt;
+}
+#footertextcontainer {
+    display: inline-block;
+    padding: 15px 0px 15px 20px;
+}
+#footerlogo {
+    width: 68px;
+    height: 34px;
+    float: left;
+    padding: 15px 0px 15px 20px;
+}

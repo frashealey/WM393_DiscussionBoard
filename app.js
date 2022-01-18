@@ -29,6 +29,7 @@ server.get("/", async (req, res) => {
     };
 
     res.render("home");
+    // res.render("home", {x: y});
 });
 
 server.listen(port, () => {
