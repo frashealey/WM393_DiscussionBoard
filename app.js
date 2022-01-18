@@ -25,7 +25,7 @@ server.get("/", async (req, res) => {
         console.log(testResults.rows);
     }
     catch (e) {
-        console.log(`Error occurred: ${e}`);
+        console.log(e);
         throw e;
     };
 
