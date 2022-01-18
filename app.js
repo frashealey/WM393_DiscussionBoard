@@ -1,5 +1,3 @@
-const { encrypt } = require("openpgp");
-
 const express = require("express"),
       path = require("path"),
       { Pool } = require("pg"),
@@ -19,10 +17,17 @@ server.use(express.static(path.join(__dirname, "public")));
 server.get("/", async (req, res) => {
     // res.statusCode = 200;
     // res.writeHead(200, {"Content-Type": "text/html"});
-    // const testResults = await pool1.query("SELECT id, pw, fname, lname, utype FROM uni_user;");
-    const testResults = await pool1.query("SELECT Crypt('testPass123', gen_salt('md5'));");
 
-    console.log(testResults.rows);
+    try {
+        const testResults = await pool1.query("SELECT id, pw, fname, lname, utype FROM uni_user;");
+        // const testResults = await pool1.query("SELECT Crypt('testPass123', gen_salt('md5'));");
+        console.log(testResults.rows);
+    }
+    catch (e) {
+        console.log(`Error occurred: ${e}`);
+        throw e;
+    };
+
     res.render("home");
 });
 
