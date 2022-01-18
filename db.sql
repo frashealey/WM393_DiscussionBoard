@@ -145,11 +145,14 @@ CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON liked EXECUTE 
 -- creating regular (university, non-admin) role
 CREATE ROLE reguser;
 -- permissions
-GRANT SELECT, INSERT, UPDATE(pw, fname, lname, email, utype) ON uni_user TO reguser;
-GRANT SELECT, INSERT, UPDATE(dis_title, archived), DELETE ON discussion TO reguser;
-GRANT SELECT, INSERT, UPDATE(top_title, top_desc), DELETE ON topic TO reguser;
-GRANT SELECT, INSERT, UPDATE(res_title, res_text, pinned) ON response TO reguser;
-GRANT SELECT, INSERT, DELETE ON liked TO reguser;
+GRANT SELECT ON uni_user, discussion, topic, response, liked TO reguser;
+GRANT INSERT ON uni_user, discussion, topic, response, liked TO reguser;
+GRANT UPDATE(pw, fname, lname, email, utype) ON uni_user TO reguser;
+GRANT UPDATE(dis_title, archived) ON discussion TO reguser;
+GRANT UPDATE(top_title, top_desc) ON topic TO reguser;
+GRANT UPDATE(res_title, res_text, pinned) ON response TO reguser;
+GRANT DELETE ON discussion, topic, response TO reguser;
+GRANT DELETE ON liked TO reguser;
 GRANT INSERT ON db_audit TO reguser;
 GRANT EXECUTE ON FUNCTION func_db_auditor TO reguser;
 -- prevents creating relations

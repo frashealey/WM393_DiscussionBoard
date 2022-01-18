@@ -19,8 +19,9 @@ server.get("/", async (req, res) => {
     // res.writeHead(200, {"Content-Type": "text/html"});
 
     try {
-        const testResults = await pool1.query("SELECT id, pw, fname, lname, utype FROM uni_user;");
+        // const testResults = await pool1.query("SELECT id, pw, fname, lname, utype FROM uni_user;");
         // const testResults = await pool1.query("SELECT Crypt('testPass123', gen_salt('md5'));");
+        const testResults = await pool1.query("SELECT dis_title FROM discussion;");
         console.log(testResults.rows);
     }
     catch (e) {
