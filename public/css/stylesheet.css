@@ -19,34 +19,56 @@ main {
 }
 footer {
     flex-shrink: 0;
-    /* padding: 15px 20px 15px 20px; */
 }
 
-#toolbar {
+/* nav {
     vertical-align: middle;
     float: right;
-    padding: 12px 10px 12px 10px;   /* find correct way to vertical align div? */
-}
+} */
 /* .icon {
     vertical-align: middle;
 } */
+nav {
+    background-color: #ff0000;
+    overflow: hidden;
+    /* float: right; */
+    display: inline-block;
+    padding: 0px;
+}
+
+nav a {
+    float: left;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 12pt;
+}
+
+nav a:hover {
+    background-color: #cccccc;
+    color: black;
+}
+nav a.active {
+    background-color: #886C91;
+    color: #ffffff;
+}
+
+
 
 .headertext {
     color: #ffffff;
 }
 h1.headertext {
     font-family: "Lato", Arial, sans-serif;
-    display:inline-block;
+    display: inline-block;
     padding: 15px 20px 15px 20px;
 }
 
-.footertext {
-    color: #ffffff;
-}
-p {
+p, a {
     font-family: "Lato", Arial, sans-serif;
 }
-p.footertext {
+p.footertext, a {
+    color: #ffffff;
     font-size: 11pt;
 }
 #footertextcontainer {
