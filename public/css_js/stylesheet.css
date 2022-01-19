@@ -70,6 +70,7 @@ h1.headertext {
     padding: 0px 0px 0px 30px;
     cursor: pointer;
     border: none;
+    transition: 0.2s;
 }
 #navopen:hover {
     color: #999999;
@@ -82,9 +83,18 @@ h1.headertext {
 .signoutcontent {
     display: inline-block;
     padding: 0px 5px 0px 5px;
+    font-size: 16px;
 }
 p.signoutcontent {
     color: #ffffff;
+}
+button.signoutcontent {
+    border: none;
+    padding: 3px 5px 3px 5px;
+    transition: 0.2s;
+}
+button.signoutcontent:hover {
+    background-color: #999999;
 }
 
 p, a, button {
