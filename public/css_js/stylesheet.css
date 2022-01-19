@@ -14,6 +14,9 @@ header, footer {
     background-color: #552D62;
     text-align: left;
 }
+/* #headerlogin {
+    text-align: center;
+} */
 main {
     flex: 1 0 auto;
 }
@@ -21,17 +24,51 @@ footer {
     flex-shrink: 0;
 }
 
-/* .icon {
-    vertical-align: middle;
-} */
-
 .headertext {
     color: #ffffff;
 }
-h1.headertext {
-    font-family: "Lato", Arial, sans-serif;
+h1.headertext.main {
     display: inline-block;
     padding: 15px 20px 15px 20px;
+}
+.headertext.login {
+    display: block;
+}
+p.headertext.login {
+    font-size: 20px;
+}
+h1.headertext.login {
+    padding: 30px 5px 15px 20px;
+}
+
+#loginbox {
+    background-color: #552D62;
+    text-align: center;
+    width: 20%;
+    min-width: 280px;
+    margin: 0 auto;
+}
+.logincontent {
+    /* font-family: "Lato", Arial, sans-serif; */
+    /* padding: 10px 20px 10px 20px; */
+    margin: 0px 20px 0px 20px;
+    text-align: left;
+    font-size: 18px;
+    color: #ffffff;
+}
+.loginfieldcontainer {
+    margin: 10px 0px 10px 0px;
+}
+input[type=text], input[type=password] {
+    font-family: "Lato", Arial, sans-serif;
+    font-size: 20px;
+    padding: 5px;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+}
+label.logincontent {
+    display: block;
 }
 
 #navpanel {
@@ -76,33 +113,56 @@ h1.headertext {
     color: #999999;
 }
 
-#signout {
+#logout {
     float: right;
     padding: 15px 20px 15px 10px;
 }
-.signoutcontent {
+.logoutcontent {
     display: inline-block;
     padding: 0px 5px 0px 5px;
     font-size: 16px;
 }
-p.signoutcontent {
+p.logoutcontent {
     color: #ffffff;
 }
-button.signoutcontent {
+button.logoutcontent {
     border: none;
     padding: 3px 5px 3px 5px;
     transition: 0.2s;
 }
-button.signoutcontent:hover {
+button.loginbutton {
+    color: #ffffff;
+    background-color: #262626;
+    border: none;
+    font-size: 18px;
+    padding: 5px;
+    margin: 10px 0px 20px 0px;
+    width: 100%;
+    transition: 0.2s;
+}
+button.logoutcontent:hover, button.loginbutton:hover {
     background-color: #999999;
 }
+button.loginbutton:hover {
+    color: #000000;
+}
 
-p, a, button {
+input:focus, select:focus, textarea:focus, button:focus {
+    outline: none;
+}
+
+p, h1, a, button, label {
     font-family: "Lato", Arial, sans-serif;
 }
 p.footertext, a {
     color: #ffffff;
     font-size: 14px;
+}
+#repolink {
+    transition: 0.2s;
+}
+#repolink:hover {
+    color: #999999;
 }
 #footertextcontainer {
     display: inline-block;

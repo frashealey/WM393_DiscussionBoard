@@ -5,6 +5,27 @@
   </head>
   <body>
     <main>
+        <div id="loginbox">
+            <h1 class="headertext login">WMGTSS</h1>
+            <p class="headertext login">Login</p>
+
+            <div class="logincontent">
+                <form action="/login" method="POST">
+                  <div class="loginfieldcontainer">
+                    <label for="id">University ID:</label>
+                    <input type="text" name="id" required oninvalid="this.setCustomValidity(' ');" oninput="setCustomValidity(' ')">
+                  </div>
+
+                  <div class="loginfieldcontainer">
+                    <label for="pw">Password:</label>
+                    <input type="password" name="pw" required oninvalid="this.setCustomValidity(' ')" oninput="setCustomValidity(' ')">
+                  </div>
+
+                  <button class="loginbutton" type="submit">Login</button>
+                </form>
+            </div>
+
+        </div>
     </main>
     <footer>
       <%- include("footer"); %>

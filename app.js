@@ -21,6 +21,7 @@ server.get("/", async (req, res) => {
     try {
         // const testResults = await pool1.query("SELECT id, pw, fname, lname, utype FROM uni_user;");
         // const testResults = await pool1.query("SELECT Crypt('testPass123', gen_salt('md5'));");
+        // password query: select id, pw from uni_user where pw = Crypt('testPass123', pw);
         const testResults = await pool1.query("SELECT dis_title FROM discussion;");
         console.log(testResults.rows);
     }
@@ -31,6 +32,10 @@ server.get("/", async (req, res) => {
 
     res.render("login");
     // res.render("home", {x: y});
+});
+
+server.post("/login", async (req, res) => {
+    console.log("LOGIN");
 });
 
 server.listen(port, () => {
