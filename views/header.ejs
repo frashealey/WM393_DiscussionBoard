@@ -1,12 +1,14 @@
-<!-- <nav>
-    <a class="active">Home</a>
-    <a>News</a>
-    <a>Contact</a>
-    <a>About</a>
-</nav> -->
+<button id="navopen" onclick="navOpen()">☰</button>
+
 <h1 class="headertext">WMGTSS</h1>
-<nav id="nav-bar">
-	<a class="active">Discussions</a>
+<div id="signout">
+	<p class="signoutcontent">Logged in: u0000000</p>
+	<button class="signoutcontent">Logout</button>
+</div>
+
+<div id="navpanel">
+	<a id="navclose" href="javascript:void(0)" onclick="navClose()">☰</a>
+	<a>Discussions</a>
 	<a>Lectures</a>
 	<a>Calendars</a>
 	<a>Notices</a>
@@ -15,4 +17,4 @@
 	<a>Files</a>
 	<a>Quizzes</a>
 	<a>Feedback</a>
-</nav>
+</div>

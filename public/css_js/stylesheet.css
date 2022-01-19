@@ -1,0 +1,107 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+}
+body {
+    display: flex;
+    flex-direction: column;
+}
+header, footer {
+    background-color: #552D62;
+    text-align: left;
+}
+main {
+    flex: 1 0 auto;
+}
+footer {
+    flex-shrink: 0;
+}
+
+/* .icon {
+    vertical-align: middle;
+} */
+
+.headertext {
+    color: #ffffff;
+}
+h1.headertext {
+    font-family: "Lato", Arial, sans-serif;
+    display: inline-block;
+    padding: 15px 20px 15px 20px;
+}
+
+#navpanel {
+    width: 0;
+    height: 360px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    padding-top: 60px;
+    background-color: #262626;
+    overflow-x: hidden;
+    transition: 0.4s;
+}
+#navpanel a {
+    display: block;
+    color: #ffffff;
+    font-size: 18px;
+    padding: 8px 8px 8px 30px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+#navpanel a:hover {
+    color: #886C91
+}
+#navpanel #navclose {
+    position: absolute;
+    top: 0;
+    font-size: 36px;
+}
+#navopen {
+    color: #ffffff;
+    background-color: #552D62;
+    font-size: 36px;
+    padding-left: 30px;
+    cursor: pointer;
+    border: none;
+}
+#navopen:hover {
+    color: #999999;
+}
+
+#signout {
+    float: right;
+    padding: 10px 10px 10px 5px;
+}
+.signoutcontent {
+    display: inline-block;
+    padding: 0px 5px 0px 5px;
+}
+p.signoutcontent {
+    color: #ffffff;
+}
+
+p, a, button {
+    font-family: "Lato", Arial, sans-serif;
+}
+p.footertext, a {
+    color: #ffffff;
+    font-size: 14px;
+}
+#footertextcontainer {
+    display: inline-block;
+    /* display: inline; */
+    padding: 15px 0px 15px 20px;
+}
+#footerlogo {
+    width: 68px;
+    height: 34px;
+    float: left;
+    padding: 15px 0px 0px 20px;
+}
