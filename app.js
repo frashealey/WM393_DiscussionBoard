@@ -29,7 +29,7 @@ server.get("/", async (req, res) => {
         throw e;
     };
 
-    res.render("home");
+    res.render("login");
     // res.render("home", {x: y});
 });
 
