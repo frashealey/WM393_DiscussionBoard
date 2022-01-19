@@ -30,12 +30,16 @@ server.get("/", async (req, res) => {
         throw e;
     };
 
-    res.render("login");
+    res.render("register");
     // res.render("home", {x: y});
 });
 
 server.post("/login", async (req, res) => {
-    console.log("LOGIN");
+    console.log(req);
+});
+
+server.post("/register", async (req, res) => {
+    console.log(req);
 });
 
 server.listen(port, () => {
