@@ -1,31 +1,31 @@
 <!DOCTYPE html>
-  <html>
+<html>
   <head>
     <%- include("head"); %>
   </head>
   <body>
     <main>
-        <div id="loginbox">
-            <h1 class="headertext login">WMGTSS</h1>
-            <p class="headertext login">Login</p>
+      <div id="loginbox">
+        <h1 class="headertext login">WMGTSS</h1>
+        <p class="headertext login">Login</p>
 
-            <div class="logincontent">
-                <form action="/login" method="POST">
-                  <div class="loginfieldcontainer">
-                    <label for="id">University ID:</label>
-                    <input type="text" name="id" required>
-                  </div>
-
-                  <div class="loginfieldcontainer">
-                    <label for="pw">Password:</label>
-                    <input type="password" name="pw" required>
-                  </div>
-
-                  <button class="loginbutton" type="submit">Login</button>
-                </form>
+        <div class="logincontent">
+          <form action="/login" method="POST">
+            <div class="loginfieldcontainer">
+              <label for="id">University ID:</label>
+              <input type="text" name="id" required>
             </div>
 
+            <div class="loginfieldcontainer">
+              <label for="pw">Password:</label>
+              <input type="password" name="pw" required>
+            </div>
+
+            <button class="loginbutton" type="submit">Login</button>
+          </form>
         </div>
+
+      </div>
     </main>
     <footer>
       <%- include("footer"); %>

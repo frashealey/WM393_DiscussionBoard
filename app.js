@@ -31,7 +31,7 @@ server.get("/", async (req, res) => {
     };
 
     res.render("register");
-    // res.render("home", {x: y});
+    // res.render("discussion", {x: y});
 });
 
 server.post("/login", async (req, res) => {
