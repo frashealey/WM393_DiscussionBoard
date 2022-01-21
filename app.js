@@ -33,17 +33,33 @@ server.get("/", async (req, res) => {
         throw e;
     };
 
-    res.render("login");
+    res.redirect("login");
     // res.render("discussion", {x: y});
 });
 
+server.get("/login", async (req, res) => {
+    res.render("login");
+});
 server.post("/login", async (req, res) => {
     console.log(req.body.id);
     console.log(req.body.pw);
 });
 
+server.get("/register", async (req, res) => {
+    res.render("register");
+});
 server.post("/register", async (req, res) => {
-    console.log(req);
+    console.log(req.body.id);
+    console.log(req.body.fname);
+    console.log(req.body.lname);
+    console.log(req.body.email);
+    console.log(req.body.pw);
+    console.log(req.body.utype); // undefined or "on"
+});
+
+// redirect undefined pages to home page
+server.get("*", function(req, res) {
+    res.redirect("/");
 });
 
 server.listen(port, () => {

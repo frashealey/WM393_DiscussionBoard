@@ -48,7 +48,7 @@ h1.headertext.login {
     width: 20%;
     min-width: 280px;
     margin: 0 auto;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 .logincontent {
     /* font-family: "Lato", Arial, sans-serif; */
@@ -61,9 +61,13 @@ h1.headertext.login {
 .loginfieldcontainer {
     margin: 10px 0px 10px 0px;
 }
+.loginredirect {
+    display: inline-block;
+    margin-bottom: 20px;
+}
 input[type=text], input[type=password] {
     font-family: "Lato", Arial, sans-serif;
-    font-size: 20px;
+    font-size: 18px;
     padding: 5px;
     display: block;
     box-sizing: border-box;
@@ -225,15 +229,19 @@ input:focus, select:focus, textarea:focus, button:focus {
 p, h1, a, button, label {
     font-family: "Lato", Arial, sans-serif;
 }
-p.footertext, a {
+p.footertext, a.footerlink {
     color: #ffffff;
     font-size: 14px;
 }
-#repolink {
+p.predirect, a.linkredirect {
+    color: #ffffff;
+    font-size: 16px;
+}
+a {
     -webkit-transition: 0.2s;
     transition: 0.2s;
 }
-#repolink:hover {
+a:hover {
     color: #999999;
 }
 #footertextcontainer {
