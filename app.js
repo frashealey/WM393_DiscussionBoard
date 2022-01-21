@@ -10,13 +10,16 @@ const express = require("express"),
         database: "discussionboard"
       }),
       passport = require("passport"),
+      LocalStrategy = require("passport-local").Strategy,
       flash = require("express-flash"),
       session = require("express-session"),
       port = process.env.PORT || 3000,
       server = express();
-// declaring view engine (as ejs), folder structure, and bodyParser
+// declaring view engine (as ejs)
 server.set("view engine", "ejs");
+// declaring folder structure
 server.use(express.static(path.join(__dirname, "public")));
+// declaring bodyParser (e.g. to read data from forms)
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: false }));
 
@@ -33,8 +36,8 @@ server.get("/", async (req, res) => {
     //     throw e;
     // };
 
-    res.redirect("/login");
-    // res.render("discussion", {x: y});
+    res.redirect("/register");
+    // res.render("discussion");
 });
 
 server.get("/login", async (req, res) => {
@@ -60,13 +63,49 @@ server.post("/register", async (req, res) => {
         pw: req.body.pw,
         confpw: req.body.confpw,
         utype: Boolean(req.body.utype)
-    };
-    console.log(regCreds);
+    },
+          regExists = await pool1.query(`SELECT id, email, pw FROM uni_user WHERE id=$1 OR email=pgp_sym_encrypt($2, 'discussKey192192', 'cipher-algo=aes128');`, [regCreds.id, regCreds.email]);
+        let regInvalid;
+
+    // SELECT id, pw FROM uni_user WHERE id='u2139948' OR email=pgp_sym_encrypt('jerry.seinfeld@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128');
+    // SELECT id, pw FROM uni_user WHERE id='u2139948';
+    // SELECT id, email FROM uni_user WHERE email=(pgp_sym_encrypt('jerry.seinfeld@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'));
+    // SELECT id, pw FROM uni_user WHERE pgp_sym_decrypt(email, 'discussKey192192', 'cipher-algo=aes128')='jerry.seinfeld@warwick.ac.uk';
+
+    console.log(regExists.rows.length);
+    // // faster execution than for loop
+    // // (don't need to check utype, as this 'selected' by default)
+    // if (!regCreds.id || !regCreds.fname || !regCreds.lname || !regCreds.email || !regCreds.pw || !regCreds.confpw) {
+    //     regInvalid = {message: "Fill all fields"};
+    // }
+    // else if (pw !== confpw) {
+    //     regInvalid = {message: "Passwords do not match"};
+    // };
+});
+
+server.post("/logout", (req, res) => {
+    // req.logout();
+    // res.redirect("/login");
+    console.log("LOGOUT");
 });
 
 // redirect undefined pages to home page
 server.get("*", function(req, res) {
     res.redirect("/");
 });
+
+
+
+
+// function passportInit(passport) {
+
+// };
+// function userAuth() {
+
+// };
+
+
+
+
 
 server.listen(port);
