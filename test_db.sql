@@ -2,25 +2,25 @@
 -- (please first initialise the database using db.sql)
 -- developed by 1928864
 
--- unit test 1 - verifying uni_user constraints
+-- unit test 1 - verifying uni_user constraints Encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'aes')
 -- 1.1 - null id
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES (NULL, Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('George', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('Jones', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('t', 'discussKey192192', 'cipher-algo=aes128'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES (NULL, Crypt('testPass123', gen_salt('md5')), Encrypt('George', 'discussKey192192', 'aes'), Encrypt('Jones', 'discussKey192192', 'aes'), Encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes'));
 -- 1.2 - invalid id
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u00000', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('George', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('Jones', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('t', 'discussKey192192', 'cipher-algo=aes128'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u00000', Crypt('testPass123', gen_salt('md5')), Encrypt('George', 'discussKey192192', 'aes'), Encrypt('Jones', 'discussKey192192', 'aes'), Encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes'));
 -- 1.3 - null fname
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('md5')), NULL, pgp_sym_encrypt('Jones', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('t', 'discussKey192192', 'cipher-algo=aes128'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('md5')), NULL, Encrypt('Jones', 'discussKey192192', 'aes'), Encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes'));
 -- 1.4 - null lname
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('George', 'discussKey192192', 'cipher-algo=aes128'), NULL, pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('t', 'discussKey192192', 'cipher-algo=aes128'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('md5')), Encrypt('George', 'discussKey192192', 'aes'), NULL, Encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes'));
 -- 1.5 - null email
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('George', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('Jones', 'discussKey192192', 'cipher-algo=aes128'), NULL, pgp_sym_encrypt('t', 'discussKey192192', 'cipher-algo=aes128'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('md5')), Encrypt('George', 'discussKey192192', 'aes'), Encrypt('Jones', 'discussKey192192', 'aes'), NULL, Encrypt('t', 'discussKey192192', 'aes'));
 -- 1.6 - invalid email
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('George', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('Jones', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('george.jones@gmail.com', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('t', 'discussKey192192', 'cipher-algo=aes128'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('md5')), Encrypt('George', 'discussKey192192', 'aes'), Encrypt('Jones', 'discussKey192192', 'aes'), Encrypt('george.jones@gmail.com', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes'));
 -- 1.7 - null utype
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('George', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('Jones', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), NULL);
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('md5')), Encrypt('George', 'discussKey192192', 'aes'), Encrypt('Jones', 'discussKey192192', 'aes'), Encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'aes'), NULL);
 -- 1.8 - invalid utype
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('George', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('Jones', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('x', 'discussKey192192', 'cipher-algo=aes128'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('md5')), Encrypt('George', 'discussKey192192', 'aes'), Encrypt('Jones', 'discussKey192192', 'aes'), Encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('x', 'discussKey192192', 'aes'));
 -- 1.9 - valid record
-INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('George', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('Jones', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('t', 'discussKey192192', 'cipher-algo=aes128'));
+INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ('u1987465', Crypt('testPass123', gen_salt('md5')), Encrypt('George', 'discussKey192192', 'aes'), Encrypt('Jones', 'discussKey192192', 'aes'), Encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes'));
 -- verify and reset after testing
 SELECT id FROM uni_user;
 TRUNCATE TABLE liked, response, topic, discussion, link_user, uni_user;
@@ -31,8 +31,8 @@ ALTER SEQUENCE db_audit_aud_id_seq RESTART;
 -- setup - inserting example users into uni_user
 INSERT INTO uni_user (id, pw, fname, lname, email, utype)
 VALUES
-    ('u1987465', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('George', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('Jones', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('t', 'discussKey192192', 'cipher-algo=aes128')),
-    ('u8857462', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('Paul', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('McDonald', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('paul.mcdonald@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('s', 'discussKey192192', 'cipher-algo=aes128'));
+    ('u1987465', Crypt('testPass123', gen_salt('md5')), Encrypt('George', 'discussKey192192', 'aes'), Encrypt('Jones', 'discussKey192192', 'aes'), Encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes')),
+    ('u8857462', Crypt('testPass123', gen_salt('md5')), Encrypt('Paul', 'discussKey192192', 'aes'), Encrypt('McDonald', 'discussKey192192', 'aes'), Encrypt('paul.mcdonald@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('s', 'discussKey192192', 'aes'));
 -- 2.1 - null lnk_tut_id
 INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES (NULL, 'u8857462');
 -- 2.2 - null lnk_stu_id
@@ -53,8 +53,8 @@ ALTER SEQUENCE db_audit_aud_id_seq RESTART;
 -- setup - inserting example users into uni_user, and adding their links
 INSERT INTO uni_user (id, pw, fname, lname, email, utype)
 VALUES
-    ('u1987465', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('George', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('Jones', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('t', 'discussKey192192', 'cipher-algo=aes128')),
-    ('u8857462', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('Paul', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('McDonald', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('paul.mcdonald@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('s', 'discussKey192192', 'cipher-algo=aes128'));
+    ('u1987465', Crypt('testPass123', gen_salt('md5')), Encrypt('George', 'discussKey192192', 'aes'), Encrypt('Jones', 'discussKey192192', 'aes'), Encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes')),
+    ('u8857462', Crypt('testPass123', gen_salt('md5')), Encrypt('Paul', 'discussKey192192', 'aes'), Encrypt('McDonald', 'discussKey192192', 'aes'), Encrypt('paul.mcdonald@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('s', 'discussKey192192', 'aes'));
 INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES ('u1987465', 'u8857462');
 -- 3.1 - null dis_id
 INSERT INTO discussion (dis_id, dis_owner, dis_title, archive) VALUES (NULL, 'u1987465', 'Example discussion board', false);
@@ -83,8 +83,8 @@ ALTER SEQUENCE db_audit_aud_id_seq RESTART;
 -- setup - inserting example users, links, and discussion
 INSERT INTO uni_user (id, pw, fname, lname, email, utype)
 VALUES
-    ('u1987465', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('George', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('Jones', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('t', 'discussKey192192', 'cipher-algo=aes128')),
-    ('u8857462', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('Paul', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('McDonald', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('paul.mcdonald@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('s', 'discussKey192192', 'cipher-algo=aes128'));
+    ('u1987465', Crypt('testPass123', gen_salt('md5')), Encrypt('George', 'discussKey192192', 'aes'), Encrypt('Jones', 'discussKey192192', 'aes'), Encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes')),
+    ('u8857462', Crypt('testPass123', gen_salt('md5')), Encrypt('Paul', 'discussKey192192', 'aes'), Encrypt('McDonald', 'discussKey192192', 'aes'), Encrypt('paul.mcdonald@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('s', 'discussKey192192', 'aes'));
 INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES ('u1987465', 'u8857462');
 INSERT INTO discussion (dis_owner, dis_title, archive) VALUES ('u1987465', 'Example discussion board', false);
 -- 4.1 - null top_id
@@ -117,8 +117,8 @@ ALTER SEQUENCE db_audit_aud_id_seq RESTART;
 -- setup - inserting example users, links, discussion, topic, and valid response (to reply to)
 INSERT INTO uni_user (id, pw, fname, lname, email, utype)
 VALUES
-    ('u1987465', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('George', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('Jones', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('t', 'discussKey192192', 'cipher-algo=aes128')),
-    ('u8857462', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('Paul', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('McDonald', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('paul.mcdonald@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('s', 'discussKey192192', 'cipher-algo=aes128'));
+    ('u1987465', Crypt('testPass123', gen_salt('md5')), Encrypt('George', 'discussKey192192', 'aes'), Encrypt('Jones', 'discussKey192192', 'aes'), Encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes')),
+    ('u8857462', Crypt('testPass123', gen_salt('md5')), Encrypt('Paul', 'discussKey192192', 'aes'), Encrypt('McDonald', 'discussKey192192', 'aes'), Encrypt('paul.mcdonald@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('s', 'discussKey192192', 'aes'));
 INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES ('u1987465', 'u8857462');
 INSERT INTO discussion (dis_owner, dis_title, archive) VALUES ('u1987465', 'Example discussion board', false);
 INSERT INTO topic (top_dis, top_title, top_desc, top_datetime) VALUES (1, 'Example topic 1', 'Lorem ipsum dolor sit amet', Now());
@@ -160,8 +160,8 @@ ALTER SEQUENCE db_audit_aud_id_seq RESTART;
 -- setup - inserting example users, links, discussion, topic, and valid response (to reply to)
 INSERT INTO uni_user (id, pw, fname, lname, email, utype)
 VALUES
-    ('u1987465', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('George', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('Jones', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('t', 'discussKey192192', 'cipher-algo=aes128')),
-    ('u8857462', Crypt('testPass123', gen_salt('md5')), pgp_sym_encrypt('Paul', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('McDonald', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('paul.mcdonald@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'), pgp_sym_encrypt('s', 'discussKey192192', 'cipher-algo=aes128'));
+    ('u1987465', Crypt('testPass123', gen_salt('md5')), Encrypt('George', 'discussKey192192', 'aes'), Encrypt('Jones', 'discussKey192192', 'aes'), Encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes')),
+    ('u8857462', Crypt('testPass123', gen_salt('md5')), Encrypt('Paul', 'discussKey192192', 'aes'), Encrypt('McDonald', 'discussKey192192', 'aes'), Encrypt('paul.mcdonald@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('s', 'discussKey192192', 'aes'));
 INSERT INTO link_user (lnk_tut_id, lnk_stu_id) VALUES ('u1987465', 'u8857462');
 INSERT INTO discussion (dis_owner, dis_title, archive) VALUES ('u1987465', 'Example discussion board', false);
 INSERT INTO topic (top_dis, top_title, top_desc, top_datetime) VALUES (1, 'Example topic 1', 'Lorem ipsum dolor sit amet', Now());

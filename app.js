@@ -55,6 +55,13 @@ server.get("/register", async (req, res) => {
     res.render("register");
 });
 server.post("/register", async (req, res) => {
+    // let tempUtype;
+    // if (Boolean(req.body.utype)) {
+    //     tempUtype = 1
+    // }
+    // else {
+
+    // }
     const regCreds = {
         id: req.body.id,
         fname: req.body.fname,
@@ -62,25 +69,28 @@ server.post("/register", async (req, res) => {
         email: req.body.email,
         pw: req.body.pw,
         confpw: req.body.confpw,
-        utype: Boolean(req.body.utype)
+        utype: tempUtype
     },
-          regExists = await pool1.query(`SELECT id, email, pw FROM uni_user WHERE id=$1 OR email=pgp_sym_encrypt($2, 'discussKey192192', 'cipher-algo=aes128');`, [regCreds.id, regCreds.email]);
+          regExists = await pool1.query(`SELECT id, email, pw FROM uni_user WHERE id=$1 OR email=Encrypt($2, 'discussKey192192', 'aes');`, [regCreds.id, regCreds.email]);
         let regInvalid;
-
-    // SELECT id, pw FROM uni_user WHERE id='u2139948' OR email=pgp_sym_encrypt('jerry.seinfeld@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128');
-    // SELECT id, pw FROM uni_user WHERE id='u2139948';
-    // SELECT id, email FROM uni_user WHERE email=(pgp_sym_encrypt('jerry.seinfeld@warwick.ac.uk', 'discussKey192192', 'cipher-algo=aes128'));
-    // SELECT id, pw FROM uni_user WHERE pgp_sym_decrypt(email, 'discussKey192192', 'cipher-algo=aes128')='jerry.seinfeld@warwick.ac.uk';
-
-    console.log(regExists.rows.length);
-    // // faster execution than for loop
-    // // (don't need to check utype, as this 'selected' by default)
-    // if (!regCreds.id || !regCreds.fname || !regCreds.lname || !regCreds.email || !regCreds.pw || !regCreds.confpw) {
-    //     regInvalid = {message: "Fill all fields"};
-    // }
-    // else if (pw !== confpw) {
-    //     regInvalid = {message: "Passwords do not match"};
-    // };
+    console.log(regCreds.utype);
+    // (don't need to check utype, as this 'selected' by default)
+    if (!regCreds.id || !regCreds.fname || !regCreds.lname || !regCreds.email || !regCreds.pw || !regCreds.confpw) {
+        regInvalid = {message: "Fill all fields"};
+    }
+    else if (pw !== confpw) {
+        regInvalid = {message: "Passwords do not match"};
+    }
+    else if (regExists.rows.length > 0) {
+        regInvalid = {message: "ID/email already registered"};
+    }
+//     // register user
+//     else {
+//         pool1.query(`INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ($1, Crypt($2, gen_salt('md5')), Encrypt($3, 'discussKey192192', 'aes'), Encrypt($4, 'discussKey192192', 'aes'), Encrypt($5, 'discussKey192192', 'aes'), Encrypt($6, 'discussKey192192', 'aes'))`)
+// //         INSERT INTO uni_user (id, pw, fname, lname, email, utype)
+// // VALUES
+// //     ('u2139948', Crypt('testPass123', gen_salt('md5')), Encrypt('John', 'discussKey192192', 'aes'), Encrypt('Smith', 'discussKey192192', 'aes'), Encrypt('john.smith@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes'));
+//     };
 });
 
 server.post("/logout", (req, res) => {
