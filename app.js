@@ -88,20 +88,20 @@ server.post("/register", async (req, res) => {
                 res.redirect("/login");
             }
             catch(e) {
-                let tempInvaildMsg;
+                let tempInvalidMsg;
                 // do not need to clarify for utype constraint, as input is checkbox
                 if (e.code === "23514" && e.constraint === "uni_user_id_check") {
-                    tempInvaildMsg = "Invalid university ID";
+                    tempInvalidMsg = "Invalid university ID";
                 }
                 else if (e.code === "23514" && e.constraint === "uni_user_email_check") {
-                    tempInvaildMsg = "Invalid university email";
+                    tempInvalidMsg = "Invalid university email";
                 }
                 else {
-                    tempInvaildMsg = "Unknown error - please try again";
+                    tempInvalidMsg = "Unknown error - please try again";
                     console.log(e);
                 };
                 await client.query("ROLLBACK");
-                res.render("register", {invalidMsg: tempInvaildMsg});
+                res.render("register", {invalidMsg: tempInvalidMsg});
             }
             finally {
                 client.release();
@@ -129,7 +129,7 @@ server.get("*", function(req, res) {
 
 
 
-// function passportInit(passport) {
+// function passportInit(passport) {   
 
 // };
 // function userAuth() {
