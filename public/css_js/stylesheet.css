@@ -41,6 +41,10 @@ p.headertext.login {
 h1.headertext.login {
     padding: 30px 0px 15px 0px;
 }
+p.logininvalid {
+    font-size: 16px;
+    color: #ff0000;
+}
 
 #loginbox {
     background-color: #552D62;

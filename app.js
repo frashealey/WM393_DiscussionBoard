@@ -31,7 +31,7 @@ server.get("/", async (req, res) => {
     //     const testResults = await pool1.query("SELECT dis_title FROM discussion;");
     //     console.log(testResults.rows);
     // }
-    // catch (e) {
+    // catch(e) {
     //     console.log(e);
     //     throw e;
     // };
@@ -55,42 +55,64 @@ server.get("/register", async (req, res) => {
     res.render("register");
 });
 server.post("/register", async (req, res) => {
-    // let tempUtype;
-    // if (Boolean(req.body.utype)) {
-    //     tempUtype = 1
-    // }
-    // else {
+    try {
+        const regCreds = {
+            id: req.body.id,
+            fname: req.body.fname,
+            lname: req.body.lname,
+            email: req.body.email,
+            pw: req.body.pw,
+            confpw: req.body.confpw,
+            ...(Boolean(req.body.utype) ? { utype: "s" } : { utype: "t" })
+        },
+            regExists = await pool1.query(`SELECT id, email, pw FROM uni_user WHERE id=$1 OR email=Encrypt($2, 'discussKey192192', 'aes');`, [regCreds.id, regCreds.email]);
 
-    // }
-    const regCreds = {
-        id: req.body.id,
-        fname: req.body.fname,
-        lname: req.body.lname,
-        email: req.body.email,
-        pw: req.body.pw,
-        confpw: req.body.confpw,
-        utype: tempUtype
-    },
-          regExists = await pool1.query(`SELECT id, email, pw FROM uni_user WHERE id=$1 OR email=Encrypt($2, 'discussKey192192', 'aes');`, [regCreds.id, regCreds.email]);
-        let regInvalid;
-    console.log(regCreds.utype);
-    // (don't need to check utype, as this 'selected' by default)
-    if (!regCreds.id || !regCreds.fname || !regCreds.lname || !regCreds.email || !regCreds.pw || !regCreds.confpw) {
-        regInvalid = {message: "Fill all fields"};
+        // (don't need to check utype, as this 'selected' by default)
+        if (!regCreds.id || !regCreds.fname || !regCreds.lname || !regCreds.email || !regCreds.pw || !regCreds.confpw) {
+            res.render("register", {invalidMsg: "Please fill all fields"});
+        }
+        else if (regCreds.pw !== regCreds.confpw) {
+            res.render("register", {invalidMsg: "Passwords do not match"});
+        }
+        else if (regExists.rows.length > 0) {
+            res.render("register", {invalidMsg: "ID/email already registered"});
+        }
+        // register user
+        else {
+            const client = await pool1.connect();
+            try {
+                await client.query("BEGIN");
+                await client.query(`INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ($1, Crypt($2, gen_salt('md5')), Encrypt($3, 'discussKey192192', 'aes'), Encrypt($4, 'discussKey192192', 'aes'), Encrypt($5, 'discussKey192192', 'aes'), Encrypt($6, 'discussKey192192', 'aes'));`,
+                                   [regCreds.id, regCreds.pw, regCreds.fname, regCreds.lname, regCreds.email, regCreds.utype]);
+                await client.query("COMMIT");
+                res.redirect("/login");
+            }
+            catch(e) {
+                let tempInvaildMsg;
+                // do not need to clarify for utype constraint, as input is checkbox
+                if (e.code === "23514" && e.constraint === "uni_user_id_check") {
+                    tempInvaildMsg = "Invalid university ID";
+                }
+                else if (e.code === "23514" && e.constraint === "uni_user_email_check") {
+                    tempInvaildMsg = "Invalid university email";
+                }
+                else {
+                    tempInvaildMsg = "Unknown error - please try again";
+                    console.log(e);
+                };
+                await client.query("ROLLBACK");
+                res.render("register", {invalidMsg: tempInvaildMsg});
+            }
+            finally {
+                client.release();
+            };
+        };
     }
-    else if (pw !== confpw) {
-        regInvalid = {message: "Passwords do not match"};
-    }
-    else if (regExists.rows.length > 0) {
-        regInvalid = {message: "ID/email already registered"};
-    }
-//     // register user
-//     else {
-//         pool1.query(`INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ($1, Crypt($2, gen_salt('md5')), Encrypt($3, 'discussKey192192', 'aes'), Encrypt($4, 'discussKey192192', 'aes'), Encrypt($5, 'discussKey192192', 'aes'), Encrypt($6, 'discussKey192192', 'aes'))`)
-// //         INSERT INTO uni_user (id, pw, fname, lname, email, utype)
-// // VALUES
-// //     ('u2139948', Crypt('testPass123', gen_salt('md5')), Encrypt('John', 'discussKey192192', 'aes'), Encrypt('Smith', 'discussKey192192', 'aes'), Encrypt('john.smith@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes'));
-//     };
+    // regExists or bodyParser error
+    catch(e) {
+        console.log(e);
+        res.render("register", {invalidMsg: "Unknown error - please try again"});
+    };
 });
 
 server.post("/logout", (req, res) => {
