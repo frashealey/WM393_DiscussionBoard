@@ -9,6 +9,16 @@
         <h1 class="headertext login">WMGTSS</h1>
         <p class="headertext login">Login</p>
 
+        <!-- <%if (typeof(invalidMsg) != "undefined") { %>
+        <p class="logininvalid"><%= invalidMsg %></p>
+        <% } %> -->
+    
+        <ul>
+          <% if (messages.error) { %>
+          <li><%= messages.error %></li>
+          <% } %>
+        </ul>
+
         <div class="logincontent">
           <form action="/login" method="POST">
             <div class="loginfieldcontainer">
