@@ -11,7 +11,7 @@ const { execPath } = require("process")
         database: "dvj5v33apq5oj",
         ssl: {
             require: true,
-            rejectUnauthorized: true
+            rejectUnauthorized: false
         }
       }),
       { initialize } = require("passport")
