@@ -8,7 +8,11 @@ const { execPath } = require("process")
         port: 5432,
         user: "ncwvkhbstisnwb",
         password: "709e09497df536b208f5fddd1f105e5b7aa05c5555e46d6fc4b0bfb2fa1e9098",
-        database: "dvj5v33apq5oj"
+        database: "dvj5v33apq5oj",
+        ssl: {
+            require: true,
+            rejectUnauthorized: true
+        }
       }),
       { initialize } = require("passport")
       passport = require("passport"),
