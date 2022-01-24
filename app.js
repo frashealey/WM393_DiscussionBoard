@@ -14,7 +14,7 @@ const { execPath } = require("process"),
             rejectUnauthorized: false
         }
       }),
-      { initialize } = require("passport"),
+    //   { initialize } = require("passport"),
       passport = require("passport"),
       LocalStrategy = require("passport-local").Strategy,
       flash = require("express-flash"),
