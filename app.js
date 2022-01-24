@@ -1,7 +1,5 @@
-const { initialize } = require("passport");
-const { execPath } = require("process");
-
-const express = require("express"),
+const { execPath } = require("process")
+      express = require("express"),
       bodyParser = require("body-parser"),
       path = require("path"),
       { Pool } = require("pg"),
@@ -12,6 +10,7 @@ const express = require("express"),
         password: "pool1pass",
         database: "discussionboard"
       }),
+      { initialize } = require("passport")
       passport = require("passport"),
       LocalStrategy = require("passport-local").Strategy,
       flash = require("express-flash"),
@@ -26,16 +25,12 @@ server.use(express.static(path.join(__dirname, "public")));
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: false }));
 server.use(flash());
-
-
-
-
 // declaring passport
 passportInit(passport);
 server.use(
     session({
         // this would normally be placed in .env with .gitignore,
-        // but for purposes of assessment it is here
+        // (but for assessment purposes it is here)
         secret: "discussSession192192",
         resave: false,
         saveUninitialized: false
@@ -44,36 +39,15 @@ server.use(
 server.use(passport.initialize());
 server.use(passport.session());
 
-
-
-
-
+// discussion
 server.get("/", checkNotAuthenticated, async (req, res) => {
-    // try {
-    //     // const testResults = await pool1.query("SELECT id, pw, fname, lname, utype FROM uni_user;");
-    //     // const testResults = await pool1.query("SELECT Crypt('testPass123', gen_salt('md5'));");
-    //     // password query: select id, pw from uni_user where pw = Crypt('testPass123', pw);
-    //     const testResults = await pool1.query("SELECT dis_title FROM discussion;");
-    //     console.log(testResults.rows);
-    // }
-    // catch(e) {
-    //     console.log(e);
-    //     throw e;
-    // };
-
     res.render("discussion", { user: req.user});
 });
 
+// login
 server.get("/login", checkAuthenticated, async (req, res) => {
     res.render("login");
 });
-// server.post("/login", async (req, res) => {
-//     const logCreds = {
-//         id: req.body.id,
-//         pw: req.body.pw,
-//     };
-//     console.log(logCreds);
-// });
 server.post("/login", passport.authenticate("local", {
         successRedirect: "/discussion",
         failureRedirect: "/login",
@@ -81,6 +55,7 @@ server.post("/login", passport.authenticate("local", {
     })
 );
 
+// register
 server.get("/register", checkAuthenticated, async (req, res) => {
     res.render("register");
 });
@@ -147,6 +122,7 @@ server.post("/register", async (req, res) => {
     };
 });
 
+// logout
 server.post("/logout", (req, res) => {
     req.logout();
     res.redirect("/login");
@@ -157,19 +133,13 @@ server.get("*", function(req, res) {
     res.redirect("/");
 });
 
-
-
-
-
 function passportInit(passport) {
     passport.use(new LocalStrategy({ usernameField: "id", passwordField: "pw" }, async function verify(id, pw, done) {
-        // const testpw = await pool1.query(`SELECT id, pw, fname, lname, email, utype FROM uni_user WHERE id=$1`, [id]);
         try {
             const idCheck = await pool1.query(`SELECT id FROM uni_user WHERE id=$1`, [id]);
             if (idCheck.rows.length) {
                 try {
                     const pwCheck = await pool1.query(`SELECT id, pw FROM uni_user WHERE id=$1 AND pw=Crypt($2, pw);`, [id, pw]);
-                    // SELECT id, pw, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, Encode(Decrypt(email, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS email, Encode(Decrypt(utype, 'discussKey192192', 'aes'), 'escape')::CHAR(1) AS utype FROM uni_user WHERE id=$1 AND pw=Crypt($2, pw);
                     if (pwCheck.rows.length === 1) {
                         return done(null, pwCheck.rows[0]);
                     }
@@ -204,48 +174,6 @@ function passportInit(passport) {
     });
 };
 
-async function userAuth(id, pw, done) {
-    // const pwCheck = await pool1.query(`SELECT * FROM uni_user WHERE id=$1::VARCHAR;` [id]);
-    // console.log(pwCheck.rows);
-
-
-
-    // try {
-    //     const idCheck = await pool1.query(`SELECT id FROM uni_user WHERE id=$1;` [id]);
-    //     // password check
-    //     if (idCheck.rows.length === 1) {
-    //         try {
-    //             const pwCheck = await pool1.query(`SELECT id, pw FROM uni_user WHERE id=$1 AND pw=Crypt($2, pw);` [id, pw]);
-    //             if (pwCheck.rows.length === 1) {
-    //                 console.log("SUCCESS");
-    //                 return done(null, pwCheck.rows[0]);
-    //             }
-    //             else {
-    //                 console.log("Password incorrect");
-    //                 return done(null, false, {message: "Password is incorrect"});
-    //             };
-    //         }
-    //         catch(e) {
-    //             console.log(e);
-    //             res.render("login", {message: "Unknown error - please try again"});
-    //         };
-    //     }
-    //     // no user found
-    //     else {
-    //         console.log("No user with that ID");
-    //         return done(null, false, {message: "No user with that ID found"});
-    //     };
-    // }
-    // // idCheck error
-    // catch(e) {
-    //     console.log(e);
-    //     res.render("login", {message: "Unknown error - please try again"});
-    // };
-};
-
-
-
-
 function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return res.redirect("/discussion");
@@ -259,8 +187,5 @@ function checkNotAuthenticated(req, res, next) {
     };
     res.redirect("/login");
 };
-
-
-
 
 server.listen(port);
