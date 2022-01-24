@@ -4,17 +4,17 @@ const { execPath } = require("process")
       path = require("path"),
       { Pool } = require("pg"),
       pool1 = new Pool({
-        host: "postgres://ncwvkhbstisnwb:709e09497df536b208f5fddd1f105e5b7aa05c5555e46d6fc4b0bfb2fa1e9098@ec2-54-220-14-54.eu-west-1.compute.amazonaws.com:5432/dvj5v33apq5oj",
+        host: "localhost",
         port: 5432,
-        user: "ncwvkhbstisnwb",
-        password: "709e09497df536b208f5fddd1f105e5b7aa05c5555e46d6fc4b0bfb2fa1e9098",
-        database: "dvj5v33apq5oj"
+        user: "pool1",
+        password: "pool1pass",
+        database: "discussionboard"
       }),
       { initialize } = require("passport")
       passport = require("passport"),
       LocalStrategy = require("passport-local").Strategy,
       flash = require("express-flash"),
-      session = require("express-session"),
+      session = require("cookie-session"),
       port = process.env.PORT || 3000,
       server = express();
 // declaring view engine (as ejs)
