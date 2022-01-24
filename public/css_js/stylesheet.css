@@ -45,6 +45,13 @@ p.logininvalid {
     font-size: 16px;
     color: #ff0000;
 }
+p.logininvalid, li.logininvalid {
+    font-size: 16px;
+    color: #ff0000;
+}
+ul.logininvalid {
+    list-style-type: none;
+}
 
 #loginbox {
     background-color: #552D62;
@@ -230,7 +237,7 @@ input:focus, select:focus, textarea:focus, button:focus {
     outline: none;
 }
 
-p, h1, a, button, label {
+p, h1, a, button, label, li {
     font-family: "Lato", Arial, sans-serif;
 }
 p.footertext, a.footerlink {

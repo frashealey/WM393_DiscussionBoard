@@ -61,8 +61,7 @@ server.get("/", checkNotAuthenticated, async (req, res) => {
     //     throw e;
     // };
 
-    console.log(req.user);
-    res.render("discussion");
+    res.render("discussion", { user: req.user});
 });
 
 server.get("/login", checkAuthenticated, async (req, res) => {
@@ -100,13 +99,13 @@ server.post("/register", async (req, res) => {
 
         // (don't need to check utype, as this 'selected' by default)
         if (!regCreds.id || !regCreds.fname || !regCreds.lname || !regCreds.email || !regCreds.pw || !regCreds.confpw) {
-            res.render("register", {invalidMsg: "Please fill all fields"});
+            res.render("register", {message: "Please fill all fields"});
         }
         else if (regCreds.pw !== regCreds.confpw) {
-            res.render("register", {invalidMsg: "Passwords do not match"});
+            res.render("register", {message: "Passwords do not match"});
         }
         else if (regExists.rows.length > 0) {
-            res.render("register", {invalidMsg: "ID/email already registered"});
+            res.render("register", {message: "ID/email already registered"});
         }
         // register user
         else {
@@ -133,7 +132,7 @@ server.post("/register", async (req, res) => {
                     console.log(e);
                 };
                 await client.query("ROLLBACK");
-                res.render("register", {invalidMsg: tempInvalidMsg});
+                res.render("register", {message: tempInvalidMsg});
             }
             finally {
                 client.release();
@@ -144,14 +143,13 @@ server.post("/register", async (req, res) => {
     // regExists or bodyParser error
     catch(e) {
         console.log(e);
-        res.render("register", {invalidMsg: "Unknown error - please try again"});
+        res.render("register", {message: "Unknown error - please try again"});
     };
 });
 
 server.post("/logout", (req, res) => {
-    console.log("LOGOUT");
-    // req.logout();
-    // res.redirect("/login");
+    req.logout();
+    res.redirect("/login");
 });
 
 // redirect undefined pages to home page
@@ -164,12 +162,40 @@ server.get("*", function(req, res) {
 
 
 function passportInit(passport) {
-    passport.use(new LocalStrategy({ usernameField: "id", passwordField: "pw" }, userAuth));
+    passport.use(new LocalStrategy({ usernameField: "id", passwordField: "pw" }, async function verify(id, pw, done) {
+        // const testpw = await pool1.query(`SELECT id, pw, fname, lname, email, utype FROM uni_user WHERE id=$1`, [id]);
+        try {
+            const idCheck = await pool1.query(`SELECT id FROM uni_user WHERE id=$1`, [id]);
+            if (idCheck.rows.length) {
+                try {
+                    const pwCheck = await pool1.query(`SELECT id, pw FROM uni_user WHERE id=$1 AND pw=Crypt($2, pw);`, [id, pw]);
+                    // SELECT id, pw, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, Encode(Decrypt(email, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS email, Encode(Decrypt(utype, 'discussKey192192', 'aes'), 'escape')::CHAR(1) AS utype FROM uni_user WHERE id=$1 AND pw=Crypt($2, pw);
+                    if (pwCheck.rows.length === 1) {
+                        return done(null, pwCheck.rows[0]);
+                    }
+                    else {
+                        return done(null, false, {message: "Incorrect username/password"});
+                    };
+                }
+                catch(e) {
+                    console.log(e);
+                    res.render("login", {message: "Unknown error - please try again"});
+                };
+            }
+            else {
+                return done(null, false, {message: "Incorrect username/password"}); 
+            }
+        }
+        catch(e) {
+            console.log(e);
+            res.render("login", {message: "Unknown error - please try again"});
+        };
+    }));
 
     passport.serializeUser((user, done) => done(null, user.id));
     passport.deserializeUser(async (id, done) => {
         try {
-            const findUser = pool1.query(`SELECT id, pw, fname, lname, email, utype FROM users WHERE id=$1;`, [id]);
+            const findUser = await pool1.query(`SELECT id, pw, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, Encode(Decrypt(email, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS email, Encode(Decrypt(utype, 'discussKey192192', 'aes'), 'escape')::CHAR(1) AS utype FROM uni_user WHERE id=$1;`, [id]);
             return done(null, findUser.rows[0]);
         }
         catch(e) {
@@ -179,13 +205,8 @@ function passportInit(passport) {
 };
 
 async function userAuth(id, pw, done) {
-    console.log(id, pw);
     // const pwCheck = await pool1.query(`SELECT * FROM uni_user WHERE id=$1::VARCHAR;` [id]);
     // console.log(pwCheck.rows);
-
-
-
-
 
 
 
