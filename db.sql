@@ -15,8 +15,8 @@ CREATE TABLE uni_user (
     pw TEXT NOT NULL,
     fname BYTEA NOT NULL,
     lname BYTEA NOT NULL,
-    email BYTEA NOT NULL CHECK (pgp_sym_decrypt(email, 'discKey192', 'cipher-algo=bf') ~ '^[A-Za-z0-9\._-]+\@warwick\.ac\.uk$'),
-    utype BYTEA NOT NULL CHECK (pgp_sym_decrypt(utype, 'discKey192', 'cipher-algo=bf') IN ('s', 't'))
+    email BYTEA NOT NULL CHECK (Encode(Decrypt(email, 'discussKey192192', 'aes'), 'escape')::VARCHAR ~ '^[A-Za-z0-9\._-]+\@warwick\.ac\.uk$'),
+    utype BYTEA NOT NULL CHECK (Encode(Decrypt(utype, 'discussKey192192', 'aes'), 'escape')::CHAR(1) IN ('s', 't'))
 );
 
 -- link_user
@@ -33,8 +33,8 @@ $$
         tutor_type CHAR(1);
         student_type CHAR(1);
     BEGIN
-        tutor_type = (SELECT pgp_sym_decrypt(utype, 'discKey192', 'cipher-algo=bf') as utype FROM uni_user WHERE id=NEW.lnk_tut_id);
-        student_type = (SELECT pgp_sym_decrypt(utype, 'discKey192', 'cipher-algo=bf') as utype FROM uni_user WHERE id=NEW.lnk_stu_id);
+        tutor_type = (SELECT Encode(Decrypt(utype, 'discussKey192192', 'aes'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.lnk_tut_id);
+        student_type = (SELECT Encode(Decrypt(utype, 'discussKey192192', 'aes'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.lnk_stu_id);
 
         IF (tutor_type != 't')
             THEN RAISE EXCEPTION 'Tutor user must be type tutor';
@@ -61,7 +61,7 @@ $$
     DECLARE
         user_type CHAR(1);
     BEGIN
-        user_type = (SELECT pgp_sym_decrypt(utype, 'discKey192', 'cipher-algo=bf') as utype FROM uni_user WHERE id=NEW.dis_owner);
+        user_type = (SELECT Encode(Decrypt(utype, 'discussKey192192', 'aes'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.dis_owner);
 
         IF (user_type != 't')
             THEN RAISE EXCEPTION 'User must be tutor to own discussion board';
@@ -119,7 +119,7 @@ $$
 BEGIN
 INSERT INTO db_audit (aud_time, aud_user, aud_table, aud_action, old_data, new_data)
 VALUES
-    (Now(), Encrypt(current_user::BYTEA, 'discKey192', 'bf'), Encrypt(TG_TABLE_NAME::BYTEA, 'discKey192', 'bf'), TG_OP, OLD::VARCHAR, NEW::VARCHAR);
+    (Now(), Encrypt(current_user::BYTEA, 'discussKey192192', 'aes'), Encrypt(TG_TABLE_NAME::BYTEA, 'discussKey192192', 'aes'), TG_OP, OLD::VARCHAR, NEW::VARCHAR);
 RETURN NEW;
 END;
 $$ LANGUAGE 'plpgsql';
@@ -145,11 +145,14 @@ CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON liked EXECUTE 
 -- creating regular (university, non-admin) role
 CREATE ROLE reguser;
 -- permissions
-GRANT SELECT, INSERT, UPDATE(pw, fname, lname, email, utype) ON uni_user TO reguser;
-GRANT SELECT, INSERT, UPDATE(dis_title, archived), DELETE ON discussion TO reguser;
-GRANT SELECT, INSERT, UPDATE(top_title, top_desc), DELETE ON topic TO reguser;
-GRANT SELECT, INSERT, UPDATE(res_title, res_text, pinned) ON response TO reguser;
-GRANT SELECT, INSERT, DELETE ON liked TO reguser;
+GRANT SELECT ON uni_user, discussion, topic, response, liked TO reguser;
+GRANT INSERT ON uni_user, discussion, topic, response, liked TO reguser;
+GRANT UPDATE(pw, fname, lname, email, utype) ON uni_user TO reguser;
+GRANT UPDATE(dis_title, archived) ON discussion TO reguser;
+GRANT UPDATE(top_title, top_desc) ON topic TO reguser;
+GRANT UPDATE(res_title, res_text, pinned) ON response TO reguser;
+GRANT DELETE ON discussion, topic, response TO reguser;
+GRANT DELETE ON liked TO reguser;
 GRANT INSERT ON db_audit TO reguser;
 GRANT EXECUTE ON FUNCTION func_db_auditor TO reguser;
 -- prevents creating relations

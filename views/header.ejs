@@ -1,0 +1,22 @@
+<button id="navopen" onclick="navOpen()">☰</button>
+
+<h1 class="headertext main">WMGTSS</h1>
+<div id="logout">
+	<form action="/logout" method="POST">
+    <p class="logoutcontent">Logged in: <%= user.id %></p>
+	  <button class="logoutcontent" type="submit">Logout</button>
+  </form>
+</div>
+
+<div id="navpanel">
+	<a id="navclose" href="javascript:void(0)" onclick="navClose()">☰</a>
+	<a>Discussions</a>
+	<a>Lectures</a>
+	<a>Calendars</a>
+	<a>Notices</a>
+	<a>Q&A</a>
+	<a>Resources</a>
+	<a>Files</a>
+	<a>Quizzes</a>
+	<a>Feedback</a>
+</div>

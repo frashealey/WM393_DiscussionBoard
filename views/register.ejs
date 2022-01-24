@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<%- include("head"); %>
+	</head>
+	<body>
+		<main>
+			<div id="loginbox">
+				<h1 class="headertext login">WMGTSS</h1>
+				<p class="headertext login">Register</p>
+
+				<%if (typeof(message) != "undefined") { %>
+				<p class="logininvalid"><%= message %></p>
+				<% } %>
+
+				<div class="logincontent">
+					<form action="/register" method="POST">
+						<div class="loginfieldcontainer">
+							<label for="id">University ID:</label>
+							<input type="text" name="id">
+						</div>
+
+						<div class="loginfieldcontainer">
+							<label for="fname">First name:</label>
+							<input type="text" name="fname">
+						</div>
+
+						<div class="loginfieldcontainer">
+							<label for="lname">Last name:</label>
+							<input type="text" name="lname">
+						</div>
+
+						<div class="loginfieldcontainer">
+							<label for="email">Email:</label>
+							<input type="text" name="email">
+						</div>
+
+						<div class="loginfieldcontainer">
+							<label for="pw">Password:</label>
+							<input type="password" name="pw">
+						</div>
+
+						<div class="loginfieldcontainer">
+							<label for="confpw">Confirm password:</label>
+							<input type="password" name="confpw">
+						</div>
+
+						<div class="loginfieldcontainer">
+							<label for="utype">User type:</label>
+							<div class="switchdiv">
+								<p class="switchtext left">Tutor</p>
+								<label class="switch">
+								<input type="checkbox" name="utype" class="switchinput">
+								<span class="slider"></span>
+								</label>
+								<p class="switchtext right">Student</p>
+							</div>
+						</div>
+
+						<button class="loginbutton" type="submit">Register</button>
+					</form>
+
+					<div class="loginredirect">
+						<p class="predirect">Already have an account?</p>
+						<a class="linkredirect" href="/login">Login</a>
+          </div>
+				</div>
+
+			</div>
+		</main>
+		<footer>
+			<%- include("footer"); %>
+		</footer>
+	</body>
+</html>

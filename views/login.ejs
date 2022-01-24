@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%- include("head"); %>
+  </head>
+  <body>
+    <main>
+      <div id="loginbox">
+        <h1 class="headertext login">WMGTSS</h1>
+        <p class="headertext login">Login</p>
+
+        <ul class="logininvalid">
+          <% if (messages.error) { %>
+          <li class="logininvalid"><%= messages.error %></li>
+          <% } %>
+        </ul>
+
+        <div class="logincontent">
+          <form action="/login" method="POST">
+            <div class="loginfieldcontainer">
+              <label for="id">University ID:</label>
+              <input type="text" name="id">
+            </div>
+
+            <div class="loginfieldcontainer">
+              <label for="pw">Password:</label>
+              <input type="password" name="pw">
+            </div>
+
+            <button class="loginbutton" type="submit">Login</button>
+          </form>
+
+          <div class="loginredirect">
+            <p class="predirect">Don't have an account?</p>
+            <a class="linkredirect" href="/register">Register</a>
+          </div>
+        </div>
+
+      </div>
+    </main>
+    <footer>
+      <%- include("footer"); %>
+    </footer>
+  </body>
+</html>
