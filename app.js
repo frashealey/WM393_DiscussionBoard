@@ -1,4 +1,4 @@
-const { execPath } = require("process")
+const { execPath } = require("process"),
       express = require("express"),
       bodyParser = require("body-parser"),
       path = require("path"),
@@ -14,7 +14,7 @@ const { execPath } = require("process")
             rejectUnauthorized: false
         }
       }),
-      { initialize } = require("passport")
+      { initialize } = require("passport"),
       passport = require("passport"),
       LocalStrategy = require("passport-local").Strategy,
       flash = require("express-flash"),
@@ -33,7 +33,7 @@ server.use(flash());
 passportInit(passport);
 server.use(
     session({
-        // this would normally be placed in .env with .gitignore,
+        // this would normally be placed in .env with .gitignore
         // (but for assessment purposes it is here)
         secret: "discussSession192192",
         resave: false,
