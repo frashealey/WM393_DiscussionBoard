@@ -45,7 +45,7 @@ $$
         RETURN NEW;
     END;
 $$ LANGUAGE 'plpgsql';
-CREATE OR REPLACE TRIGGER trig_link_user_type AFTER INSERT OR UPDATE OR DELETE ON link_user FOR EACH ROW EXECUTE PROCEDURE func_link_user_type();
+CREATE TRIGGER trig_link_user_type AFTER INSERT OR UPDATE OR DELETE ON link_user FOR EACH ROW EXECUTE PROCEDURE func_link_user_type();
 
 -- discussion
 -- (enforcement of 1 non-archived board per tutor to be outlined in js)
@@ -70,7 +70,7 @@ $$
         RETURN NEW;
     END;
 $$ LANGUAGE 'plpgsql';
-CREATE OR REPLACE TRIGGER trig_discussion_user_type AFTER INSERT OR UPDATE OR DELETE ON discussion FOR EACH ROW EXECUTE PROCEDURE func_discussion_user_type();
+CREATE TRIGGER trig_discussion_user_type AFTER INSERT OR UPDATE OR DELETE ON discussion FOR EACH ROW EXECUTE PROCEDURE func_discussion_user_type();
 
 -- topic
 CREATE TABLE topic (
@@ -124,39 +124,40 @@ RETURN NEW;
 END;
 $$ LANGUAGE 'plpgsql';
 -- uni_user
-CREATE OR REPLACE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON uni_user FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
-CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON uni_user EXECUTE PROCEDURE func_db_auditor();
+CREATE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON uni_user FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
+CREATE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON uni_user EXECUTE PROCEDURE func_db_auditor();
 -- link_user
-CREATE OR REPLACE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON link_user FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
-CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON link_user EXECUTE PROCEDURE func_db_auditor();
+CREATE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON link_user FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
+CREATE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON link_user EXECUTE PROCEDURE func_db_auditor();
 -- discussion
-CREATE OR REPLACE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON discussion FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
-CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON discussion EXECUTE PROCEDURE func_db_auditor();
+CREATE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON discussion FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
+CREATE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON discussion EXECUTE PROCEDURE func_db_auditor();
 -- topic
-CREATE OR REPLACE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON topic FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
-CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON topic EXECUTE PROCEDURE func_db_auditor();
+CREATE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON topic FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
+CREATE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON topic EXECUTE PROCEDURE func_db_auditor();
 -- response
-CREATE OR REPLACE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON response FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
-CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON response EXECUTE PROCEDURE func_db_auditor();
+CREATE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON response FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
+CREATE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON response EXECUTE PROCEDURE func_db_auditor();
 -- liked
-CREATE OR REPLACE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON liked FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
-CREATE OR REPLACE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON liked EXECUTE PROCEDURE func_db_auditor();
+CREATE TRIGGER trig_db_auditor AFTER INSERT OR UPDATE OR DELETE ON liked FOR EACH ROW EXECUTE PROCEDURE func_db_auditor();
+CREATE TRIGGER trig_db_auditor_trunc AFTER TRUNCATE ON liked EXECUTE PROCEDURE func_db_auditor();
 
--- creating regular (university, non-admin) role
-CREATE ROLE reguser;
--- permissions
-GRANT SELECT ON uni_user, discussion, topic, response, liked TO reguser;
-GRANT INSERT ON uni_user, discussion, topic, response, liked TO reguser;
-GRANT UPDATE(pw, fname, lname, email, utype) ON uni_user TO reguser;
-GRANT UPDATE(dis_title, archived) ON discussion TO reguser;
-GRANT UPDATE(top_title, top_desc) ON topic TO reguser;
-GRANT UPDATE(res_title, res_text, pinned) ON response TO reguser;
-GRANT DELETE ON discussion, topic, response TO reguser;
-GRANT DELETE ON liked TO reguser;
-GRANT INSERT ON db_audit TO reguser;
-GRANT EXECUTE ON FUNCTION func_db_auditor TO reguser;
--- prevents creating relations
-REVOKE CREATE ON SCHEMA public FROM PUBLIC;
--- pools
-CREATE ROLE pool1 LOGIN PASSWORD 'pool1pass';
-GRANT reguser TO pool1;
+-- -- creating roles is not possible in heroku, so all database CRUD done from single user
+-- -- creating regular (university, non-admin) role
+-- CREATE ROLE reguser;
+-- -- permissions
+-- GRANT SELECT ON uni_user, discussion, topic, response, liked TO reguser;
+-- GRANT INSERT ON uni_user, discussion, topic, response, liked TO reguser;
+-- GRANT UPDATE(pw, fname, lname, email, utype) ON uni_user TO reguser;
+-- GRANT UPDATE(dis_title, archived) ON discussion TO reguser;
+-- GRANT UPDATE(top_title, top_desc) ON topic TO reguser;
+-- GRANT UPDATE(res_title, res_text, pinned) ON response TO reguser;
+-- GRANT DELETE ON discussion, topic, response TO reguser;
+-- GRANT DELETE ON liked TO reguser;
+-- GRANT INSERT ON db_audit TO reguser;
+-- GRANT EXECUTE ON FUNCTION func_db_auditor TO reguser;
+-- -- prevents creating relations
+-- REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+-- -- pools
+-- CREATE ROLE pool1 LOGIN PASSWORD 'pool1pass';
+-- GRANT reguser TO pool1;

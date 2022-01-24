@@ -4,11 +4,11 @@ const { execPath } = require("process")
       path = require("path"),
       { Pool } = require("pg"),
       pool1 = new Pool({
-        host: "localhost",
+        host: "postgres://ncwvkhbstisnwb:709e09497df536b208f5fddd1f105e5b7aa05c5555e46d6fc4b0bfb2fa1e9098@ec2-54-220-14-54.eu-west-1.compute.amazonaws.com:5432/dvj5v33apq5oj",
         port: 5432,
-        user: "pool1",
-        password: "pool1pass",
-        database: "discussionboard"
+        user: "ncwvkhbstisnwb",
+        password: "709e09497df536b208f5fddd1f105e5b7aa05c5555e46d6fc4b0bfb2fa1e9098",
+        database: "dvj5v33apq5oj"
       }),
       { initialize } = require("passport")
       passport = require("passport"),
