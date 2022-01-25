@@ -8,8 +8,11 @@
     <%- include("header"); %>
   </header>
   <main>
-    <p>Hello <%= user.fname %> <%= user.lname %></p>
-    <a href="/topics">topic</a>
+
+    <% activeDiscs.forEach(function(activeDisc) { %>
+      <p><%=activeDisc.dis_id%> &#8211 <%=activeDisc.dis_title%></p>
+    <% })%>
+
   </main>
   <footer>
     <%- include("footer"); %>

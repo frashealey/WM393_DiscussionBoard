@@ -49,20 +49,31 @@ server.use((req, res, next) => {
 });
 
 // discussion
-server.get("/", checkNotAuthenticated, (req, res) => {
+server.get("/", isNotLoggedIn, (req, res) => {
     res.redirect("/discussions");
 });
-server.get("/discussions", checkNotAuthenticated, (req, res) => {
-    res.render("discussion", { user: req.user});
+server.get("/discussions", isNotLoggedIn, async (req, res) => {
+    try {
+        // tutor query: SELECT dis_id, dis_owner, dis_title, archive FROM discussion WHERE archive=false ORDER BY CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner;
+        // student query 1?: SELECT dis_id, dis_owner, dis_title, archive FROM discussion INNER JOIN uni_user ON discussion.dis_id=uni_user.id INNER JOIN link_user ON uni_user.id=link_user.lnk_stu_id WHERE archive=false AND dis_owner=lnk_tut_id;
+        // student query 2?: SELECT dis_id, dis_owner, dis_title, archive FROM discussion WHERE archive=false
+        const activeDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive FROM discussion WHERE archive=false ORDER BY CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner;`, [req.user.id]);
+        console.log(activeDisc.rows);
+        res.render("discussion", { user: req.user, activeDiscs: activeDisc.rows });
+    }
+    catch(e) {
+        console.log(e);
+        res.render("discussion", { user: req.user, activeDiscs: [] });
+    };
 });
 
 // topic
-server.get("/topics", checkNotAuthenticated, async (req, res) => {
+server.get("/topics", isNotLoggedIn, async (req, res) => {
     res.render("topic", { user: req.user});
 });
 
 // login
-server.get("/login", checkAuthenticated, async (req, res) => {
+server.get("/login", isLoggedIn, (req, res) => {
     res.render("login");
 });
 server.post("/login", passport.authenticate("local", {
@@ -73,7 +84,7 @@ server.post("/login", passport.authenticate("local", {
 );
 
 // register
-server.get("/register", checkAuthenticated, async (req, res) => {
+server.get("/register", isLoggedIn, (req, res) => {
     res.render("register");
 });
 server.post("/register", async (req, res) => {
@@ -145,13 +156,13 @@ server.post("/logout", (req, res) => {
     res.redirect("/login");
 });
 
-// redirect undefined pages to home page
-server.get("*", function(req, res) {
+// redirect undefined pages
+server.get("*", (req, res) => {
     res.redirect("/");
 });
 
 function passportInit(passport) {
-    passport.use(new LocalStrategy({ usernameField: "id", passwordField: "pw" }, async function verify(id, pw, done) {
+    passport.use(new LocalStrategy({ usernameField: "id", passwordField: "pw" }, async (id, pw, done) => {
         try {
             const idCheck = await pool1.query(`SELECT id FROM uni_user WHERE id=$1`, [id]);
             if (idCheck.rows.length) {
@@ -191,14 +202,14 @@ function passportInit(passport) {
     });
 };
 
-function checkAuthenticated(req, res, next) {
+function isLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
         return res.redirect("/discussion");
     };
     next();
 };
 
-function checkNotAuthenticated(req, res, next) {
+function isNotLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
     };
