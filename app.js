@@ -42,10 +42,23 @@ server.use(
 );
 server.use(passport.initialize());
 server.use(passport.session());
+// prevents browser back button (browser cache) depending on logged-in state
+server.use((req, res, next) => {
+    res.set("Cache-Control", "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0");
+    next();
+});
 
 // discussion
-server.get("/", checkNotAuthenticated, async (req, res) => {
+server.get("/", checkNotAuthenticated, (req, res) => {
+    res.redirect("/discussions");
+});
+server.get("/discussions", checkNotAuthenticated, (req, res) => {
     res.render("discussion", { user: req.user});
+});
+
+// topic
+server.get("/topics", checkNotAuthenticated, async (req, res) => {
+    res.render("topic", { user: req.user});
 });
 
 // login
