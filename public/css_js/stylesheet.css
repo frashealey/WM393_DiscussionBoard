@@ -9,6 +9,8 @@ html, body {
 body {
     display: flex;
     flex-direction: column;
+    background-image: url("/resources/background.png");
+    background-repeat: repeat;
 }
 header, footer {
     background-color: #552D62;
@@ -16,6 +18,7 @@ header, footer {
 }
 main {
     flex: 1 0 auto;
+    margin-bottom: 50px;
 }
 footer {
     flex-shrink: 0;
@@ -193,6 +196,7 @@ input:checked + .slider:before {
 h1.pagetitle {
     color: #000000;
     margin: 20px 30px 20px 30px;
+    font-weight: normal;
 }
 hr.pagetitle {
     background-color: #552D62;
@@ -200,6 +204,55 @@ hr.pagetitle {
     height: 2px;
     margin: 0px 20px 0 20px;
 }
+
+div.screencontent {
+    margin: 10px 40px 10px 40px;
+}
+div.discusspanel {
+    background-color: #ffffff;
+    border: 2px solid #262626;
+    margin: 0px 0px 10px 0px;
+}
+h2.discusspanel.text {
+    color: #000000;
+    font-weight: normal;
+    padding: 20px 20px 20px 20px;
+}
+div.statcontainer {
+    margin: 0px 10px 10px 10px;
+}
+div.statdiv, button.statdiv {
+    display: inline-block;
+    margin: 0px 10px 0px 10px;
+    /* outline: 1px solid black; */
+}
+div.statdiv.nonselect {
+    cursor: default;
+}
+form.statform {
+    display: inline-block;
+}
+button.statdiv {
+    background-color: #ffffff;
+    border: none;
+    cursor: pointer;
+}
+p.stattext {
+    color: #000000;
+    font-size: 16px;
+    display: inline;
+    vertical-align: top;
+}
+img.staticon {
+    display: inline;
+    height: 24px;
+    width: 24px;
+}
+
+
+
+
+
 
 #logout {
     float: right;
@@ -241,7 +294,7 @@ input:focus, select:focus, textarea:focus, button:focus {
     outline: none;
 }
 
-p, h1, a, button, label, li {
+p, h1, h2, a, button, label, li {
     font-family: "Lato", Arial, sans-serif;
 }
 p.footertext, a.footerlink {
