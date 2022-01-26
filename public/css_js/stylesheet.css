@@ -58,8 +58,6 @@ ul.logininvalid {
     margin-bottom: 30px;
 }
 .logincontent {
-    /* font-family: "Lato", Arial, sans-serif; */
-    /* padding: 10px 20px 10px 20px; */
     margin: 0px 20px 0px 20px;
     text-align: left;
     font-size: 18px;
@@ -195,9 +193,41 @@ input:checked + .slider:before {
 
 h1.pagetitle {
     color: #000000;
-    margin: 20px 30px 20px 30px;
+    /* margin: 20px 30px 20px 30px; */
+    /* margin: 0; */
     font-weight: normal;
+    display: inline;
 }
+div.pagetitle {
+    background-color: red;
+    /* margin: 20px 30px 20px 30px; */
+}
+div.pagetitlebut {
+    background-color: blue;
+    /* padding: 20px 30px 20px 30px; */
+    /* float: right; */
+    /* display: table-cell; */
+}
+form.pagetitlebut {
+    display: inline-block;
+}
+button.pagetitlebut {
+    /* color: #ffffff;
+    background-color: #262626; */
+    border: none;
+    font-size: 20px;
+    padding: 5px;
+    /* margin: 10px 0px 20px 0px; */
+    width: 100%;
+    -webkit-transition: 0.2s;
+    transition: 0.2s;
+}
+button.pagetitlebut:hover {
+    background-color: #999999;
+}
+
+
+
 hr.pagetitle {
     background-color: #552D62;
     border: none;
@@ -224,7 +254,6 @@ div.statcontainer {
 div.statdiv, button.statdiv {
     display: inline-block;
     margin: 0px 10px 0px 10px;
-    /* outline: 1px solid black; */
 }
 div.statdiv.nonselect {
     cursor: default;
@@ -314,7 +343,6 @@ a:hover {
 }
 #footertextcontainer {
     display: inline-block;
-    /* display: inline; */
     padding: 15px 0px 15px 20px;
 }
 #footerlogo {

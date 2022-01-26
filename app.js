@@ -68,16 +68,24 @@ server.get("/discussions", isNotLoggedIn, async (req, res) => {
         res.render("discussion", { user: req.user, activeDiscs: [] });
     };
 });
-
 // archive discussion
-server.post("/archive", (req, res) => {
-    console.log("ARCHIVE");
+server.post("/archivediscussion", (req, res) => {
+    console.log("ARCHIVE DISCUSSION");
     res.redirect("/");
 });
-
 // delete discussion
 server.post("/deletediscussion", (req, res) => {
     console.log("DELETE");
+    res.redirect("/");
+});
+// new discussion
+server.post("/newdiscussion", (req, res) => {
+    console.log("NEW DISCUSSION");
+    res.redirect("/");
+});
+// archive
+server.post("/archive", (req, res) => {
+    console.log("ARCHIVE");
     res.redirect("/");
 });
 

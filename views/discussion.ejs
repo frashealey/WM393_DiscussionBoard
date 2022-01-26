@@ -9,7 +9,30 @@
   </header>
   <main>
 
-    <h1 class="pagetitle">Discussion boards</h1>
+    <!-- <div class="screentitle"> -->
+      <!-- <form class="newboard" action="/archive" method="POST">
+        <button type="submit">Archived boards</button>
+      </form> -->
+
+    <!-- <% if(user.utype == "t"){ %>
+      <div class="newboardcontainer">
+        <form class="newboard" action="/archive" method="POST">
+          <button type="submit">Archived boards</button>
+        </form>
+        <form class="newboard" action="/newdiscussion" method="POST">
+          <button type="submit">New board +</button>
+        </form>
+      </div>
+    <% } %> -->
+
+    <div class="pagetitle">
+      <h1 class="pagetitle">Discussion boards</h1>
+      <div class="pagetitlebut">
+        <form class="pagetitlebut" action="/archive" method="POST"><button class="pagetitlebut archive">Archived boards</button></form>
+        <form class="pagetitlebut" action="/newdiscussion" method="POST"><button class="pagetitlebut newboard">New board +</button></form>
+      </div>
+    </div>
+
     <hr class="pagetitle">
 
     <div class="screencontent">
@@ -30,7 +53,7 @@
             </div>
 
             <% if(user.utype == "t" && activeDisc.dis_owner == user.id){ %>
-              <form class="statform" action="/archive" method="POST">
+              <form class="statform" action="/archivediscussion" method="POST">
                 <button class="statdiv" type="submit">
                   <img src="/resources/archive.png" class="staticon">
                   <p class="stattext">Archive</p>
