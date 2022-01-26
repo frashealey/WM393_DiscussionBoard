@@ -9,8 +9,11 @@
   </header>
   <main>
 
+    <h1 class="pagetitle">Discussion boards</h1>
+    <hr class="pagetitle">
+
     <% activeDiscs.forEach(function(activeDisc) { %>
-      <p><%=activeDisc.dis_title%> &#8211 <%=activeDisc.fname%> <%=activeDisc.lname%></p>
+      <p><%=activeDisc.dis_title%> &#8211 <%=activeDisc.fname%> <%=activeDisc.lname%> &#8211 <%=activeDisc.top_count%> topics , <%=activeDisc.res_count%> responses</p>
     <% })%>
 
   </main>

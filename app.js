@@ -54,17 +54,19 @@ server.get("/", isNotLoggedIn, (req, res) => {
 });
 server.get("/discussions", isNotLoggedIn, async (req, res) => {
     try {
-        // tutor query: SELECT dis_id, dis_owner, dis_title, archive FROM discussion WHERE archive=false ORDER BY CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner;
         // student query using subqueries: SELECT dis_id, dis_owner, dis_title, archive FROM discussion WHERE archive=false AND dis_owner IN (SELECT lnk_tut_id FROM link_user WHERE lnk_stu_id='u1827746') ORDER BY dis_id DESC;
         // student query using joins: SELECT dis_id, dis_owner, dis_title, archive FROM discussion INNER JOIN uni_user ON discussion.dis_owner=uni_user.id INNER JOIN link_user ON uni_user.id=link_user.lnk_tut_id WHERE archive=false AND lnk_stu_id='u1827746' ORDER BY dis_id DESC;
+
+        // SELECT dis_id, dis_owner, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top INNER JOIN uni_user ON dis_owner=id WHERE archive=false GROUP BY dis_id, id ORDER BY CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner;
+
+        let activeDisc = [];
         if (req.user.utype === "t") {
-            const activeDisc = await pool1.query(`SELECT dis_id, dis_owner, Encode(Decrypt(uni_user.fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(uni_user.lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, dis_title, archive FROM discussion INNER JOIN uni_user ON discussion.dis_owner=uni_user.id WHERE archive=false ORDER BY CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner;`, [req.user.id]);
-            res.render("discussion", { user: req.user, activeDiscs: activeDisc.rows });
+            activeDisc = await pool1.query(`SELECT dis_id, dis_owner, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top INNER JOIN uni_user ON dis_owner=id WHERE archive=false GROUP BY dis_id, id ORDER BY CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner;`, [req.user.id]);
         }
         else if (req.user.utype === "s") {
-            const activeDisc = await pool1.query(`SELECT dis_id, dis_owner, Encode(Decrypt(uni_user.fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(uni_user.lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, dis_title, archive FROM discussion INNER JOIN uni_user ON discussion.dis_owner=uni_user.id INNER JOIN link_user ON uni_user.id=link_user.lnk_tut_id WHERE archive=false AND lnk_stu_id=$1 ORDER BY dis_id DESC;`, [req.user.id]);
-            res.render("discussion", { user: req.user, activeDiscs: activeDisc.rows });
+            activeDisc = await pool1.query(`SELECT dis_id, dis_owner, Encode(Decrypt(uni_user.fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(uni_user.lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, dis_title, archive FROM discussion INNER JOIN uni_user ON discussion.dis_owner=uni_user.id INNER JOIN link_user ON uni_user.id=link_user.lnk_tut_id WHERE archive=false AND lnk_stu_id=$1 ORDER BY dis_id DESC;`, [req.user.id]);
         };
+        res.render("discussion", { user: req.user, activeDiscs: activeDisc.rows });
     }
     catch(e) {
         console.log(e);

@@ -190,6 +190,17 @@ input:checked + .slider:before {
     color: #999999;
 }
 
+h1.pagetitle {
+    color: #000000;
+    margin: 20px 30px 20px 30px;
+}
+hr.pagetitle {
+    background-color: #552D62;
+    border: none;
+    height: 2px;
+    margin: 0px 20px 0 20px;
+}
+
 #logout {
     float: right;
     padding: 15px 20px 15px 10px;
