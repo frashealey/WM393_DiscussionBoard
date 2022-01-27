@@ -192,7 +192,6 @@ input:checked + .slider:before {
 }
 
 div.subheader {
-    /* background-color: red; */
     padding: 0px 0px 20px 0px;
 }
 h1.pagetitle {
@@ -202,7 +201,6 @@ h1.pagetitle {
     display: inline-block;
 }
 div.pagetitlebut {
-    /* background-color: blue; */
     float: right;
     margin: 15px 30px 0px 30px;
 }
@@ -210,16 +208,16 @@ form.pagetitlebut {
     display: inline-block;
 }
 button.pagetitlebut {
-    border: 2px solid #262626;
-    /* border: none; */
+    /* border: 2px solid #262626; */
+    border: none;
     font-size: 22px;
     padding: 5px 10px 5px 10px;
     -webkit-transition: 0.2s;
     transition: 0.2s;
 }
 button.pagetitlebut.archive {
-    color: #000000;
-    background-color: #ffffff;
+    color: #ffffff;
+    background-color: #262626;
     margin: 5px 10px 0px 0px;
 }
 button.pagetitlebut.archive:hover {
@@ -233,11 +231,6 @@ button.pagetitlebut.newboard {
 button.pagetitlebut.newboard:hover {
     background-color: #886C91;
 }
-
-
-
-
-
 
 hr.pagetitle {
     background-color: #552D62;
@@ -288,11 +281,6 @@ img.staticon {
     height: 24px;
     width: 24px;
 }
-
-
-
-
-
 
 #logout {
     float: right;
