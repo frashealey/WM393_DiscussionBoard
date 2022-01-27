@@ -8,11 +8,10 @@
     <%- include("header"); %>
   </header>
   <div class="subheader">
-    <h1 class="pagetitle">Discussion boards</h1>
+    <h1 class="pagetitle">Archived discussion boards</h1>
     <% if(user.utype == "t"){ %>
       <div class="pagetitlebut">
-        <form class="pagetitlebut" action="/archive" method="POST"><button class="pagetitlebut archive">Archived boards</button></form>
-        <form class="pagetitlebut" action="/newdiscussion" method="POST"><button class="pagetitlebut newboard">New board +</button></form>
+        <form class="pagetitlebut" action="/discussions" method="POST"><button class="pagetitlebut archive">Active boards</button></form>
       </div>
     <% } %>
   </div>
@@ -22,30 +21,30 @@
 
     <div class="screencontent">
 
-      <% activeDiscs.forEach(function(activeDisc) { %>
+      <% archiveDiscs.forEach(function(archiveDisc) { %>
         <div class="discusspanel">
-          <h2 class="discusspanel text"><%=activeDisc.dis_title%></h2>
+          <h2 class="discusspanel text"><%=archiveDisc.dis_title%></h2>
 
           <div class="statcontainer">
             <div class="statdiv nonselect">
               <img src="/resources/topic.png" class="staticon">
-              <% if(activeDisc.top_count == 1){ %><p class="stattext"><%=activeDisc.top_count%> topic</p><% } else{ %><p class="stattext"><%=activeDisc.top_count%> topics</p><% } %>
+              <% if(archiveDisc.top_count == 1){ %><p class="stattext"><%=archiveDisc.top_count%> topic</p><% } else{ %><p class="stattext"><%=archiveDisc.top_count%> topics</p><% } %>
             </div>
 
             <div class="statdiv nonselect">
               <img src="/resources/response.png" class="staticon">
-              <% if(activeDisc.res_count == 1){ %><p class="stattext"><%=activeDisc.res_count%> response</p><% } else{ %><p class="stattext"><%=activeDisc.res_count%> responses</p><% } %>
+              <% if(archiveDisc.res_count == 1){ %><p class="stattext"><%=archiveDisc.res_count%> response</p><% } else{ %><p class="stattext"><%=archiveDisc.res_count%> responses</p><% } %>
             </div>
 
-            <% if(user.utype == "t" && activeDisc.dis_owner == user.id){ %>
-              <form class="statform" action="/archivediscussion?dis_id=<%=activeDisc.dis_id%>" method="POST">
+            <% if(user.utype == "t" && archiveDisc.dis_owner == user.id){ %>
+              <form class="statform" action="/unarchivediscussion?dis_id=<%=archiveDisc.dis_id%>" method="POST">
                 <button class="statdiv" type="submit">
                   <img src="/resources/archive.png" class="staticon">
-                  <p class="stattext">Archive</p>
+                  <p class="stattext">Unarchive</p>
                 </button>
               </form>
 
-              <form class="statform" action="/deletediscussion?dis_id=<%=activeDisc.dis_id%>&screen=discussions" method="POST">
+              <form class="statform" action="/deletediscussion?dis_id=<%=archiveDisc.dis_id%>&screen=archive" method="POST">
                 <button class="statdiv" type="submit" onclick="return deleteConfirm()">
                   <img src="/resources/delete.png" class="staticon">
                   <p class="stattext">Delete</p>

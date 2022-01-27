@@ -17,17 +17,15 @@ VALUES
 INSERT INTO discussion (dis_owner, dis_title, archive)
 VALUES
     ('u2139948', 'Example discussion board 1', false),
-    ('u2139948', 'Example discussion board 2', false),
-    ('u2139948', 'Example discussion board 3', false),
-    ('u2139948', 'Example archived discussion board', true),
-    ('u9999999', 'Example discussion board 4', false),
-    ('u9999999', 'Example discussion board 5', false);
+    ('u2139948', 'Example discussion board 2', true),
+    ('u9999999', 'Example discussion board 3', false),
+    ('u9999999', 'Example discussion board 4', true);
 -- topic
 INSERT INTO topic (top_dis, top_title, top_desc, top_datetime)
 VALUES
     (1, 'Example topic 1', 'Lorem ipsum dolor sit amet', Now()),
     (1, 'Example topic 2', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', Now()),
-    (5, 'Example topic 3', 'Example description', Now());
+    (3, 'Example topic 3', 'Example description', Now());
 -- response
 INSERT INTO response (res_user, res_top, res_title, res_text) VALUES ('u1827746', 1, 'Example response 1', 'Ut enim ad minim veniam');
 INSERT INTO response (res_user, res_top, res_title, res_text, replyto, pinned) VALUES ('u2139948', 1, 'Example response 2', 'Excepteur sint occaecat cupidatat non proident', 1, true);

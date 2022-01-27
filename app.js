@@ -1,3 +1,5 @@
+const { redirect } = require("express/lib/response");
+
 const { execPath } = require("process"),
       express = require("express"),
       bodyParser = require("body-parser"),
@@ -52,6 +54,9 @@ server.use((req, res, next) => {
 server.get("/", isNotLoggedIn, (req, res) => {
     res.redirect("/discussions");
 });
+server.post("/discussions", isNotLoggedIn, (req, res) => {
+    res.redirect("/discussions");
+});
 server.get("/discussions", isNotLoggedIn, async (req, res) => {
     try {
         let activeDisc = [];
@@ -68,8 +73,10 @@ server.get("/discussions", isNotLoggedIn, async (req, res) => {
         res.render("discussion", { user: req.user, activeDiscs: [] });
     };
 });
+
 // archive discussion
 server.post("/archivediscussion", async (req, res) => {
+    // check that user has <=50 archived boards
     const client = await pool1.connect();
     try {
         await client.query("BEGIN");
@@ -85,6 +92,47 @@ server.post("/archivediscussion", async (req, res) => {
     };
     res.redirect("/discussions");
 });
+
+// new discussion
+server.post("/newdiscussion", (req, res) => {
+    // check that user has 0 active discussion boards
+    console.log("NEW DISCUSSION");
+    res.redirect("/");
+});
+
+// archive
+server.post("/archive", isTutor, async (req, res) => {
+    res.redirect("/archive");
+});
+server.get("/archive", isTutor, async (req, res) => {
+    try {
+        const archiveDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE archive=true GROUP BY dis_id ORDER BY dis_id DESC, CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner;`, [req.user.id]);
+        res.render("archive", { user: req.user, archiveDiscs: archiveDisc.rows });
+    }
+    catch(e) {
+        console.log(e);
+        res.render("archive", { user: req.user, archiveDiscs: [] });
+    };
+});
+// unarchive discussion
+server.post("/unarchivediscussion", async (req, res) => {
+    console.log("UNARCHIVE");
+    // const client = await pool1.connect();
+    // try {
+    //     await client.query("BEGIN");
+    //     await client.query(`UPDATE discussion SET archive=true WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
+    //     await client.query("COMMIT");
+    // }
+    // catch(e) {
+    //     console.log(e);
+    //     await client.query("ROLLBACK");
+    // }
+    // finally {
+    //     client.release();
+    // };
+    res.redirect("/discussions");
+});
+
 // delete discussion
 server.post("/deletediscussion", async (req, res) => {
     const client = await pool1.connect();
@@ -100,21 +148,12 @@ server.post("/deletediscussion", async (req, res) => {
     finally {
         client.release();
     };
-    res.redirect("/discussions");
-});
-// new discussion
-server.post("/newdiscussion", (req, res) => {
-    console.log("NEW DISCUSSION");
-    res.redirect("/");
-});
-// archive
-server.post("/archive", (req, res) => {
-    console.log("ARCHIVE");
-    res.redirect("/");
+    res.redirect("/" + req.query.screen);
 });
 
 // topic
-server.get("/topics", isNotLoggedIn, async (req, res) => {
+server.get("/topics", isNotLoggedIn, (req, res) => {
+    // check that user has <=50 topics
     res.render("topic", { user: req.user});
 });
 
@@ -212,18 +251,12 @@ function passportInit(passport) {
         try {
             const idCheck = await pool1.query(`SELECT id FROM uni_user WHERE id=$1`, [id]);
             if (idCheck.rows.length) {
-                try {
-                    const pwCheck = await pool1.query(`SELECT id, pw FROM uni_user WHERE id=$1 AND pw=Crypt($2, pw);`, [id, pw]);
-                    if (pwCheck.rows.length === 1) {
-                        return done(null, pwCheck.rows[0]);
-                    }
-                    else {
-                        return done(null, false, {message: "Incorrect username/password"});
-                    };
+                const pwCheck = await pool1.query(`SELECT id, pw FROM uni_user WHERE id=$1 AND pw=Crypt($2, pw);`, [id, pw]);
+                if (pwCheck.rows.length === 1) {
+                    return done(null, pwCheck.rows[0]);
                 }
-                catch(e) {
-                    console.log(e);
-                    res.render("login", {message: "Unknown error - please try again"});
+                else {
+                    return done(null, false, {message: "Incorrect username/password"});
                 };
             }
             else {
@@ -252,14 +285,21 @@ function isLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
         return res.redirect("/discussions");
     };
-    next();
+    return next();
 };
 
 function isNotLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
     };
-    res.redirect("/login");
+    return res.redirect("/login");
+};
+
+function isTutor(req, res, next) {
+    if (req.user.utype === "t") {
+        return next();
+    }
+    return res.redirect("/discussions");
 };
 
 server.listen(port);
