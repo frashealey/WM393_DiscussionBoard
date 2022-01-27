@@ -7,6 +7,15 @@
   <header>
     <%- include("header"); %>
   </header>
+  <div class="subheader">
+    <h1 class="pagetitle">Discussion boards</h1>
+    <% if(user.utype == "t"){ %>
+      <div class="pagetitlebut">
+        <form class="pagetitlebut" action="/archive" method="POST"><button class="pagetitlebut archive">Archived boards</button></form>
+        <form class="pagetitlebut" action="/newdiscussion" method="POST"><button class="pagetitlebut newboard">New board +</button></form>
+      </div>
+    <% } %>
+  </div>
   <main>
 
     <!-- <div class="screentitle"> -->
@@ -25,13 +34,14 @@
       </div>
     <% } %> -->
 
-    <div class="pagetitle">
-      <h1 class="pagetitle">Discussion boards</h1>
+    <!-- <div class="pagetitle">
       <div class="pagetitlebut">
         <form class="pagetitlebut" action="/archive" method="POST"><button class="pagetitlebut archive">Archived boards</button></form>
         <form class="pagetitlebut" action="/newdiscussion" method="POST"><button class="pagetitlebut newboard">New board +</button></form>
       </div>
-    </div>
+    </div> -->
+
+
 
     <hr class="pagetitle">
 

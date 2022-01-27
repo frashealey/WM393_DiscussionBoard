@@ -191,40 +191,51 @@ input:checked + .slider:before {
     color: #999999;
 }
 
+div.subheader {
+    /* background-color: red; */
+    padding: 0px 0px 20px 0px;
+}
 h1.pagetitle {
     color: #000000;
-    /* margin: 20px 30px 20px 30px; */
-    /* margin: 0; */
+    margin: 20px 30px 0px 30px;
     font-weight: normal;
-    display: inline;
-}
-div.pagetitle {
-    background-color: red;
-    /* margin: 20px 30px 20px 30px; */
+    display: inline-block;
 }
 div.pagetitlebut {
-    background-color: blue;
-    /* padding: 20px 30px 20px 30px; */
-    /* float: right; */
-    /* display: table-cell; */
+    /* background-color: blue; */
+    float: right;
+    margin: 15px 30px 0px 30px;
 }
 form.pagetitlebut {
     display: inline-block;
 }
 button.pagetitlebut {
-    /* color: #ffffff;
-    background-color: #262626; */
-    border: none;
-    font-size: 20px;
-    padding: 5px;
-    /* margin: 10px 0px 20px 0px; */
-    width: 100%;
+    border: 2px solid #262626;
+    /* border: none; */
+    font-size: 22px;
+    padding: 5px 10px 5px 10px;
     -webkit-transition: 0.2s;
     transition: 0.2s;
 }
-button.pagetitlebut:hover {
+button.pagetitlebut.archive {
+    color: #000000;
+    background-color: #ffffff;
+    margin: 5px 10px 0px 0px;
+}
+button.pagetitlebut.archive:hover {
     background-color: #999999;
 }
+button.pagetitlebut.newboard {
+    color: #ffffff;
+    background-color: #552D62;
+    margin: 5px 0px 0px 0px;
+}
+button.pagetitlebut.newboard:hover {
+    background-color: #886C91;
+}
+
+
+
 
 
 
