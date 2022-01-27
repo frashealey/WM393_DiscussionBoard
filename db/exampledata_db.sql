@@ -20,7 +20,8 @@ VALUES
     ('u2139948', 'Example discussion board 2', false),
     ('u2139948', 'Example discussion board 3', false),
     ('u2139948', 'Example archived discussion board', true),
-    ('u9999999', 'Example discussion board 4', false);
+    ('u9999999', 'Example discussion board 4', false),
+    ('u9999999', 'Example discussion board 5', false);
 -- topic
 INSERT INTO topic (top_dis, top_title, top_desc, top_datetime)
 VALUES

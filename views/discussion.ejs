@@ -38,15 +38,15 @@
             </div>
 
             <% if(user.utype == "t" && activeDisc.dis_owner == user.id){ %>
-              <form class="statform" action="/archivediscussion" method="POST">
+              <form class="statform" action="/archivediscussion?dis_id=<%=activeDisc.dis_id%>" method="POST">
                 <button class="statdiv" type="submit">
                   <img src="/resources/archive.png" class="staticon">
                   <p class="stattext">Archive</p>
                 </button>
               </form>
 
-              <form class="statform" action="/deletediscussion" method="POST">
-                <button class="statdiv" type="submit">
+              <form class="statform" action="/deletediscussion?dis_id=<%=activeDisc.dis_id%>" method="POST">
+                <button class="statdiv" type="submit" onclick="return deleteConfirm()">
                   <img src="/resources/delete.png" class="staticon">
                   <p class="stattext">Delete</p>
                 </button>

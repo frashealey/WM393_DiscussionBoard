@@ -75,7 +75,7 @@ CREATE TRIGGER trig_discussion_user_type AFTER INSERT OR UPDATE OR DELETE ON dis
 -- topic
 CREATE TABLE topic (
     top_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    top_dis INTEGER NOT NULL REFERENCES discussion(dis_id),
+    top_dis INTEGER NOT NULL REFERENCES discussion(dis_id) ON DELETE CASCADE,
     top_title VARCHAR(100) NOT NULL,
     top_desc VARCHAR(200) NOT NULL,
     top_datetime TIMESTAMP NOT NULL DEFAULT Now()
@@ -85,18 +85,18 @@ CREATE TABLE topic (
 CREATE TABLE response (
     res_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     res_user CHAR(8) NOT NULL REFERENCES uni_user(id),
-    res_top INTEGER NOT NULL REFERENCES topic(top_id),
+    res_top INTEGER NOT NULL REFERENCES topic(top_id) ON DELETE CASCADE,
     res_title VARCHAR(100) NOT NULL,
     res_text VARCHAR(3000) NOT NULL,
     res_datetime TIMESTAMP NOT NULL DEFAULT Now(),
-    replyto INTEGER REFERENCES response(res_id),
+    replyto INTEGER REFERENCES response(res_id) ON DELETE SET NULL,
     pinned BOOLEAN NOT NULL DEFAULT false
 );
 
 -- liked
 CREATE TABLE liked (
     lke_user CHAR(8) NOT NULL REFERENCES uni_user(id),
-    lke_res INTEGER NOT NULL REFERENCES response(res_id),
+    lke_res INTEGER NOT NULL REFERENCES response(res_id) ON DELETE CASCADE,
     PRIMARY KEY (lke_user, lke_res)
 );
 

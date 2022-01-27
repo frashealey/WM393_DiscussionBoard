@@ -182,7 +182,6 @@ input:checked + .slider:before {
     background-color: #552D62;
     font-size: 36px;
     padding: 0px 0px 0px 30px;
-    cursor: pointer;
     border: none;
     -webkit-transition: 0.2s;
     transition: 0.2s;
@@ -208,10 +207,10 @@ form.pagetitlebut {
     display: inline-block;
 }
 button.pagetitlebut {
-    /* border: 2px solid #262626; */
     border: none;
-    font-size: 22px;
+    font-size: 20px;
     padding: 5px 10px 5px 10px;
+    min-width: 180px;
     -webkit-transition: 0.2s;
     transition: 0.2s;
 }
@@ -244,7 +243,7 @@ div.screencontent {
 }
 div.discusspanel {
     background-color: #ffffff;
-    border: 2px solid #262626;
+    border: 1px solid #262626;
     margin: 0px 0px 10px 0px;
 }
 h2.discusspanel.text {
@@ -268,7 +267,6 @@ form.statform {
 button.statdiv {
     background-color: #ffffff;
     border: none;
-    cursor: pointer;
 }
 p.stattext {
     color: #000000;
@@ -304,7 +302,7 @@ button.loginbutton {
     color: #ffffff;
     background-color: #262626;
     border: none;
-    font-size: 18px;
+    font-size: 20px;
     padding: 5px;
     margin: 10px 0px 20px 0px;
     width: 100%;
@@ -320,6 +318,9 @@ button.loginbutton:hover {
 
 input:focus, select:focus, textarea:focus, button:focus {
     outline: none;
+}
+button {
+    cursor: pointer;
 }
 
 p, h1, h2, a, button, label, li {

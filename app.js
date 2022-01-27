@@ -69,14 +69,38 @@ server.get("/discussions", isNotLoggedIn, async (req, res) => {
     };
 });
 // archive discussion
-server.post("/archivediscussion", (req, res) => {
-    console.log("ARCHIVE DISCUSSION");
-    res.redirect("/");
+server.post("/archivediscussion", async (req, res) => {
+    const client = await pool1.connect();
+    try {
+        await client.query("BEGIN");
+        await client.query(`UPDATE discussion SET archive=true WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
+        await client.query("COMMIT");
+    }
+    catch(e) {
+        console.log(e);
+        await client.query("ROLLBACK");
+    }
+    finally {
+        client.release();
+    };
+    res.redirect("/discussions");
 });
 // delete discussion
-server.post("/deletediscussion", (req, res) => {
-    console.log("DELETE");
-    res.redirect("/");
+server.post("/deletediscussion", async (req, res) => {
+    const client = await pool1.connect();
+    try {
+        await client.query("BEGIN");
+        await client.query(`DELETE FROM discussion WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
+        await client.query("COMMIT");
+    }
+    catch(e) {
+        console.log(e);
+        await client.query("ROLLBACK");
+    }
+    finally {
+        client.release();
+    };
+    res.redirect("/discussions");
 });
 // new discussion
 server.post("/newdiscussion", (req, res) => {
@@ -99,7 +123,7 @@ server.get("/login", isLoggedIn, (req, res) => {
     res.render("login");
 });
 server.post("/login", passport.authenticate("local", {
-        successRedirect: "/discussion",
+        successRedirect: "/discussions",
         failureRedirect: "/login",
         failureFlash: true
     })
@@ -226,7 +250,7 @@ function passportInit(passport) {
 
 function isLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
-        return res.redirect("/discussion");
+        return res.redirect("/discussions");
     };
     next();
 };
