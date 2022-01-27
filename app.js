@@ -116,11 +116,12 @@ server.get("/archive", isTutor, async (req, res) => {
 });
 // unarchive discussion
 server.post("/unarchivediscussion", async (req, res) => {
+    // check user has 0 active discussion boards
     console.log("UNARCHIVE");
     // const client = await pool1.connect();
     // try {
     //     await client.query("BEGIN");
-    //     await client.query(`UPDATE discussion SET archive=true WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
+    //     await client.query(`UPDATE discussion SET archive=false WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
     //     await client.query("COMMIT");
     // }
     // catch(e) {
