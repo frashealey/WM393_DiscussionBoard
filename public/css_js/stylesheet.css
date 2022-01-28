@@ -85,13 +85,13 @@ label.logincontent {
     display: block;
 }
 
-.switchdiv {
+div.switchdiv {
     display: table;
     margin-top: 5px;
 }
 p.switchtext {
     display: table-cell;
-    vertical-align: middle;
+    vertical-align: bottom;
 }
 p.switchtext.left {
     padding: 0px 10px 10px 0px;
@@ -209,7 +209,7 @@ div.pagetitlebut {
 form.pagetitlebut {
     display: inline-block;
 }
-button.pagetitlebut {
+button.pagetitlebut, button.createbutton {
     border: none;
     font-size: 20px;
     padding: 5px 10px 5px 10px;
@@ -217,20 +217,27 @@ button.pagetitlebut {
     -webkit-transition: 0.2s;
     transition: 0.2s;
 }
-button.pagetitlebut.archive {
-    color: #ffffff;
-    background-color: #262626;
+button.createbutton {
     margin: 5px 10px 0px 0px;
 }
-button.pagetitlebut.archive:hover {
+button.pagetitlebut.archive, button.createbutton.cancel {
+    color: #ffffff;
+    background-color: #262626;
+}
+button.pagetitlebut.archive {
+    margin: 5px 10px 0px 0px;
+}
+button.pagetitlebut.archive:hover, button.createbutton.cancel:hover {
     background-color: #999999;
 }
-button.pagetitlebut.newboard {
+button.pagetitlebut.newboard, button.createbutton.create {
     color: #ffffff;
     background-color: #552D62;
+}
+button.pagetitlebut.newboard {
     margin: 5px 0px 0px 0px;
 }
-button.pagetitlebut.newboard:hover {
+button.pagetitlebut.newboard:hover, button.createbutton.create:hover {
     background-color: #886C91;
 }
 
@@ -281,6 +288,20 @@ img.staticon {
     display: inline;
     height: 24px;
     width: 24px;
+}
+
+label.createscreen, p.switchtext.right.createscreen {
+    font-size: 18px;
+    color: #000000;
+}
+input.createscreen[type=text] {
+    margin-top: 5px;
+}
+div.switchdiv.createscreen {
+    margin-top: 20px;
+}
+div.createbuttoncontainer {
+    margin: 35px 0px 0px 0px;
 }
 
 #logout {

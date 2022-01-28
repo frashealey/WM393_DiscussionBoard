@@ -51,13 +51,13 @@ server.use((req, res, next) => {
 });
 
 // discussion
-server.get("/", isNotLoggedIn, (req, res) => {
+server.get("/", isLoggedIn, (req, res) => {
     res.redirect("/discussions");
 });
-server.post("/discussions", isNotLoggedIn, (req, res) => {
+server.post("/discussions", isLoggedIn, (req, res) => {
     res.redirect("/discussions");
 });
-server.get("/discussions", isNotLoggedIn, async (req, res) => {
+server.get("/discussions", isLoggedIn, async (req, res) => {
     try {
         let activeDisc = [];
         if (req.user.utype === "t") {
@@ -75,10 +75,10 @@ server.get("/discussions", isNotLoggedIn, async (req, res) => {
 });
 
 // archive
-server.post("/archive", async (req, res) => {
+server.post("/archive", isLoggedIn, isTutor, async (req, res) => {
     res.redirect("/archive");
 });
-server.get("/archive", isTutor, async (req, res) => {
+server.get("/archive", isLoggedIn, isTutor, async (req, res) => {
     try {
         const archiveDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE dis_owner=$1 AND archive=true GROUP BY dis_id ORDER BY dis_id DESC, CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner;`, [req.user.id]);
         res.render("archive", { user: req.user, archiveDiscs: archiveDisc.rows, message: req.flash("activeLimit")[0] });
@@ -90,7 +90,7 @@ server.get("/archive", isTutor, async (req, res) => {
 });
 
 // archive discussion
-server.post("/archivediscussion", async (req, res) => {
+server.post("/archivediscussion", isLoggedIn, isTutor, async (req, res) => {
     const client = await pool1.connect();
     try {
         await client.query("BEGIN");
@@ -115,7 +115,7 @@ server.post("/archivediscussion", async (req, res) => {
 });
 
 // unarchive discussion
-server.post("/unarchivediscussion", async (req, res) => {
+server.post("/unarchivediscussion", isLoggedIn, isTutor, async (req, res) => {
     const client = await pool1.connect();
     try {
         await client.query("BEGIN");
@@ -139,15 +139,8 @@ server.post("/unarchivediscussion", async (req, res) => {
     res.redirect("/archive");
 });
 
-// new discussion
-server.post("/newdiscussion", (req, res) => {
-    // check that user has 0 active discussion boards
-    console.log("NEW DISCUSSION");
-    res.redirect("/");
-});
-
 // delete discussion
-server.post("/deletediscussion", async (req, res) => {
+server.post("/deletediscussion", isLoggedIn, isTutor, async (req, res) => {
     const client = await pool1.connect();
     try {
         await client.query("BEGIN");
@@ -161,17 +154,54 @@ server.post("/deletediscussion", async (req, res) => {
     finally {
         client.release();
     };
-    res.redirect(req.get("referer"));
+    res.redirect("back");
+});
+
+// new discussion
+server.post("/newdiscussion", isLoggedIn, isTutor, (req, res) => {
+    res.redirect("/newdiscussion");
+});
+server.get("/newdiscussion", isLoggedIn, isTutor, (req, res) => {
+    // check that user has 0 active discussion boards
+    res.render("newdiscussion", { user: req.user, message: req.flash("createDiscError")});
+});
+server.post("/creatediscussion", isLoggedIn, isTutor, (req, res) => {
+    // try {
+    //     const newDiscCreds = {
+    //         discussionname: req.body.discussionname,
+    //         createasarchived: Boolean(req.body.createasarchived)
+    //     },
+    //           activeLimit = await pool1.query;
+    // }
+    // catch(e) {
+    //     console.log(e);
+    //     req.flash("createDiscError", "Unknown error - please try again");
+    //     res.redirect("/newdiscussion"); 
+    // }
+    // const newDiscCreds = {
+    //     discussionname: req.body.discussionname,
+    //     createasarchived: Boolean(req.body.createasarchived)
+    // };
+    // // (don't need to check createasarchived, as this 'selected' by default)
+    // if (!newDiscCreds.discussionname) {
+    //     req.flash("createDiscError", "Please fill all fields");
+    //     res.redirect("/newdiscussion");
+    // }
+    // // else if (newDiscCreds.createasarchived )
+    // else {
+    //     console.log(newDiscCreds.discussionname, newDiscCreds.createasarchived);
+    //     res.redirect("/discussions");
+    // };
 });
 
 // topic
-server.get("/topics", isNotLoggedIn, (req, res) => {
+server.get("/topics", isLoggedIn, (req, res) => {
     // check that user has <=50 topics
     res.render("topic", { user: req.user});
 });
 
 // login
-server.get("/login", isLoggedIn, (req, res) => {
+server.get("/login", isNotLoggedIn, (req, res) => {
     res.render("login");
 });
 server.post("/login", passport.authenticate("local", {
@@ -182,8 +212,8 @@ server.post("/login", passport.authenticate("local", {
 );
 
 // register
-server.get("/register", isLoggedIn, (req, res) => {
-    res.render("register");
+server.get("/register", isNotLoggedIn, (req, res) => {
+    res.render("register", { message: req.flash("registerError")[0] });
 });
 server.post("/register", async (req, res) => {
     try {
@@ -200,13 +230,16 @@ server.post("/register", async (req, res) => {
 
         // (don't need to check utype, as this 'selected' by default)
         if (!regCreds.id || !regCreds.fname || !regCreds.lname || !regCreds.email || !regCreds.pw || !regCreds.confpw) {
-            res.render("register", {message: "Please fill all fields"});
+            req.flash("registerError", "Please fill all fields");
+            res.redirect("/register");
         }
         else if (regCreds.pw !== regCreds.confpw) {
-            res.render("register", {message: "Passwords do not match"});
+            req.flash("registerError", "Passwords do not match");
+            res.redirect("/register");
         }
         else if (regExists.rows.length > 0) {
-            res.render("register", {message: "ID/email already registered"});
+            req.flash("registerError", "ID/email already registered");
+            res.redirect("/register");
         }
         // register user
         else {
@@ -233,7 +266,8 @@ server.post("/register", async (req, res) => {
                     console.log(e);
                 };
                 await client.query("ROLLBACK");
-                res.render("register", {message: tempInvalidMsg});
+                req.flash("registerError", tempInvalidMsg);
+                res.redirect("/register");
             }
             finally {
                 client.release();
@@ -244,7 +278,8 @@ server.post("/register", async (req, res) => {
     // regExists or bodyParser error
     catch(e) {
         console.log(e);
-        res.render("register", {message: "Unknown error - please try again"});
+        req.flash("registerError", "Unknown error - please try again");
+        res.redirect("/register");
     };
 });
 
@@ -269,16 +304,16 @@ function passportInit(passport) {
                     return done(null, pwCheck.rows[0]);
                 }
                 else {
-                    return done(null, false, {message: "Incorrect username/password"});
+                    return done(null, false, { message: "Incorrect username/password" });
                 };
             }
             else {
-                return done(null, false, {message: "Incorrect username/password"}); 
+                return done(null, false, { message: "Incorrect username/password" }); 
             }
         }
         catch(e) {
             console.log(e);
-            res.render("login", {message: "Unknown error - please try again"});
+            return done(e, false, { message: "Unknown error - please try again" });
         };
     }));
 
@@ -296,16 +331,16 @@ function passportInit(passport) {
 
 function isLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
-        return res.redirect("/discussions");
+        return next();
     };
-    return next();
+    return res.redirect("/login");
 };
 
 function isNotLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
-        return next();
+        return res.redirect("/")
     };
-    return res.redirect("/login");
+    return next();
 };
 
 function isTutor(req, res, next) {
