@@ -1,4 +1,5 @@
 const { redirect } = require("express/lib/response");
+const { lstat } = require("fs");
 
 const { execPath } = require("process"),
       express = require("express"),
@@ -91,68 +92,47 @@ server.get("/archive", isLoggedIn, isTutor, async (req, res) => {
 
 // archive discussion
 server.post("/archivediscussion", isLoggedIn, isTutor, async (req, res) => {
-    const client = await pool1.connect();
     try {
-        await client.query("BEGIN");
         // check that user has <=50 archived boards
-        const archiveLimit = await client.query(`SELECT COUNT(dis_id) FROM discussion WHERE dis_owner=$1 AND archive=true;`, [req.user.id]);
+        const archiveLimit = await pool1.query(`SELECT COUNT(dis_id) FROM discussion WHERE dis_owner=$1 AND archive=true;`, [req.user.id]);
         if (parseInt(archiveLimit.rows[0].count) >= 50) {
             req.flash("archiveLimit", "Limit of archived discussion boards reached - please delete archived discussion boards to archive more");
         }
         else {
-            await client.query(`UPDATE discussion SET archive=true WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
-            await client.query("COMMIT");
+            await pool1.query(`UPDATE discussion SET archive=true WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
         };
     }
     catch(e) {
         console.log(e);
-        await client.query("ROLLBACK");
-    }
-    finally {
-        client.release();
     };
     res.redirect("/discussions");
 });
 
 // unarchive discussion
 server.post("/unarchivediscussion", isLoggedIn, isTutor, async (req, res) => {
-    const client = await pool1.connect();
     try {
-        await client.query("BEGIN");
         // check that user has 0 active discussion boards
-        const activeLimit = await client.query(`SELECT COUNT(dis_id) FROM discussion WHERE dis_owner=$1 AND archive=false;`, [req.user.id]);
+        const activeLimit = await pool1.query(`SELECT COUNT(dis_id) FROM discussion WHERE dis_owner=$1 AND archive=false;`, [req.user.id]);
         if (parseInt(activeLimit.rows[0].count) > 0) {
             req.flash("activeLimit", "A discussion board is already active - please archive or delete it to make another active");
         }
         else {
-            await client.query(`UPDATE discussion SET archive=false WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
-            await client.query("COMMIT");
+            await pool1.query(`UPDATE discussion SET archive=false WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
         };
     }
     catch(e) {
         console.log(e);
-        await client.query("ROLLBACK");
-    }
-    finally {
-        client.release();
     };
     res.redirect("/archive");
 });
 
 // delete discussion
 server.post("/deletediscussion", isLoggedIn, isTutor, async (req, res) => {
-    const client = await pool1.connect();
     try {
-        await client.query("BEGIN");
-        await client.query(`DELETE FROM discussion WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
-        await client.query("COMMIT");
+        await pool1.query(`DELETE FROM discussion WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
     }
     catch(e) {
         console.log(e);
-        await client.query("ROLLBACK");
-    }
-    finally {
-        client.release();
     };
     res.redirect("back");
 });
@@ -216,6 +196,7 @@ server.get("/register", isNotLoggedIn, (req, res) => {
     res.render("register", { message: req.flash("registerError")[0] });
 });
 server.post("/register", async (req, res) => {
+    let regSuccess = false;
     try {
         const regCreds = {
             id: req.body.id,
@@ -231,54 +212,37 @@ server.post("/register", async (req, res) => {
         // (don't need to check utype, as this 'selected' by default)
         if (!regCreds.id || !regCreds.fname || !regCreds.lname || !regCreds.email || !regCreds.pw || !regCreds.confpw) {
             req.flash("registerError", "Please fill all fields");
-            res.redirect("/register");
         }
         else if (regCreds.pw !== regCreds.confpw) {
             req.flash("registerError", "Passwords do not match");
-            res.redirect("/register");
         }
         else if (regExists.rows.length > 0) {
             req.flash("registerError", "ID/email already registered");
-            res.redirect("/register");
         }
-        // register user
         else {
-            const client = await pool1.connect();
-            let regSuccess = false;
-            try {
-                await client.query("BEGIN");
-                await client.query(`INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ($1, Crypt($2, gen_salt('md5')), Encrypt($3, 'discussKey192192', 'aes'), Encrypt($4, 'discussKey192192', 'aes'), Encrypt($5, 'discussKey192192', 'aes'), Encrypt($6, 'discussKey192192', 'aes'));`,
-                                   [regCreds.id, regCreds.pw, regCreds.fname, regCreds.lname, regCreds.email, regCreds.utype]);
-                await client.query("COMMIT");
-                regSuccess = true;
-            }
-            catch(e) {
-                let tempInvalidMsg;
-                // do not need to clarify for utype constraint, as input is checkbox
-                if (e.code === "23514" && e.constraint === "uni_user_id_check") {
-                    tempInvalidMsg = "Invalid university ID";
-                }
-                else if (e.code === "23514" && e.constraint === "uni_user_email_check") {
-                    tempInvalidMsg = "Invalid university email";
-                }
-                else {
-                    tempInvalidMsg = "Unknown error - please try again";
-                    console.log(e);
-                };
-                await client.query("ROLLBACK");
-                req.flash("registerError", tempInvalidMsg);
-                res.redirect("/register");
-            }
-            finally {
-                client.release();
-                if (regSuccess) { res.redirect("/login") };
-            };
+            await pool1.query(`INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES ($1, Crypt($2, gen_salt('md5')), Encrypt($3, 'discussKey192192', 'aes'), Encrypt($4, 'discussKey192192', 'aes'), Encrypt($5, 'discussKey192192', 'aes'), Encrypt($6, 'discussKey192192', 'aes'));`, [regCreds.id, regCreds.pw, regCreds.fname, regCreds.lname, regCreds.email, regCreds.utype]);
+            regSuccess = true;
         };
     }
-    // regExists or bodyParser error
-    catch(e) {
-        console.log(e);
-        req.flash("registerError", "Unknown error - please try again");
+    catch (e) {
+        let tempInvalidMsg;
+        // do not need to clarify for utype constraint, as input is checkbox
+        if (e.code === "23514" && e.constraint === "uni_user_id_check") {
+            tempInvalidMsg = "Invalid university ID";
+        }
+        else if (e.code === "23514" && e.constraint === "uni_user_email_check") {
+            tempInvalidMsg = "Invalid university email";
+        }
+        else {
+            tempInvalidMsg = "Unknown error - please try again";
+            console.log(e);
+        };
+        req.flash("registerError", tempInvalidMsg);
+    };
+    if (regSuccess) {
+        res.redirect("/login");
+    }
+    else if (!regSuccess) {
         res.redirect("/register");
     };
 });
