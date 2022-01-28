@@ -30,8 +30,8 @@ server.use(express.static(path.join(__dirname, "public")));
 // declaring bodyParser (e.g. to read data from forms)
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: false }));
-server.use(flash());
 // declaring passport
+server.use(flash());
 passportInit(passport);
 server.use(
     session({
@@ -66,22 +66,43 @@ server.get("/discussions", isNotLoggedIn, async (req, res) => {
         else if (req.user.utype === "s") {
             activeDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND lnk_stu_id=$1 GROUP BY dis_id, id ORDER BY dis_id DESC;`, [req.user.id]);
         };
-        res.render("discussion", { user: req.user, activeDiscs: activeDisc.rows });
+        res.render("discussion", { user: req.user, activeDiscs: activeDisc.rows, message: req.flash("archiveLimit")[0] });
     }
     catch(e) {
         console.log(e);
-        res.render("discussion", { user: req.user, activeDiscs: [] });
+        res.render("discussion", { user: req.user, activeDiscs: [], message: req.flash("archiveLimit")[0] });
+    };
+});
+
+// archive
+server.post("/archive", async (req, res) => {
+    res.redirect("/archive");
+});
+server.get("/archive", isTutor, async (req, res) => {
+    try {
+        const archiveDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE dis_owner=$1 AND archive=true GROUP BY dis_id ORDER BY dis_id DESC, CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner;`, [req.user.id]);
+        res.render("archive", { user: req.user, archiveDiscs: archiveDisc.rows, message: req.flash("activeLimit")[0] });
+    }
+    catch(e) {
+        console.log(e);
+        res.render("archive", { user: req.user, archiveDiscs: [], message: req.flash("activeLimit")[0] });
     };
 });
 
 // archive discussion
 server.post("/archivediscussion", async (req, res) => {
-    // check that user has <=50 archived boards
     const client = await pool1.connect();
     try {
         await client.query("BEGIN");
-        await client.query(`UPDATE discussion SET archive=true WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
-        await client.query("COMMIT");
+        // check that user has <=50 archived boards
+        const archiveLimit = await client.query(`SELECT COUNT(dis_id) FROM discussion WHERE dis_owner=$1 AND archive=true;`, [req.user.id]);
+        if (parseInt(archiveLimit.rows[0].count) >= 50) {
+            req.flash("archiveLimit", "Limit of archived discussion boards reached - please delete archived discussion boards to archive more");
+        }
+        else {
+            await client.query(`UPDATE discussion SET archive=true WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
+            await client.query("COMMIT");
+        };
     }
     catch(e) {
         console.log(e);
@@ -93,45 +114,36 @@ server.post("/archivediscussion", async (req, res) => {
     res.redirect("/discussions");
 });
 
+// unarchive discussion
+server.post("/unarchivediscussion", async (req, res) => {
+    const client = await pool1.connect();
+    try {
+        await client.query("BEGIN");
+        // check that user has 0 active discussion boards
+        const activeLimit = await client.query(`SELECT COUNT(dis_id) FROM discussion WHERE dis_owner=$1 AND archive=false;`, [req.user.id]);
+        if (parseInt(activeLimit.rows[0].count) > 0) {
+            req.flash("activeLimit", "A discussion board is already active - please archive or delete it to make another active");
+        }
+        else {
+            await client.query(`UPDATE discussion SET archive=false WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
+            await client.query("COMMIT");
+        };
+    }
+    catch(e) {
+        console.log(e);
+        await client.query("ROLLBACK");
+    }
+    finally {
+        client.release();
+    };
+    res.redirect("/archive");
+});
+
 // new discussion
 server.post("/newdiscussion", (req, res) => {
     // check that user has 0 active discussion boards
     console.log("NEW DISCUSSION");
     res.redirect("/");
-});
-
-// archive
-server.post("/archive", isTutor, async (req, res) => {
-    res.redirect("/archive");
-});
-server.get("/archive", isTutor, async (req, res) => {
-    try {
-        const archiveDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE archive=true GROUP BY dis_id ORDER BY dis_id DESC, CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner;`, [req.user.id]);
-        res.render("archive", { user: req.user, archiveDiscs: archiveDisc.rows });
-    }
-    catch(e) {
-        console.log(e);
-        res.render("archive", { user: req.user, archiveDiscs: [] });
-    };
-});
-// unarchive discussion
-server.post("/unarchivediscussion", async (req, res) => {
-    // check user has 0 active discussion boards
-    console.log("UNARCHIVE");
-    // const client = await pool1.connect();
-    // try {
-    //     await client.query("BEGIN");
-    //     await client.query(`UPDATE discussion SET archive=false WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
-    //     await client.query("COMMIT");
-    // }
-    // catch(e) {
-    //     console.log(e);
-    //     await client.query("ROLLBACK");
-    // }
-    // finally {
-    //     client.release();
-    // };
-    res.redirect("/discussions");
 });
 
 // delete discussion
@@ -149,7 +161,7 @@ server.post("/deletediscussion", async (req, res) => {
     finally {
         client.release();
     };
-    res.redirect("/" + req.query.screen);
+    res.redirect(req.get("referer"));
 });
 
 // topic

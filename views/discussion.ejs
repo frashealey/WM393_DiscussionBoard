@@ -22,6 +22,10 @@
 
     <div class="screencontent">
 
+      <%if (typeof(message) != "undefined") { %>
+        <p class="invalid mainscreen"><%=message%></p>
+      <% } %>
+
       <% activeDiscs.forEach(function(activeDisc) { %>
         <div class="discusspanel">
           <h2 class="discusspanel text"><%=activeDisc.dis_title%></h2>
@@ -45,7 +49,7 @@
                 </button>
               </form>
 
-              <form class="statform" action="/deletediscussion?dis_id=<%=activeDisc.dis_id%>&screen=discussions" method="POST">
+              <form class="statform" action="/deletediscussion?dis_id=<%=activeDisc.dis_id%>" method="POST">
                 <button class="statdiv" type="submit" onclick="return deleteConfirm()">
                   <img src="/resources/delete.png" class="staticon">
                   <p class="stattext">Delete</p>

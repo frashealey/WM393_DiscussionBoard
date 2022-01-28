@@ -41,11 +41,14 @@ p.headertext.login {
 h1.headertext.login {
     padding: 30px 0px 15px 0px;
 }
-p.logininvalid, li.logininvalid {
+p.invalid, li.invalid {
     font-size: 16px;
     color: #ff0000;
 }
-ul.logininvalid {
+p.invalid.mainscreen {
+    margin: 20px 0px 20px 0px;
+}
+ul.invalid {
     list-style-type: none;
 }
 
