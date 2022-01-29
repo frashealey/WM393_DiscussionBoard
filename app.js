@@ -188,8 +188,19 @@ server.post("/creatediscussion", isLoggedIn, isTutor, async (req, res) => {
 });
 
 // topic
-server.get("/topics", isLoggedIn, (req, res) => {
+server.post("/topics", isLoggedIn, (req, res) => {
+    res.redirect("/topics?dis_id=" + encodeURIComponent(req.query.dis_id));
+});
+server.get("/topics", isLoggedIn, async (req, res) => {
+    const discExists = await pool1.query(`SELECT dis_id, dis_owner FROM discussion WHERE dis_id=$1`, [parseInt(req.query.dis_id)]);
+    if (discExists.rows.length === 0) {
+        res.redirect("/discussions");
+    };
+    const activeTopics = await pool1.query(`SELECT top_id, top_dis, top_title, top_desc, top_datetime, COUNT(DISTINCT res_id) AS res_count FROM topic LEFT JOIN response ON top_id=res_top WHERE top_dis=$1 GROUP BY top_id ORDER BY top_id DESC;`, [parseInt(req.query.dis_id)]);
+    console.log(activeTopics.rows);
+
     // check that user has <=50 topics
+    // check that user is permitted to view (if student belongs to dis_owner)
     res.render("topic", { user: req.user});
 });
 
