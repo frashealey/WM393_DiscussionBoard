@@ -1,6 +1,3 @@
-const { redirect } = require("express/lib/response");
-const { lstat } = require("fs");
-
 const { execPath } = require("process"),
       express = require("express"),
       bodyParser = require("body-parser"),
@@ -17,7 +14,6 @@ const { execPath } = require("process"),
             rejectUnauthorized: false
         }
       }),
-    //   { initialize } = require("passport"),
       passport = require("passport"),
       LocalStrategy = require("passport-local").Strategy,
       flash = require("express-flash"),
@@ -76,7 +72,7 @@ server.get("/discussions", isLoggedIn, async (req, res) => {
 });
 
 // archive
-server.post("/archive", isLoggedIn, isTutor, async (req, res) => {
+server.post("/archive", isLoggedIn, isTutor, (req, res) => {
     res.redirect("/archive");
 });
 server.get("/archive", isLoggedIn, isTutor, async (req, res) => {
@@ -104,8 +100,10 @@ server.post("/archivediscussion", isLoggedIn, isTutor, async (req, res) => {
     }
     catch(e) {
         console.log(e);
+    }
+    finally {
+        res.redirect("/discussions");
     };
-    res.redirect("/discussions");
 });
 
 // unarchive discussion
@@ -122,8 +120,10 @@ server.post("/unarchivediscussion", isLoggedIn, isTutor, async (req, res) => {
     }
     catch(e) {
         console.log(e);
+    }
+    finally {
+        res.redirect("/archive");
     };
-    res.redirect("/archive");
 });
 
 // delete discussion
@@ -133,8 +133,10 @@ server.post("/deletediscussion", isLoggedIn, isTutor, async (req, res) => {
     }
     catch(e) {
         console.log(e);
+    }
+    finally {
+        res.redirect("back");
     };
-    res.redirect("back");
 });
 
 // new discussion
@@ -142,36 +144,47 @@ server.post("/newdiscussion", isLoggedIn, isTutor, (req, res) => {
     res.redirect("/newdiscussion");
 });
 server.get("/newdiscussion", isLoggedIn, isTutor, (req, res) => {
-    // check that user has 0 active discussion boards
     res.render("newdiscussion", { user: req.user, message: req.flash("createDiscError")});
 });
-server.post("/creatediscussion", isLoggedIn, isTutor, (req, res) => {
-    // try {
-    //     const newDiscCreds = {
-    //         discussionname: req.body.discussionname,
-    //         createasarchived: Boolean(req.body.createasarchived)
-    //     },
-    //           activeLimit = await pool1.query;
-    // }
-    // catch(e) {
-    //     console.log(e);
-    //     req.flash("createDiscError", "Unknown error - please try again");
-    //     res.redirect("/newdiscussion"); 
-    // }
-    // const newDiscCreds = {
-    //     discussionname: req.body.discussionname,
-    //     createasarchived: Boolean(req.body.createasarchived)
-    // };
-    // // (don't need to check createasarchived, as this 'selected' by default)
-    // if (!newDiscCreds.discussionname) {
-    //     req.flash("createDiscError", "Please fill all fields");
-    //     res.redirect("/newdiscussion");
-    // }
-    // // else if (newDiscCreds.createasarchived )
-    // else {
-    //     console.log(newDiscCreds.discussionname, newDiscCreds.createasarchived);
-    //     res.redirect("/discussions");
-    // };
+server.post("/creatediscussion", isLoggedIn, isTutor, async (req, res) => {
+    let createDiscSuccess = false;
+    try {
+        const newDiscCreds = {
+            discussionname: req.body.discussionname,
+            createasarchived: Boolean(req.body.createasarchived)
+        },
+              activeLimit = await pool1.query(`SELECT COUNT(dis_id) FROM discussion WHERE dis_owner=$1 AND archive=false;`, [req.user.id]),
+              archiveLimit = await pool1.query(`SELECT COUNT(dis_id) FROM discussion WHERE dis_owner=$1 AND archive=true;`, [req.user.id]);
+
+        // (don't need to check createasarchived, as this 'selected' by default)
+        if (!newDiscCreds.discussionname) {
+            req.flash("createDiscError", "Please fill all fields");
+        }
+        // check that user has 0 active discussion boards
+        else if (!newDiscCreds.createasarchived && parseInt(activeLimit.rows[0].count) > 0) {
+            req.flash("createDiscError", "A discussion board is already active - please archive or delete it to create another");
+        }
+        // check that user has <=50 archived boards
+        else if (newDiscCreds.createasarchived && parseInt(archiveLimit.rows[0].count) >= 50) {
+            req.flash("createDiscError", "Limit of archived discussion boards reached - please delete archived discussion boards to create another");
+        }
+        else {
+            await pool1.query(`INSERT INTO discussion (dis_owner, dis_title, archive) VALUES ($1, $2, $3);`, [req.user.id, newDiscCreds.discussionname, newDiscCreds.createasarchived]);
+            createDiscSuccess = true;
+        };
+    }
+    catch(e) {
+        console.log(e);
+        req.flash("createDiscError", "Unknown error - please try again");
+    }
+    finally {
+        if (createDiscSuccess) {
+            res.redirect("/discussions");
+        }
+        else if (!createDiscSuccess) {
+            res.redirect("/newdiscussion");
+        };
+    };
 });
 
 // topic
