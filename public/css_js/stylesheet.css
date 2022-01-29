@@ -9,16 +9,16 @@ html, body {
 body {
     display: flex;
     flex-direction: column;
+    background-image: url("/resources/background.png");
+    background-repeat: repeat;
 }
 header, footer {
     background-color: #552D62;
     text-align: left;
 }
-/* #headerlogin {
-    text-align: center;
-} */
 main {
     flex: 1 0 auto;
+    margin-bottom: 50px;
 }
 footer {
     flex-shrink: 0;
@@ -41,11 +41,14 @@ p.headertext.login {
 h1.headertext.login {
     padding: 30px 0px 15px 0px;
 }
-p.logininvalid, li.logininvalid {
+p.invalid, li.invalid {
     font-size: 16px;
     color: #ff0000;
 }
-ul.logininvalid {
+p.invalid.mainscreen {
+    margin: 20px 0px 20px 0px;
+}
+ul.invalid {
     list-style-type: none;
 }
 
@@ -58,8 +61,6 @@ ul.logininvalid {
     margin-bottom: 30px;
 }
 .logincontent {
-    /* font-family: "Lato", Arial, sans-serif; */
-    /* padding: 10px 20px 10px 20px; */
     margin: 0px 20px 0px 20px;
     text-align: left;
     font-size: 18px;
@@ -84,13 +85,13 @@ label.logincontent {
     display: block;
 }
 
-.switchdiv {
+div.switchdiv {
     display: table;
     margin-top: 5px;
 }
 p.switchtext {
     display: table-cell;
-    vertical-align: middle;
+    vertical-align: bottom;
 }
 p.switchtext.left {
     padding: 0px 10px 10px 0px;
@@ -184,13 +185,123 @@ input:checked + .slider:before {
     background-color: #552D62;
     font-size: 36px;
     padding: 0px 0px 0px 30px;
-    cursor: pointer;
     border: none;
     -webkit-transition: 0.2s;
     transition: 0.2s;
 }
 #navopen:hover {
     color: #999999;
+}
+
+div.subheader {
+    padding: 0px 0px 20px 0px;
+}
+h1.pagetitle {
+    color: #000000;
+    margin: 20px 30px 0px 30px;
+    font-weight: normal;
+    display: inline-block;
+}
+div.pagetitlebut {
+    float: right;
+    margin: 15px 30px 0px 30px;
+}
+form.pagetitlebut {
+    display: inline-block;
+}
+button.pagetitlebut, button.createbutton {
+    border: none;
+    font-size: 20px;
+    padding: 5px 10px 5px 10px;
+    min-width: 180px;
+    -webkit-transition: 0.2s;
+    transition: 0.2s;
+}
+button.createbutton {
+    margin: 5px 10px 0px 0px;
+}
+button.pagetitlebut.archive, button.createbutton.cancel {
+    color: #ffffff;
+    background-color: #262626;
+}
+button.pagetitlebut.archive {
+    margin: 5px 10px 0px 0px;
+}
+button.pagetitlebut.archive:hover, button.createbutton.cancel:hover {
+    background-color: #999999;
+}
+button.pagetitlebut.newboard, button.createbutton.create {
+    color: #ffffff;
+    background-color: #552D62;
+}
+button.pagetitlebut.newboard {
+    margin: 5px 0px 0px 0px;
+}
+button.pagetitlebut.newboard:hover, button.createbutton.create:hover {
+    background-color: #886C91;
+}
+
+hr.pagetitle {
+    background-color: #552D62;
+    border: none;
+    height: 2px;
+    margin: 0px 20px 0 20px;
+}
+
+div.screencontent {
+    margin: 10px 40px 10px 40px;
+}
+div.discusspanel {
+    background-color: #ffffff;
+    border: 1px solid #262626;
+    margin: 0px 0px 10px 0px;
+}
+h2.discusspanel.text {
+    color: #000000;
+    font-weight: normal;
+    padding: 20px 20px 20px 20px;
+}
+div.statcontainer {
+    margin: 0px 10px 10px 10px;
+}
+div.statdiv, button.statdiv {
+    display: inline-block;
+    margin: 0px 10px 0px 10px;
+}
+div.statdiv.nonselect {
+    cursor: default;
+}
+form.statform {
+    display: inline-block;
+}
+button.statdiv {
+    background-color: #ffffff;
+    border: none;
+}
+p.stattext {
+    color: #000000;
+    font-size: 16px;
+    display: inline;
+    vertical-align: top;
+}
+img.staticon {
+    display: inline;
+    height: 24px;
+    width: 24px;
+}
+
+label.createscreen, p.switchtext.right.createscreen {
+    font-size: 18px;
+    color: #000000;
+}
+input.createscreen[type=text] {
+    margin-top: 5px;
+}
+div.switchdiv.createscreen {
+    margin-top: 20px;
+}
+div.createbuttoncontainer {
+    margin: 35px 0px 0px 0px;
 }
 
 #logout {
@@ -215,7 +326,7 @@ button.loginbutton {
     color: #ffffff;
     background-color: #262626;
     border: none;
-    font-size: 18px;
+    font-size: 20px;
     padding: 5px;
     margin: 10px 0px 20px 0px;
     width: 100%;
@@ -232,8 +343,11 @@ button.loginbutton:hover {
 input:focus, select:focus, textarea:focus, button:focus {
     outline: none;
 }
+button {
+    cursor: pointer;
+}
 
-p, h1, a, button, label, li {
+p, h1, h2, a, button, label, li {
     font-family: "Lato", Arial, sans-serif;
 }
 p.footertext, a.footerlink {
@@ -253,7 +367,6 @@ a:hover {
 }
 #footertextcontainer {
     display: inline-block;
-    /* display: inline; */
     padding: 15px 0px 15px 20px;
 }
 #footerlogo {

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%- include("head"); %>
+  </head>
+  <body>
+  <header>
+    <%- include("header"); %>
+  </header>
+  <div class="subheader">
+    <h1 class="pagetitle">New discussion board</h1>
+  </div>
+  <main>
+    <hr class="pagetitle">
+
+    <div class="screencontent">
+
+      <form action="/creatediscussion" method="POST">
+        <label class="createscreen" for="discussionname">Name:</label>
+        <input class="createscreen" type="text" name="discussionname">
+
+        <div class="switchdiv createscreen">
+          <label class="switch">
+          <input type="checkbox" name="createasarchived" class="switchinput">
+          <span class="slider"></span>
+          </label>
+          <p class="switchtext right createscreen">Create as archived</p>
+        </div>
+
+        <%if (typeof(message) != "undefined") { %>
+          <p class="invalid mainscreen"><%=message%></p>
+        <% } %>
+
+        <div class="createbuttoncontainer">
+          <a href="/discussions"><button class="createbutton cancel" type="button">&#60; Cancel</button></a>
+          <button class="createbutton create" type="submit">Create &#62;</button>
+        </div>
+      </form>
+
+    </div>
+
+  </main>
+  <footer>
+    <%- include("footer"); %>
+  </footer>
+  </body>
+</html>
