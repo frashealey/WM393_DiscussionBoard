@@ -26,9 +26,9 @@
       <% } %>
 
       <% activeDiscs.forEach(function(activeDisc) { %>
-        <div class="discusspanel">
-          <div class="discusspanelcontents">
-            <h2 class="discusspanel text"><%=activeDisc.dis_title%></h2>
+        <div class="screenpanel">
+          <div class="screenpanelcontents">
+            <h2 class="screenpanel text"><%=activeDisc.dis_title%></h2>
 
             <div class="statcontainer">
               <div class="statdiv nonselect">
@@ -61,7 +61,7 @@
           </div>
 
           <form class="selectdisc" action="/topics?dis_id=<%=activeDisc.dis_id%>" method="POST">
-            <button class="screenpanelnext" type="submit">&#62;</button>
+            <button class="screenpanelnext" type="submit"><img src="/resources/next.png" class="screenpanelnext"></button>
           </form>
 
         </div>
