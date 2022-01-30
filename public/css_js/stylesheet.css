@@ -256,6 +256,14 @@ div.discusspanel {
     border: 1px solid #262626;
     margin: 0px 0px 10px 0px;
 }
+div.discusspanelcontents {
+    width: 100%;
+    display: table-cell;
+}
+form.selectdisc {
+    display: table-cell;
+    vertical-align: middle;
+}
 h2.discusspanel.text {
     color: #000000;
     font-weight: normal;
@@ -275,8 +283,25 @@ form.statform {
     display: inline-block;
 }
 button.statdiv {
-    background-color: #ffffff;
+    background-color: transparent;
     border: none;
+}
+button.screenpanelnext {
+    height: 100%;
+    background-color: transparent;
+    border: none;
+    color: #000000;
+    font-size: 80px;
+}
+@media (max-width: 320px) {
+	button.screenpanelnext {
+		padding: 5px 0px 5px 0px;
+	}
+}
+@media (min-width: 321px) {
+	button.screenpanelnext {
+		padding: 5px 20px 5px 20px;
+	}
 }
 p.stattext {
     color: #000000;
