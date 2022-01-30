@@ -7,8 +7,58 @@
   <header>
     <%- include("header"); %>
   </header>
+  <div class="subheader">
+    <h1 class="pagetitle"><%=activeTopics[0].dis_title%></h1>
+    <% if(user.utype == "t" && user.id == activeTopics[0].dis_owner){ %>
+      <div class="pagetitlebut">
+        <form class="pagetitlebut" action="/discussions" method="POST"><button class="pagetitlebut newcontent">New topic &#43;</button></form>
+      </div>
+    <% } %>
+  </div>
   <main>
-    <p>TOPIC</p>
+    <hr class="pagetitle">
+
+    <div class="screencontent">
+
+      <%if (typeof(message) != "undefined") { %>
+        <p class="invalid mainscreen"><%=message%></p>
+      <% } %>
+
+      <% activeTopics.forEach(function(activeTopic) { %>
+        <div class="screenpanel">
+          <div class="screenpanelcontents">
+            <h3 class="screenpanel topic"><%=activeTopic.top_title%></h3>
+
+            <p class="screenpanel created"><%=activeTopic.fname%> <%=activeTopic.lname%> created <%=activeTopic.top_datetime.toISOString()%></p>
+            <p class="screenpanel topic"><%=activeTopic.top_desc%></p>
+
+            <div class="statcontainer">
+              <div class="statdiv nonselect">
+                <img src="/resources/response.png" class="staticon">
+                <% if(activeTopic.res_count == 1){ %><p class="stattext"><%=activeTopic.res_count%> response</p><% } else{ %><p class="stattext"><%=activeTopic.res_count%> responses</p><% } %>
+              </div>
+
+              <% if(user.utype == "t" && activeTopic.dis_owner == user.id){ %>
+                <form class="statform" action="/deletetopic?top_id=<%=activeTopic.top_id%>" method="POST">
+                  <button class="statdiv" type="submit" onclick="return deleteConfirm()">
+                    <img src="/resources/delete.png" class="staticon">
+                    <p class="stattext">Delete</p>
+                  </button>
+                </form>
+              <% } %>
+
+            </div>
+          </div>
+
+          <form class="selectnext" action="/responses?top_id=<%=activeTopic.res_id%>" method="POST">
+            <button class="screenpanelnext" type="submit"><img src="/resources/next.png" class="screenpanelnext"></button>
+          </form>
+
+        </div>
+      <% })%>
+
+    </div>
+
   </main>
   <footer>
     <%- include("footer"); %>

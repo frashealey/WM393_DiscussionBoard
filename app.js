@@ -191,17 +191,22 @@ server.post("/creatediscussion", isLoggedIn, isTutor, async (req, res) => {
 server.post("/topics", isLoggedIn, (req, res) => {
     res.redirect("/topics?dis_id=" + encodeURIComponent(req.query.dis_id));
 });
-server.get("/topics", isLoggedIn, async (req, res) => {
-    const discExists = await pool1.query(`SELECT dis_id, dis_owner FROM discussion WHERE dis_id=$1`, [parseInt(req.query.dis_id)]);
-    if (discExists.rows.length === 0) {
-        res.redirect("/discussions");
-    };
-    const activeTopics = await pool1.query(`SELECT top_id, top_dis, top_title, top_desc, top_datetime, COUNT(DISTINCT res_id) AS res_count FROM topic LEFT JOIN response ON top_id=res_top WHERE top_dis=$1 GROUP BY top_id ORDER BY top_id DESC;`, [parseInt(req.query.dis_id)]);
-    console.log(activeTopics.rows);
+server.get("/topics", isPermittedTopic, isLoggedIn, async (req, res) => {
+    try {
+        const discExists = await pool1.query(`SELECT dis_id, dis_owner FROM discussion WHERE dis_id=$1`, [parseInt(req.query.dis_id)]);
+        if (discExists.rows.length === 0) {
+            res.redirect("/discussions");
+        };
+        const activeTopics = await pool1.query(`SELECT top_id, top_dis, dis_title, dis_owner, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, top_title, top_desc, top_datetime, COUNT(DISTINCT res_id) AS res_count FROM topic LEFT JOIN response ON top_id=res_top INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id WHERE top_dis=$1 GROUP BY top_id, dis_id, id ORDER BY top_id DESC;`, [parseInt(req.query.dis_id)]);
+        // console.log(String(activeTopics.rows[0].top_datetime.getHours()).padStart(2, "0") + ":" + String(activeTopics.rows[0].top_datetime.getMinutes()).padStart(2, "0") + ":" + String(activeTopics.rows[0].top_datetime.getSeconds()).padStart(2, "0") + " " + String(activeTopics.rows[0].top_datetime.getDate()).padStart(2, "0") + "/" + String(activeTopics.rows[0].top_datetime.getMonth() + 1).padStart(2, "0") + "/" + String(activeTopics.rows[0].top_datetime.getFullYear()));
 
-    // check that user has <=50 topics
-    // check that user is permitted to view (if student belongs to dis_owner)
-    res.render("topic", { user: req.user});
+        // check that user has <=50 topics
+        res.render("topic", { user: req.user, activeTopics: activeTopics.rows });
+    }
+    catch(e) {
+        console.log(e);
+        res.render("topic", { user: req.user, activeTopics: [] });
+    };
 });
 
 // login
@@ -297,7 +302,7 @@ function passportInit(passport) {
             }
             else {
                 return done(null, false, { message: "Incorrect username/password" }); 
-            }
+            };
         }
         catch(e) {
             console.log(e);
@@ -334,8 +339,27 @@ function isNotLoggedIn(req, res, next) {
 function isTutor(req, res, next) {
     if (req.user.utype === "t") {
         return next();
-    }
+    };
     return res.redirect("/discussions");
+};
+
+async function isPermittedTopic(req, res, next) {
+    try {
+        if (req.user.utype === "t") {
+            return next();
+        };
+        permitDiscs = await pool1.query(`SELECT dis_id, dis_owner FROM discussion INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND lnk_stu_id=$1 GROUP BY dis_id, id;`, [req.user.id]);
+        if (permitDiscs.rows.some(dis => dis.dis_id === parseInt(req.query.dis_id))) {
+            return next();
+        }
+        else {
+            return res.redirect("/discussions");
+        };
+    }
+    catch(e) {
+        console.log(e);
+        return res.redirect("/discussions");
+    };
 };
 
 server.listen(port);

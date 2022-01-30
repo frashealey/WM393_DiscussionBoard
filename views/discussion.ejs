@@ -11,8 +11,8 @@
     <h1 class="pagetitle">Discussion boards</h1>
     <% if(user.utype == "t"){ %>
       <div class="pagetitlebut">
+        <form class="pagetitlebut" action="/newdiscussion" method="POST"><button class="pagetitlebut newcontent">New board &#43;</button></form>
         <form class="pagetitlebut" action="/archive" method="POST"><button class="pagetitlebut archive">Archived boards</button></form>
-        <form class="pagetitlebut" action="/newdiscussion" method="POST"><button class="pagetitlebut newboard">New board &#43;</button></form>
       </div>
     <% } %>
   </div>
@@ -28,7 +28,7 @@
       <% activeDiscs.forEach(function(activeDisc) { %>
         <div class="screenpanel">
           <div class="screenpanelcontents">
-            <h2 class="screenpanel text"><%=activeDisc.dis_title%></h2>
+            <h2 class="screenpanel discussion"><%=activeDisc.dis_title%></h2>
 
             <div class="statcontainer">
               <div class="statdiv nonselect">
@@ -60,7 +60,7 @@
             </div>
           </div>
 
-          <form class="selectdisc" action="/topics?dis_id=<%=activeDisc.dis_id%>" method="POST">
+          <form class="selectnext" action="/topics?dis_id=<%=activeDisc.dis_id%>" method="POST">
             <button class="screenpanelnext" type="submit"><img src="/resources/next.png" class="screenpanelnext"></button>
           </form>
 

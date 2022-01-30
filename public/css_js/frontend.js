@@ -7,7 +7,7 @@ function navClose() {
 };
 
 function deleteConfirm() {
-    let confirmBox = confirm("Confirm discussion board deletion?");
+    let confirmBox = confirm("Confirm deletion?");
     if (confirmBox) {
         return true;
     }

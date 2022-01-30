@@ -207,7 +207,7 @@ div.pagetitlebut {
     margin: 15px 30px 0px 30px;
 }
 form.pagetitlebut {
-    display: inline-block;
+    float: right;
 }
 button.pagetitlebut, button.createbutton {
     border: none;
@@ -225,19 +225,19 @@ button.pagetitlebut.archive, button.createbutton.cancel {
     background-color: #262626;
 }
 button.pagetitlebut.archive {
-    margin: 5px 10px 0px 0px;
+    margin: 5px 0px 0px 0px;
 }
 button.pagetitlebut.archive:hover, button.createbutton.cancel:hover {
     background-color: #999999;
 }
-button.pagetitlebut.newboard, button.createbutton.create {
+button.pagetitlebut.newcontent, button.createbutton.create {
     color: #ffffff;
     background-color: #552D62;
 }
-button.pagetitlebut.newboard {
-    margin: 5px 0px 0px 0px;
+button.pagetitlebut.newcontent {
+    margin: 5px 0px 0px 10px;
 }
-button.pagetitlebut.newboard:hover, button.createbutton.create:hover {
+button.pagetitlebut.newcontent:hover, button.createbutton.create:hover {
     background-color: #886C91;
 }
 
@@ -260,14 +260,30 @@ div.screenpanelcontents {
     width: 100%;
     display: table-cell;
 }
-form.selectdisc {
+form.selectnext {
     display: table-cell;
     vertical-align: middle;
 }
-h2.screenpanel.text {
+h2.screenpanel, h3.screenpanel {
     color: #000000;
     font-weight: normal;
+}
+h2.screenpanel.discussion {
     padding: 20px 20px 20px 20px;
+}
+h3.screenpanel.topic {
+    padding: 20px 20px 10px 20px;
+}
+p.screenpanel {
+    font-size: 16px;
+}
+p.screenpanel.topic {
+    color: #000000;
+    padding: 0px 20px 20px 20px;
+}
+p.screenpanel.created {
+    color: #5c5c5c;
+    padding: 0px 20px 10px 20px;
 }
 div.statcontainer {
     margin: 0px 10px 10px 10px;
@@ -285,14 +301,19 @@ form.statform {
 button.statdiv, button.screenpanelnext {
     background-color: transparent;
     border: none;
+    -webkit-transition: 0.2s;
+    transition: 0.2s;
+}
+button.statdiv:hover, button.screenpanelnext:hover {
+    opacity: 0.4;
 }
 img.screenpanelnext {
     vertical-align: middle;
 }
 @media (max-width: 299px) {
 	img.screenpanelnext {
-        width: 50px;
-        height: 50px;
+        width: 45px;
+        height: 45px;
 	}
 }
 @media (min-width: 300px) {
@@ -370,8 +391,14 @@ button {
     cursor: pointer;
 }
 
-p, h1, h2, a, button, label, li {
+p, h1, h2, h3, a, button, label, li {
     font-family: "Lato", Arial, sans-serif;
+    -ms-word-break: break-all;
+    word-break: break-all;
+    word-break: break-word;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    hyphens: auto;
 }
 p.footertext, a.footerlink {
     color: #ffffff;
