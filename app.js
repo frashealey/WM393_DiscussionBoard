@@ -144,7 +144,7 @@ server.post("/newdiscussion", isLoggedIn, isTutor, (req, res) => {
     res.redirect("/newdiscussion");
 });
 server.get("/newdiscussion", isLoggedIn, isTutor, (req, res) => {
-    res.render("newdiscussion", { user: req.user, message: req.flash("createDiscError")});
+    res.render("newdiscussion", { user: req.user, message: req.flash("createDiscError") });
 });
 server.post("/creatediscussion", isLoggedIn, isTutor, async (req, res) => {
     let createDiscSuccess = false;
@@ -191,7 +191,7 @@ server.post("/creatediscussion", isLoggedIn, isTutor, async (req, res) => {
 server.post("/topics", isLoggedIn, (req, res) => {
     res.redirect("/topics?dis_id=" + encodeURIComponent(req.query.dis_id));
 });
-server.get("/topics", isPermittedTopic, isLoggedIn, async (req, res) => {
+server.get("/topics", isPermittedViewTopic, isLoggedIn, async (req, res) => {
     try {
         const discExists = await pool1.query(`SELECT dis_id, dis_owner FROM discussion WHERE dis_id=$1`, [parseInt(req.query.dis_id)]);
         if (discExists.rows.length === 0) {
@@ -207,6 +207,19 @@ server.get("/topics", isPermittedTopic, isLoggedIn, async (req, res) => {
         console.log(e);
         res.render("topic", { user: req.user, activeTopics: [] });
     };
+});
+
+// new topic
+server.post("/newtopic", isLoggedIn, isTutor, isPermittedCreateTopic, (req, res) => {
+    res.redirect("/newtopic?dis_id=" + encodeURIComponent(req.query.top_id));
+});
+server.get("/newtopic", isLoggedIn, isTutor, isPermittedCreateTopic, (req, res) => {
+    console.log(req.query);
+    res.render("newtopic", { user: req.user });
+});
+server.post("/newtopic", isLoggedIn, isTutor, isPermittedCreateTopic, (req, res) => {
+    // placeholder function
+    res.redirect("/discussions");
 });
 
 // login
@@ -343,7 +356,7 @@ function isTutor(req, res, next) {
     return res.redirect("/discussions");
 };
 
-async function isPermittedTopic(req, res, next) {
+async function isPermittedViewTopic(req, res, next) {
     try {
         if (req.user.utype === "t") {
             return next();
@@ -360,6 +373,10 @@ async function isPermittedTopic(req, res, next) {
         console.log(e);
         return res.redirect("/discussions");
     };
+};
+
+function isPermittedCreateTopic(req, res, next) {
+
 };
 
 server.listen(port);
