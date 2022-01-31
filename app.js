@@ -58,7 +58,7 @@ server.get("/discussions", isLoggedIn, async (req, res) => {
     try {
         let activeDisc = [];
         if (req.user.utype === "t") {
-            activeDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE archive=false GROUP BY dis_id ORDER BY dis_id DESC, CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner;`, [req.user.id]);
+            activeDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE archive=false GROUP BY dis_id ORDER BY CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner, dis_id DESC;`, [req.user.id]);
         }
         else if (req.user.utype === "s") {
             activeDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND lnk_stu_id=$1 GROUP BY dis_id, id ORDER BY dis_id DESC;`, [req.user.id]);
@@ -77,7 +77,7 @@ server.post("/archive", isLoggedIn, (req, res) => {
 });
 server.get("/archive", isLoggedIn, isTutor, async (req, res) => {
     try {
-        const archiveDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE dis_owner=$1 AND archive=true GROUP BY dis_id ORDER BY dis_id DESC, CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner;`, [req.user.id]);
+        const archiveDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE dis_owner=$1 AND archive=true GROUP BY dis_id ORDER BY dis_id DESC;`, [req.user.id]);
         res.render("archive", { user: req.user, archiveDiscs: archiveDisc.rows, message: req.flash("activeLimit")[0] });
     }
     catch(e) {
@@ -281,6 +281,22 @@ server.post("/createtopic", isLoggedIn, isTutor, isPermittedCreateDelete(`SELECT
     };
 });
 
+// response
+server.post("/responses", isLoggedIn, (req, res) => {
+    res.redirect("/responses?top_id=" + encodeURIComponent(req.query.top_id));
+});
+server.get("/responses", isLoggedIn, (req, res) => {
+    // add permission check and pass actual data
+    console.log(req.query);
+    res.render("response", { user: req.user });
+});
+
+// new response
+server.post("/newresponse", isLoggedIn, (req, res) => {
+    console.log(req.query);
+    res.redirect("/discussions");
+});
+
 // login
 server.get("/login", isNotLoggedIn, (req, res) => {
     res.render("login");
@@ -415,27 +431,6 @@ function isTutor(req, res, next) {
     return res.redirect("/discussions");
 };
 
-// async function isPermittedDeleteTopic(req, res, next) {
-//     try {
-//         if (req.query.top_id && /^[0-9]+$/.test(req.query.top_id)) {
-//             const ownDisc = await pool1.query(`SELECT dis_id, dis_owner, archive FROM topic INNER JOIN discussion ON top_dis=dis_id WHERE top_id=$1;`, [parseInt(req.query.top_id)])
-//             // discussion exists, is owned by user, and is not archived
-//             if (ownDisc.rows.length > 0 && ownDisc.rows[0].dis_owner === req.user.id && !ownDisc.rows[0].archive) {
-//                 return next();
-//             };
-//             // discussion does not exist, is not owned by user, or is archived
-//             return res.redirect("back");
-    
-//         };
-//         // redirect if invalid req.query provided
-//         return res.redirect("/discussions");
-//     }
-//     catch(e) {
-//         console.log(e);
-//         return res.redirect("/discussions");
-//     };
-// };
-
 function isPermittedCreateDelete(queryParam, idParam, redirectParam, archiveFlag) {
     return async (req, res, next) => {
         try {
@@ -443,16 +438,13 @@ function isPermittedCreateDelete(queryParam, idParam, redirectParam, archiveFlag
                 const permitQuery = await pool1.query(queryParam, [parseInt(req.query[idParam])])
                 // exists, is owned by user, and is not archived (if archiveFlag is true)
                 if ((permitQuery.rows.length > 0 && permitQuery.rows[0].dis_owner === req.user.id) && (!archiveFlag || (archiveFlag && !permitQuery.rows[0].archive))) {
-                    console.log("next");
                     return next();
                 }
                 // discussion does not exist, is not owned by user, or is archived (if archiveFlag is true)
-                console.log("not exist/owned");
                 return res.redirect(redirectParam);
         
             };
             // redirect if invalid req.query provided (deliberate malform)
-            console.log("invalid");
             return res.redirect("/discussions");
         }
         catch(e) {

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%- include("head"); %>
+  </head>
+  <body>
+  <header>
+    <%- include("header"); %>
+  </header>
+  <div class="subheader">
+    <h1 class="pagetitle">Response</h1>
+    <div class="pagetitlebut">
+    <form class="pagetitlebut" action="/newtopic" method="POST"><button class="pagetitlebut newcontent">Respond to topic &#43;</button></form>
+    </div>
+  </div>
+  <main>
+    <hr class="pagetitle">
+
+    <div class="screencontent">
+
+      <%if (typeof(message) != "undefined") { %>
+        <p class="invalid mainscreen"><%=message%></p>
+      <% } %>
+
+    </div>
+
+  </main>
+  <footer>
+    <%- include("footer"); %>
+  </footer>
+  </body>
+</html>
