@@ -15,9 +15,12 @@
 
     <div class="screencontent">
 
-      <form action="/createtopic?dis_id=<%=String(dis_id)%>=" method="POST">
+      <form action="/createtopic?dis_id=<%=String(dis_id)%>" method="POST">
         <label class="createscreen" for="topicname">Name:</label>
         <textarea class="createscreen" rows="3" name="topicname"></textarea>
+
+        <label class="createscreen" for="topicdesc">Description:</label>
+        <textarea class="createscreen" rows="8" name="topicdesc"></textarea>
 
         <%if (typeof(message) != "undefined") { %>
           <p class="invalid mainscreen"><%=message%></p>

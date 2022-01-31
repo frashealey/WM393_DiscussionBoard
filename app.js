@@ -165,8 +165,8 @@ server.post("/creatediscussion", isLoggedIn, isTutor, async (req, res) => {
             req.flash("createDiscError", "A discussion board is already active - please archive or delete it to create another");
         }
         // check that user has <=50 archived boards
-        else if (newDiscCreds.createasarchived && parseInt(archiveLimit.rows[0].count) >= 50) {
-            req.flash("createDiscError", "Limit of archived discussion boards reached - please delete archived discussion boards to create another");
+        else if (newDiscCreds.createasarchived && parseInt(archiveLimit.rows[0].count) > 50) {
+            req.flash("createDiscError", "Archived discussion limit reached - please delete archived discussion boards to create more");
         }
         else {
             await pool1.query(`INSERT INTO discussion (dis_owner, dis_title, archive) VALUES ($1, $2, $3);`, [req.user.id, newDiscCreds.discussionname, newDiscCreds.createasarchived]);
@@ -228,23 +228,45 @@ server.post("/newtopic", isLoggedIn, (req, res) => {
     res.redirect("/newtopic?dis_id=" + encodeURIComponent(req.query.dis_id));
 });
 server.get("/newtopic", isLoggedIn, isTutor, isPermittedCreateTopic, (req, res) => {
+    res.render("newtopic", { user: req.user, dis_id: parseInt(req.query.dis_id), message: req.flash("createTopicError") });
+});
+server.post("/createtopic", isLoggedIn, isTutor, isPermittedCreateTopic, async (req, res) => {
+    // check that user has <=50 topics
+    let createTopicSuccess = false;
     try {
-        // no req.query (e.g. user has not navigated through UI)
-        if (Object.keys(req.query).length === 0) {
-            res.redirect("/discussions");
+        const newTopicCreds = {
+            topicname: req.body.topicname,
+            // topicdesc: req.body.topicdesc
+            ...(req.body.topicdesc === "" ? { topicdesc: null } : { topicdesc: req.body.topicdesc })
+        },
+              topicLimit = await pool1.query(`SELECT COUNT(top_id) FROM topic WHERE top_dis=$1;`, [req.query.dis_id]);
+
+        // topic name is only mandatory field
+        if (!newTopicCreds.topicname) {
+            req.flash("createTopicError", "Please fill topic name field");
+        }
+        // check that discussion board has <=50 topics
+        else if (parseInt(topicLimit.rows[0].count) > 50) {
+            req.flash("createTopicError", "Topic limit reached - please delete topics to create more");
         }
         else {
-            res.render("newtopic", { user: req.user, dis_id: parseInt(req.query.dis_id) });
+            // top_datetime default is Now()
+            await pool1.query(`INSERT INTO topic (top_dis, top_title, top_desc) VALUES ($1, $2, $3)`, [parseInt(req.query.dis_id), newTopicCreds.topicname, newTopicCreds.topicdesc]);
+            createTopicSuccess = true;
         };
     }
     catch(e) {
         console.log(e);
-        res.redirect("/discussions");
+        req.flash("createTopicError", "Unknown error - please try again");
+    }
+    finally {
+        if (createTopicSuccess) {
+            res.redirect("/topics?dis_id=" + encodeURIComponent(req.query.dis_id));
+        }
+        else if (!createTopicSuccess) {
+            res.redirect("/newtopic?dis_id=" + encodeURIComponent(req.query.dis_id));
+        };
     };
-});
-server.post("/createtopic", isLoggedIn, isTutor, isPermittedCreateTopic, (req, res) => {
-    // check that user has <=50 topics
-    res.redirect("/discussions");
 });
 
 // login
@@ -383,14 +405,18 @@ function isTutor(req, res, next) {
 
 async function isPermittedCreateTopic(req, res, next) {
     try {
-        if (req.user.utype === "s") {
-            return res.redirect("/discussions");
+        if (req.query.dis_id && /^[0-9]+$/.test(req.query.dis_id)) {
+            const ownDisc = await pool1.query(`SELECT dis_id, dis_owner, archive FROM discussion WHERE dis_id=$1;`, [parseInt(req.query.dis_id)])
+            // discussion exists, is owned by user, and is not archived
+            if (ownDisc.rows.length > 0 && ownDisc.rows[0].dis_owner === req.user.id && !ownDisc.rows[0].archive) {
+                return next();
+            };
+            // discussion does not exist, is not owned by user, or is archived
+            return res.redirect("/topics?dis_id=" + encodeURIComponent(req.query.dis_id));
+    
         };
-        const ownDisc = await pool1.query(`SELECT dis_id, dis_owner FROM discussion WHERE dis_id=$1`, [parseInt(req.query.dis_id)])
-        if (ownDisc.rows[0].dis_owner === req.user.id) {
-            return next();
-        };
-        return res.redirect("/topics?dis_id=" + encodeURIComponent(req.query.dis_id));
+        // redirect if invalid req.query provided
+        return res.redirect("/discussions");
     }
     catch(e) {
         console.log(e);

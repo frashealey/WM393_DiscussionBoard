@@ -77,7 +77,7 @@ CREATE TABLE topic (
     top_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     top_dis INTEGER NOT NULL REFERENCES discussion(dis_id) ON DELETE CASCADE,
     top_title VARCHAR(100) NOT NULL,
-    top_desc VARCHAR(200) NOT NULL,
+    top_desc VARCHAR(200),
     top_datetime TIMESTAMP NOT NULL DEFAULT Now()
 );
 

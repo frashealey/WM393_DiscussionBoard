@@ -339,7 +339,7 @@ label.createscreen, p.switchtext.right.createscreen {
     color: #000000;
 }
 input.createscreen[type=text], textarea.createscreen {
-    margin-top: 5px;
+    margin: 5px 0px 5px 0px;
 }
 div.switchdiv.createscreen {
     margin-top: 20px;
@@ -388,7 +388,7 @@ button.loginbutton:hover {
     color: #000000;
 }
 
-input:focus, select:focus, textarea:focus, button:focus, textarea:focus {
+input:focus, select:focus, textarea:focus, button:focus {
     outline: none;
 }
 button {
