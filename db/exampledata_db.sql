@@ -24,7 +24,7 @@ VALUES
 INSERT INTO topic (top_dis, top_title, top_desc, top_datetime)
 VALUES
     (1, 'Example topic 1', 'Lorem ipsum dolor sit amet', Now()),
-    (1, 'Example topic 2', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', Now()),
+    (1, 'Example topic 2', 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat', Now()),
     (3, 'Example topic 3', 'Example description', Now());
 -- response
 INSERT INTO response (res_user, res_top, res_title, res_text) VALUES ('u1827746', 1, 'Example response 1', 'Ut enim ad minim veniam');

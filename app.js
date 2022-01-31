@@ -127,7 +127,7 @@ server.post("/unarchivediscussion", isLoggedIn, isTutor, async (req, res) => {
 });
 
 // delete discussion
-server.post("/deletediscussion", isLoggedIn, isTutor, async (req, res) => {
+server.post("/deletediscussion", isLoggedIn, isTutor, isPermittedCreateDelete(`SELECT dis_id, dis_owner, archive FROM discussion WHERE dis_id=$1;`, "dis_id", "/discussions", false), async (req, res) => {
     try {
         await pool1.query(`DELETE FROM discussion WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
     }
@@ -223,20 +223,32 @@ server.get("/topics", isLoggedIn, async (req, res) => {
     };
 });
 
+// delete topic
+server.post("/deletetopic", isLoggedIn, isTutor, isPermittedCreateDelete(`SELECT dis_id, dis_owner, archive FROM topic INNER JOIN discussion ON top_dis=dis_id WHERE top_id=$1;`, "top_id", "back", true), async (req, res) => {
+    try {
+        await pool1.query(`DELETE FROM topic WHERE top_id=$1;`, [parseInt(req.query.top_id)]);
+    }
+    catch(e) {
+        console.log(e);
+    }
+    finally {
+        res.redirect("back");
+    };
+});
+
 // new topic
 server.post("/newtopic", isLoggedIn, (req, res) => {
     res.redirect("/newtopic?dis_id=" + encodeURIComponent(req.query.dis_id));
 });
-server.get("/newtopic", isLoggedIn, isTutor, isPermittedCreateTopic, (req, res) => {
+server.get("/newtopic", isLoggedIn, isTutor, isPermittedCreateDelete(`SELECT dis_id, dis_owner, archive FROM discussion WHERE dis_id=$1;`, "dis_id", "back", true), (req, res) => {
     res.render("newtopic", { user: req.user, dis_id: parseInt(req.query.dis_id), message: req.flash("createTopicError") });
 });
-server.post("/createtopic", isLoggedIn, isTutor, isPermittedCreateTopic, async (req, res) => {
+server.post("/createtopic", isLoggedIn, isTutor, isPermittedCreateDelete(`SELECT dis_id, dis_owner, archive FROM discussion WHERE dis_id=$1;`, "dis_id", "back", true), async (req, res) => {
     // check that user has <=50 topics
     let createTopicSuccess = false;
     try {
         const newTopicCreds = {
             topicname: req.body.topicname,
-            // topicdesc: req.body.topicdesc
             ...(req.body.topicdesc === "" ? { topicdesc: null } : { topicdesc: req.body.topicdesc })
         },
               topicLimit = await pool1.query(`SELECT COUNT(top_id) FROM topic WHERE top_dis=$1;`, [req.query.dis_id]);
@@ -403,24 +415,50 @@ function isTutor(req, res, next) {
     return res.redirect("/discussions");
 };
 
-async function isPermittedCreateTopic(req, res, next) {
-    try {
-        if (req.query.dis_id && /^[0-9]+$/.test(req.query.dis_id)) {
-            const ownDisc = await pool1.query(`SELECT dis_id, dis_owner, archive FROM discussion WHERE dis_id=$1;`, [parseInt(req.query.dis_id)])
-            // discussion exists, is owned by user, and is not archived
-            if (ownDisc.rows.length > 0 && ownDisc.rows[0].dis_owner === req.user.id && !ownDisc.rows[0].archive) {
-                return next();
-            };
-            // discussion does not exist, is not owned by user, or is archived
-            return res.redirect("/topics?dis_id=" + encodeURIComponent(req.query.dis_id));
+// async function isPermittedDeleteTopic(req, res, next) {
+//     try {
+//         if (req.query.top_id && /^[0-9]+$/.test(req.query.top_id)) {
+//             const ownDisc = await pool1.query(`SELECT dis_id, dis_owner, archive FROM topic INNER JOIN discussion ON top_dis=dis_id WHERE top_id=$1;`, [parseInt(req.query.top_id)])
+//             // discussion exists, is owned by user, and is not archived
+//             if (ownDisc.rows.length > 0 && ownDisc.rows[0].dis_owner === req.user.id && !ownDisc.rows[0].archive) {
+//                 return next();
+//             };
+//             // discussion does not exist, is not owned by user, or is archived
+//             return res.redirect("back");
     
+//         };
+//         // redirect if invalid req.query provided
+//         return res.redirect("/discussions");
+//     }
+//     catch(e) {
+//         console.log(e);
+//         return res.redirect("/discussions");
+//     };
+// };
+
+function isPermittedCreateDelete(queryParam, idParam, redirectParam, archiveFlag) {
+    return async (req, res, next) => {
+        try {
+            if (req.query[idParam] && /^[0-9]+$/.test(req.query[idParam])) {
+                const permitQuery = await pool1.query(queryParam, [parseInt(req.query[idParam])])
+                // exists, is owned by user, and is not archived (if archiveFlag is true)
+                if ((permitQuery.rows.length > 0 && permitQuery.rows[0].dis_owner === req.user.id) && (!archiveFlag || (archiveFlag && !permitQuery.rows[0].archive))) {
+                    console.log("next");
+                    return next();
+                }
+                // discussion does not exist, is not owned by user, or is archived (if archiveFlag is true)
+                console.log("not exist/owned");
+                return res.redirect(redirectParam);
+        
+            };
+            // redirect if invalid req.query provided (deliberate malform)
+            console.log("invalid");
+            return res.redirect("/discussions");
+        }
+        catch(e) {
+            console.log(e);
+            return res.redirect("/discussions");
         };
-        // redirect if invalid req.query provided
-        return res.redirect("/discussions");
-    }
-    catch(e) {
-        console.log(e);
-        return res.redirect("/discussions");
     };
 };
 
