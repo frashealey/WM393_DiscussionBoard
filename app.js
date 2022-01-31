@@ -72,7 +72,7 @@ server.get("/discussions", isLoggedIn, async (req, res) => {
 });
 
 // archive
-server.post("/archive", isLoggedIn, isTutor, (req, res) => {
+server.post("/archive", isLoggedIn, (req, res) => {
     res.redirect("/archive");
 });
 server.get("/archive", isLoggedIn, isTutor, async (req, res) => {
@@ -140,7 +140,7 @@ server.post("/deletediscussion", isLoggedIn, isTutor, async (req, res) => {
 });
 
 // new discussion
-server.post("/newdiscussion", isLoggedIn, isTutor, (req, res) => {
+server.post("/newdiscussion", isLoggedIn, (req, res) => {
     res.redirect("/newdiscussion");
 });
 server.get("/newdiscussion", isLoggedIn, isTutor, (req, res) => {
@@ -191,34 +191,59 @@ server.post("/creatediscussion", isLoggedIn, isTutor, async (req, res) => {
 server.post("/topics", isLoggedIn, (req, res) => {
     res.redirect("/topics?dis_id=" + encodeURIComponent(req.query.dis_id));
 });
-server.get("/topics", isPermittedViewTopic, isLoggedIn, async (req, res) => {
+server.get("/topics", isLoggedIn, async (req, res) => {
     try {
-        const discExists = await pool1.query(`SELECT dis_id, dis_owner FROM discussion WHERE dis_id=$1`, [parseInt(req.query.dis_id)]);
-        if (discExists.rows.length === 0) {
-            res.redirect("/discussions");
+        if (req.query.dis_id && /^[0-9]+$/.test(req.query.dis_id)) {
+            let discInfo = [];
+            if (req.user.utype === "t") {
+                discInfo = await pool1.query(`SELECT dis_id, dis_title, dis_owner FROM discussion WHERE dis_id=$1 AND archive=false;`, [parseInt(req.query.dis_id)]);
+            }
+            else if (req.user.utype === "s") {
+                discInfo = await pool1.query(`SELECT dis_id, dis_title, dis_owner FROM discussion INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND dis_id=$1 AND lnk_stu_id=$2 GROUP BY dis_id, id;`, [parseInt(req.query.dis_id), req.user.id]);
+            };
+            // check that discussion exists, is active, and user has permission to view it
+            if (discInfo.rows.length === 0) {
+                res.redirect("/discussions");
+            }
+            else {
+                const activeTopics = await pool1.query(`SELECT top_id, top_dis, dis_title, dis_owner, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, top_title, top_desc, top_datetime, COUNT(DISTINCT res_id) AS res_count FROM topic LEFT JOIN response ON top_id=res_top INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id WHERE top_dis=$1 GROUP BY top_id, dis_id, id ORDER BY top_id DESC;`, [parseInt(req.query.dis_id)]);
+                // console.log(String(activeTopics.rows[0].top_datetime.getHours()).padStart(2, "0") + ":" + String(activeTopics.rows[0].top_datetime.getMinutes()).padStart(2, "0") + ":" + String(activeTopics.rows[0].top_datetime.getSeconds()).padStart(2, "0") + " " + String(activeTopics.rows[0].top_datetime.getDate()).padStart(2, "0") + "/" + String(activeTopics.rows[0].top_datetime.getMonth() + 1).padStart(2, "0") + "/" + String(activeTopics.rows[0].top_datetime.getFullYear()));
+                res.render("topic", { user: req.user, activeTopics: activeTopics.rows, discInfo: discInfo.rows[0] });
+            };
+        }
+        // redirect if invalid req.query provided
+        else {
+            return res.redirect("/discussions"); 
         };
-        const activeTopics = await pool1.query(`SELECT top_id, top_dis, dis_title, dis_owner, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, top_title, top_desc, top_datetime, COUNT(DISTINCT res_id) AS res_count FROM topic LEFT JOIN response ON top_id=res_top INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id WHERE top_dis=$1 GROUP BY top_id, dis_id, id ORDER BY top_id DESC;`, [parseInt(req.query.dis_id)]);
-        // console.log(String(activeTopics.rows[0].top_datetime.getHours()).padStart(2, "0") + ":" + String(activeTopics.rows[0].top_datetime.getMinutes()).padStart(2, "0") + ":" + String(activeTopics.rows[0].top_datetime.getSeconds()).padStart(2, "0") + " " + String(activeTopics.rows[0].top_datetime.getDate()).padStart(2, "0") + "/" + String(activeTopics.rows[0].top_datetime.getMonth() + 1).padStart(2, "0") + "/" + String(activeTopics.rows[0].top_datetime.getFullYear()));
-
-        // check that user has <=50 topics
-        res.render("topic", { user: req.user, activeTopics: activeTopics.rows });
     }
     catch(e) {
+        // // catches undefined req.query here
         console.log(e);
-        res.render("topic", { user: req.user, activeTopics: [] });
+        res.redirect("/discussions");
     };
 });
 
 // new topic
-server.post("/newtopic", isLoggedIn, isTutor, isPermittedCreateTopic, (req, res) => {
-    res.redirect("/newtopic?dis_id=" + encodeURIComponent(req.query.top_id));
+server.post("/newtopic", isLoggedIn, (req, res) => {
+    res.redirect("/newtopic?dis_id=" + encodeURIComponent(req.query.dis_id));
 });
 server.get("/newtopic", isLoggedIn, isTutor, isPermittedCreateTopic, (req, res) => {
-    console.log(req.query);
-    res.render("newtopic", { user: req.user });
+    try {
+        // no req.query (e.g. user has not navigated through UI)
+        if (Object.keys(req.query).length === 0) {
+            res.redirect("/discussions");
+        }
+        else {
+            res.render("newtopic", { user: req.user, dis_id: parseInt(req.query.dis_id) });
+        };
+    }
+    catch(e) {
+        console.log(e);
+        res.redirect("/discussions");
+    };
 });
-server.post("/newtopic", isLoggedIn, isTutor, isPermittedCreateTopic, (req, res) => {
-    // placeholder function
+server.post("/createtopic", isLoggedIn, isTutor, isPermittedCreateTopic, (req, res) => {
+    // check that user has <=50 topics
     res.redirect("/discussions");
 });
 
@@ -297,7 +322,7 @@ server.post("/logout", (req, res) => {
 
 // redirect undefined pages
 server.get("*", (req, res) => {
-    res.redirect("/");
+    res.redirect("/discussions");
 });
 
 function passportInit(passport) {
@@ -344,7 +369,7 @@ function isLoggedIn(req, res, next) {
 
 function isNotLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
-        return res.redirect("/")
+        return res.redirect("/discussions")
     };
     return next();
 };
@@ -356,27 +381,21 @@ function isTutor(req, res, next) {
     return res.redirect("/discussions");
 };
 
-async function isPermittedViewTopic(req, res, next) {
+async function isPermittedCreateTopic(req, res, next) {
     try {
-        if (req.user.utype === "t") {
-            return next();
-        };
-        permitDiscs = await pool1.query(`SELECT dis_id, dis_owner FROM discussion INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND lnk_stu_id=$1 GROUP BY dis_id, id;`, [req.user.id]);
-        if (permitDiscs.rows.some(dis => dis.dis_id === parseInt(req.query.dis_id))) {
-            return next();
-        }
-        else {
+        if (req.user.utype === "s") {
             return res.redirect("/discussions");
         };
+        const ownDisc = await pool1.query(`SELECT dis_id, dis_owner FROM discussion WHERE dis_id=$1`, [parseInt(req.query.dis_id)])
+        if (ownDisc.rows[0].dis_owner === req.user.id) {
+            return next();
+        };
+        return res.redirect("/topics?dis_id=" + encodeURIComponent(req.query.dis_id));
     }
     catch(e) {
         console.log(e);
         return res.redirect("/discussions");
     };
-};
-
-function isPermittedCreateTopic(req, res, next) {
-
 };
 
 server.listen(port);

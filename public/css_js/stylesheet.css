@@ -73,7 +73,7 @@ ul.invalid {
     display: inline-block;
     margin-bottom: 20px;
 }
-input[type=text], input[type=password] {
+input[type=text], input[type=password], textarea {
     font-family: "Lato", Arial, sans-serif;
     font-size: 18px;
     padding: 5px;
@@ -338,7 +338,7 @@ label.createscreen, p.switchtext.right.createscreen {
     font-size: 18px;
     color: #000000;
 }
-input.createscreen[type=text] {
+input.createscreen[type=text], textarea.createscreen {
     margin-top: 5px;
 }
 div.switchdiv.createscreen {
@@ -346,6 +346,10 @@ div.switchdiv.createscreen {
 }
 div.createbuttoncontainer {
     margin: 35px 0px 0px 0px;
+}
+
+textarea {
+    resize: none;
 }
 
 #logout {
@@ -384,7 +388,7 @@ button.loginbutton:hover {
     color: #000000;
 }
 
-input:focus, select:focus, textarea:focus, button:focus {
+input:focus, select:focus, textarea:focus, button:focus, textarea:focus {
     outline: none;
 }
 button {

@@ -15,19 +15,16 @@
 
     <div class="screencontent">
 
-      <form action="/createtopic" method="POST">
+      <form action="/createtopic?dis_id=<%=String(dis_id)%>=" method="POST">
         <label class="createscreen" for="topicname">Name:</label>
-        <input class="createscreen" type="text" name="topicname">
-
-        <!-- add in textarea -->
+        <textarea class="createscreen" rows="3" name="topicname"></textarea>
 
         <%if (typeof(message) != "undefined") { %>
           <p class="invalid mainscreen"><%=message%></p>
         <% } %>
 
         <div class="createbuttoncontainer">
-            <!-- change href -->
-          <a href="/topics"><button class="createbutton cancel" type="button">&#60; Cancel</button></a>
+          <a href="/topics?dis_id=<%=String(dis_id)%>"><button class="createbutton cancel" type="button">&#60; Cancel</button></a>
           <button class="createbutton create" type="submit">Create &#62;</button>
         </div>
       </form>

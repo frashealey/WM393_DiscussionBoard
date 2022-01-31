@@ -8,10 +8,10 @@
     <%- include("header"); %>
   </header>
   <div class="subheader">
-    <h1 class="pagetitle"><%=activeTopics[0].dis_title%></h1>
-    <% if(user.utype == "t" && user.id == activeTopics[0].dis_owner){ %>
+    <h1 class="pagetitle"><%=discInfo.dis_title%></h1>
+    <% if(user.utype == "t" && user.id == discInfo.dis_owner){ %>
       <div class="pagetitlebut">
-        <form class="pagetitlebut" action="/newtopic" method="POST"><button class="pagetitlebut newcontent">New topic &#43;</button></form>
+        <form class="pagetitlebut" action="/newtopic?dis_id=<%=discInfo.dis_id%>" method="POST"><button class="pagetitlebut newcontent">New topic &#43;</button></form>
       </div>
     <% } %>
   </div>
