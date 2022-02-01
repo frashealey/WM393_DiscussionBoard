@@ -1,3 +1,5 @@
+const e = require("express");
+
 const { execPath } = require("process"),
       express = require("express"),
       bodyParser = require("body-parser"),
@@ -199,21 +201,20 @@ server.post("/topics", isLoggedIn, (req, res) => {
 server.get("/topics", isLoggedIn, async (req, res) => {
     try {
         if (req.query.dis_id && /^[0-9]+$/.test(req.query.dis_id)) {
-            let discInfo = [];
+            let activeTopics = [];
             if (req.user.utype === "t") {
-                discInfo = await pool1.query(`SELECT dis_id, dis_title, dis_owner FROM discussion WHERE dis_id=$1 AND archive=false;`, [parseInt(req.query.dis_id)]);
+                activeTopics = await pool1.query(`SELECT top_id, top_dis, dis_title, dis_owner, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, top_title, top_desc, top_datetime, COUNT(DISTINCT res_id) AS res_count FROM topic LEFT JOIN response ON top_id=res_top INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id WHERE top_dis=$1 AND archive=false GROUP BY top_id, dis_id, id ORDER BY top_id DESC;`, [parseInt(req.query.dis_id)]);
             }
             else if (req.user.utype === "s") {
-                discInfo = await pool1.query(`SELECT dis_id, dis_title, dis_owner FROM discussion INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND dis_id=$1 AND lnk_stu_id=$2 GROUP BY dis_id, id;`, [parseInt(req.query.dis_id), req.user.id]);
+                activeTopics = await pool1.query(`SELECT top_id, top_dis, dis_title, dis_owner, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, top_title, top_desc, top_datetime, COUNT(DISTINCT res_id) AS res_count FROM topic LEFT JOIN response ON top_id=res_top INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND dis_id=$1 AND lnk_stu_id=$2 GROUP BY top_id, dis_id, id ORDER BY top_id DESC;`, [parseInt(req.query.dis_id), req.user.id]);
             };
             // check that discussion exists, is active, and user has permission to view it
-            if (discInfo.rows.length === 0) {
+            if (activeTopics.rows.length === 0) {
                 res.redirect("/discussions");
             }
             else {
-                const activeTopics = await pool1.query(`SELECT top_id, top_dis, dis_title, dis_owner, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, top_title, top_desc, top_datetime, COUNT(DISTINCT res_id) AS res_count FROM topic LEFT JOIN response ON top_id=res_top INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id WHERE top_dis=$1 GROUP BY top_id, dis_id, id ORDER BY top_id DESC;`, [parseInt(req.query.dis_id)]);
                 // console.log(String(activeTopics.rows[0].top_datetime.getHours()).padStart(2, "0") + ":" + String(activeTopics.rows[0].top_datetime.getMinutes()).padStart(2, "0") + ":" + String(activeTopics.rows[0].top_datetime.getSeconds()).padStart(2, "0") + " " + String(activeTopics.rows[0].top_datetime.getDate()).padStart(2, "0") + "/" + String(activeTopics.rows[0].top_datetime.getMonth() + 1).padStart(2, "0") + "/" + String(activeTopics.rows[0].top_datetime.getFullYear()));
-                res.render("topic", { user: req.user, activeTopics: activeTopics.rows, discInfo: discInfo.rows[0] });
+                res.render("topic", { user: req.user, activeTopics: activeTopics.rows });
             };
         }
         // redirect if invalid req.query provided
@@ -294,21 +295,24 @@ server.post("/createtopic", isLoggedIn, isTutor, isPermittedCreateDelete(`SELECT
 server.post("/responses", isLoggedIn, (req, res) => {
     res.redirect("/responses?top_id=" + encodeURIComponent(req.query.top_id));
 });
-server.get("/responses", isLoggedIn, (req, res) => {
+server.get("/responses", isLoggedIn, async (req, res) => {
     // add permission check and pass actual data
     console.log(req.query);
     res.render("response", { user: req.user });
 
-    // try {
-    //     activeRes = await pool1.query(`SELECT res_id, res_user, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, res_top, top_title, top_desc, res_title, res_text, res_datetime, replyto, pinned FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id WHERE res_top=$1 GROUP BY res_id, top_id, dis_id, id ORDER BY res_id ASC;`)
-    // }
+    try {
+        activeRes = await pool1.query(`SELECT res_id, res_user, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, res_top, top_title, top_desc, res_title, res_text, res_datetime, replyto, pinned FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id WHERE res_top=$1 GROUP BY res_id, top_id, dis_id, id ORDER BY res_id ASC;`)
+    }
+    catch(e) {
+        console.log(e);
+    }
+    finally {
+        res.redirect("/discussions");
+    };
 
+    // FINAL?
+    // SELECT res_id, res_user, Encode(Decrypt(A.fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(B.lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, res_top, top_title, top_desc, dis_id, dis_owner, archive, res_title, res_text, replyto, pinned FROM response INNER JOIN uni_user A ON res_user=A.id INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user B ON dis_owner=B.id INNER JOIN link_user ON B.id=lnk_tut_id WHERE lnk_stu_id='u1827746';
 
-
-
-    // SELECT res_id, res_user, res_top, dis_id, dis_owner FROM response LEFT JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE lnk_stu_id='u1827746';
-
-    // SELECT res_id, res_user, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, res_title, res_text, replyto, pinned FROM response LEFT JOIN uni_user ON res_user=id WHERE res_top=3 ORDER BY res_id ASC;
 
 
     // try {
