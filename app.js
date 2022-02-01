@@ -201,20 +201,21 @@ server.post("/topics", isLoggedIn, (req, res) => {
 server.get("/topics", isLoggedIn, async (req, res) => {
     try {
         if (req.query.dis_id && /^[0-9]+$/.test(req.query.dis_id)) {
-            let activeTopics = [];
+            let discInfo = [];
             if (req.user.utype === "t") {
-                activeTopics = await pool1.query(`SELECT top_id, top_dis, dis_title, dis_owner, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, top_title, top_desc, top_datetime, COUNT(DISTINCT res_id) AS res_count FROM topic LEFT JOIN response ON top_id=res_top INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id WHERE top_dis=$1 AND archive=false GROUP BY top_id, dis_id, id ORDER BY top_id DESC;`, [parseInt(req.query.dis_id)]);
+                discInfo = await pool1.query(`SELECT dis_id, dis_title, dis_owner FROM discussion WHERE dis_id=$1 AND archive=false;`, [parseInt(req.query.dis_id)]);
             }
             else if (req.user.utype === "s") {
-                activeTopics = await pool1.query(`SELECT top_id, top_dis, dis_title, dis_owner, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, top_title, top_desc, top_datetime, COUNT(DISTINCT res_id) AS res_count FROM topic LEFT JOIN response ON top_id=res_top INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND dis_id=$1 AND lnk_stu_id=$2 GROUP BY top_id, dis_id, id ORDER BY top_id DESC;`, [parseInt(req.query.dis_id), req.user.id]);
+                discInfo = await pool1.query(`SELECT dis_id, dis_title, dis_owner FROM discussion INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND dis_id=$1 AND lnk_stu_id=$2 GROUP BY dis_id, id;`, [parseInt(req.query.dis_id), req.user.id]);
             };
             // check that discussion exists, is active, and user has permission to view it
-            if (activeTopics.rows.length === 0) {
+            if (discInfo.rows.length === 0) {
                 res.redirect("/discussions");
             }
             else {
+                const activeTopics = await pool1.query(`SELECT top_id, top_dis, dis_title, dis_owner, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, top_title, top_desc, top_datetime, COUNT(DISTINCT res_id) AS res_count FROM topic LEFT JOIN response ON top_id=res_top INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id WHERE top_dis=$1 GROUP BY top_id, dis_id, id ORDER BY top_id DESC;`, [parseInt(req.query.dis_id)]);
                 // console.log(String(activeTopics.rows[0].top_datetime.getHours()).padStart(2, "0") + ":" + String(activeTopics.rows[0].top_datetime.getMinutes()).padStart(2, "0") + ":" + String(activeTopics.rows[0].top_datetime.getSeconds()).padStart(2, "0") + " " + String(activeTopics.rows[0].top_datetime.getDate()).padStart(2, "0") + "/" + String(activeTopics.rows[0].top_datetime.getMonth() + 1).padStart(2, "0") + "/" + String(activeTopics.rows[0].top_datetime.getFullYear()));
-                res.render("topic", { user: req.user, activeTopics: activeTopics.rows });
+                res.render("topic", { user: req.user, activeTopics: activeTopics.rows, discInfo: discInfo.rows[0] });
             };
         }
         // redirect if invalid req.query provided
