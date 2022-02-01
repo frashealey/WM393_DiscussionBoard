@@ -115,17 +115,6 @@ $$
 $$ LANGUAGE 'plpgsql';
 CREATE TRIGGER trig_res_perm AFTER INSERT OR UPDATE OR DELETE ON response FOR EACH ROW EXECUTE PROCEDURE func_res_perm();
 
--- INSERT INTO response (res_user, res_top, res_title, res_text) VALUES ('u9999999', 3, 'test response', 'test response');
--- INSERT INTO response (res_user, res_top, res_title, res_text) VALUES ('u1928899', 3, 'test response', 'test response');
--- INSERT INTO response (res_user, res_top, res_title, res_text) VALUES ('u1827746', 3, 'test response', 'test response');
-
--- DROP TRIGGER trig_res_perm ON response;
-
--- SELECT top_id, dis_id, dis_owner FROM topic INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE lnk_stu_id='u1928899';
--- SELECT COUNT(top_id) FROM topic INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE lnk_stu_id='u1928899';
-
-
-
 -- liked
 CREATE TABLE liked (
     lke_user CHAR(8) NOT NULL REFERENCES uni_user(id),

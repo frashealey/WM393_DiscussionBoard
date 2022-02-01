@@ -311,10 +311,6 @@ server.get("/responses", isLoggedIn, (req, res) => {
     // SELECT res_id, res_user, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, res_title, res_text, replyto, pinned FROM response LEFT JOIN uni_user ON res_user=id WHERE res_top=3 ORDER BY res_id ASC;
 
 
-    // this has wrong users (displays discussion owner, not res_user)
-    // SELECT res_id, res_user, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, res_top, top_title, top_desc, res_title, res_text, res_datetime, replyto, pinned FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id WHERE res_top=3 GROUP BY res_id, top_id, dis_id, id ORDER BY res_id ASC;
-
-
     // try {
     //     if (req.query.dis_id && /^[0-9]+$/.test(req.query.dis_id)) {
     //         let discInfo = [];
