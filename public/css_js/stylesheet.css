@@ -75,11 +75,13 @@ ul.invalid {
 }
 input[type=text], input[type=password], textarea {
     font-family: "Lato", Arial, sans-serif;
-    font-size: 18px;
-    padding: 5px;
     display: block;
     box-sizing: border-box;
     width: 100%;
+}
+input[type=text].loginput, input[type=password].loginput {
+    font-size: 18px;
+    padding: 8px;
 }
 label.logincontent {
     display: block;
@@ -199,6 +201,7 @@ div.subheader {
 h1.pagetitle {
     color: #000000;
     margin: 20px 30px 0px 30px;
+    font-size: 28px;
     font-weight: normal;
     display: inline-block;
 }
@@ -211,8 +214,8 @@ form.pagetitlebut {
 }
 button.pagetitlebut, button.createbutton {
     border: none;
-    font-size: 20px;
-    padding: 5px 10px 5px 10px;
+    font-size: 18px;
+    padding: 6px 10px 6px 10px;
     min-width: 180px;
     -webkit-transition: 0.2s;
     transition: 0.2s;
@@ -249,7 +252,7 @@ hr.pagetitle {
 }
 
 div.screencontent {
-    margin: 10px 40px 10px 40px;
+    margin: 20px 40px 10px 40px;
 }
 div.screenpanel {
     background-color: #ffffff;
@@ -269,6 +272,7 @@ h2.screenpanel, h3.screenpanel {
     font-weight: normal;
 }
 h2.screenpanel.discussion {
+    font-size: 22px;
     padding: 20px 20px 20px 20px;
 }
 h3.screenpanel.topic {
@@ -338,8 +342,10 @@ label.createscreen, p.switchtext.right.createscreen {
     font-size: 18px;
     color: #000000;
 }
-input.createscreen[type=text], textarea.createscreen {
-    margin: 5px 0px 5px 0px;
+input[type=text].createscreen, textarea.createscreen {
+    font-size: 16px;
+    padding: 8px;
+    margin: 5px 0px 10px 0px;
 }
 div.switchdiv.createscreen {
     margin-top: 20px;
@@ -374,8 +380,8 @@ button.loginbutton {
     color: #ffffff;
     background-color: #262626;
     border: none;
-    font-size: 20px;
-    padding: 5px;
+    font-size: 18px;
+    padding: 8px;
     margin: 10px 0px 20px 0px;
     width: 100%;
     -webkit-transition: 0.2s;
@@ -397,6 +403,8 @@ button {
 
 p, h1, h2, h3, a, button, label, li {
     font-family: "Lato", Arial, sans-serif;
+}
+p {
     -ms-word-break: break-all;
     word-break: break-all;
     word-break: break-word;
