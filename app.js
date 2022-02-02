@@ -58,13 +58,27 @@ server.post("/discussions", isLoggedIn, (req, res) => {
 });
 server.get("/discussions", isLoggedIn, async (req, res) => {
     try {
-        let activeDisc = [];
-        if (req.user.utype === "t") {
-            activeDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE archive=false GROUP BY dis_id ORDER BY CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner, dis_id DESC;`, [req.user.id]);
-        }
-        else if (req.user.utype === "s") {
-            activeDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND lnk_stu_id=$1 GROUP BY dis_id, id ORDER BY dis_id DESC;`, [req.user.id]);
-        };
+        // let activeDisc = [];
+
+        // console.log(utypeCheck(req.user.utype,
+        //                        `SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE archive=false GROUP BY dis_id ORDER BY CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner, dis_id DESC;`,
+        //                        [req.user.id],
+        //                        `SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND lnk_stu_id=$1 GROUP BY dis_id, id ORDER BY dis_id DESC;`,
+        //                        [req.user.id]));
+
+
+        // if (req.user.utype === "t") {
+        //     activeDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE archive=false GROUP BY dis_id ORDER BY CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner, dis_id DESC;`, [req.user.id]);
+        // }
+        // else if (req.user.utype === "s") {
+        //     activeDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND lnk_stu_id=$1 GROUP BY dis_id, id ORDER BY dis_id DESC;`, [req.user.id]);
+        // };
+        const discQuery = utypeQuery(req.user.utype,
+                                     `SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE archive=false GROUP BY dis_id ORDER BY CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner, dis_id DESC;`,
+                                     [req.user.id],
+                                     `SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND lnk_stu_id=$1 GROUP BY dis_id, id ORDER BY dis_id DESC;`,
+                                     [req.user.id]),
+              activeDisc = await pool1.query(discQuery.query, discQuery.params);
         res.render("discussion", { user: req.user, activeDiscs: activeDisc.rows, message: req.flash("archiveLimit")[0] });
     }
     catch(e) {
@@ -203,7 +217,7 @@ server.get("/topics", isLoggedIn, async (req, res) => {
         if (req.query.dis_id && /^[0-9]+$/.test(req.query.dis_id)) {
             let discInfo = [];
             if (req.user.utype === "t") {
-                discInfo = await pool1.query(`SELECT dis_id, dis_title, dis_owner FROM discussion WHERE dis_id=$1 AND archive=false;`, [parseInt(req.query.dis_id)]);
+                discInfo = await pool1.query(`SELECT dis_id, dis_title, dis_owner FROM discussion WHERE archive=false AND dis_id=$1;`, [parseInt(req.query.dis_id)]);
             }
             else if (req.user.utype === "s") {
                 discInfo = await pool1.query(`SELECT dis_id, dis_title, dis_owner FROM discussion INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND dis_id=$1 AND lnk_stu_id=$2 GROUP BY dis_id, id;`, [parseInt(req.query.dis_id), req.user.id]);
@@ -296,55 +310,73 @@ server.post("/createtopic", isLoggedIn, isTutor, isPermittedCreateDelete(`SELECT
 server.post("/responses", isLoggedIn, (req, res) => {
     res.redirect("/responses?top_id=" + encodeURIComponent(req.query.top_id));
 });
-server.get("/responses", isLoggedIn, async (req, res) => {
-    // add permission check and pass actual data
-    console.log(req.query);
-    res.render("response", { user: req.user });
+// server.get("/responses", isLoggedIn, async (req, res) => {
+//     // add permission check and pass actual data
+//     console.log(req.query);
 
-    try {
-        activeRes = await pool1.query(`SELECT res_id, res_user, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, res_top, top_title, top_desc, res_title, res_text, res_datetime, replyto, pinned FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id WHERE res_top=$1 GROUP BY res_id, top_id, dis_id, id ORDER BY res_id ASC;`)
-    }
-    catch(e) {
-        console.log(e);
-    }
-    finally {
-        res.redirect("/discussions");
-    };
+//     try {
+//         // activeRes = await pool1.query(`SELECT res_id, res_user, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, res_top, top_title, top_desc, res_title, res_text, res_datetime, replyto, pinned FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id WHERE res_top=$1 GROUP BY res_id, top_id, dis_id, id ORDER BY res_id ASC;`)
+//         let topInfo = [];
+//         if (req.user.utype === "t") {
+//             topInfo = await pool1.query(`SELECT top_id, top_dis, dis_owner, top_title, top_desc, top_datetime FROM topic INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND top_id=$1;`, [req.query.top_id]);
+//         }
+//         else if (req.user.utype === "s") {
+//             topInfo = await pool1.query(`SELECT top_id, top_dis, dis_owner, top_title, top_desc, top_datetime FROM topic INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND top_id=$1 AND lnk_stu_id=$2;`, [req.query.top_id, req.user.id]);
+//         };
+//         // check that topic exists, is active, and user has permission to view it
+//         if (topInfo.rows.length === 0) {
+//             res.redirect("back");
+//         }
+//         else {
+//             const 
+//             // const activeTopics = await pool1.query(`SELECT top_id, top_dis, dis_title, dis_owner, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, top_title, top_desc, top_datetime, COUNT(DISTINCT res_id) AS res_count FROM topic LEFT JOIN response ON top_id=res_top INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id WHERE top_dis=$1 GROUP BY top_id, dis_id, id ORDER BY top_id DESC;`, [parseInt(req.query.dis_id)]);
+//             // res.render("topic", { user: req.user, activeTopics: activeTopics.rows, discInfo: discInfo.rows[0] });
+//         };
 
-    // FINAL?
-    // SELECT res_id, res_user, Encode(Decrypt(A.fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(B.lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, res_top, top_title, top_desc, dis_id, dis_owner, archive, res_title, res_text, replyto, pinned FROM response INNER JOIN uni_user A ON res_user=A.id INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user B ON dis_owner=B.id INNER JOIN link_user ON B.id=lnk_tut_id WHERE lnk_stu_id='u1827746';
+//     }
+//     catch(e) {
+//         console.log(e);
+//     }
+//     finally {
+//         res.render("response", { user: req.user });
+//     };
+
+//     // Final student? - this is for everything
+//     // SELECT res_id, res_user, Encode(Decrypt(A.fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(A.lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, res_top, top_title, top_desc, dis_id, dis_owner, archive, res_title, res_text, replyto, pinned FROM response INNER JOIN uni_user A ON res_user=A.id INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user B ON dis_owner=B.id INNER JOIN link_user ON B.id=lnk_tut_id WHERE lnk_stu_id='u1827746';
+
+//     // Final tutor - just response
+//     // SELECT res_id, res_user, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, res_top, res_title, res_text, res_datetime, replyto, pinned FROM response INNER JOIN uni_user ON res_user=id;
 
 
-
-    // try {
-    //     if (req.query.dis_id && /^[0-9]+$/.test(req.query.dis_id)) {
-    //         let discInfo = [];
-    //         if (req.user.utype === "t") {
-    //             discInfo = await pool1.query(`SELECT dis_id, dis_title, dis_owner FROM discussion WHERE dis_id=$1 AND archive=false;`, [parseInt(req.query.dis_id)]);
-    //         }
-    //         else if (req.user.utype === "s") {
-    //             discInfo = await pool1.query(`SELECT dis_id, dis_title, dis_owner FROM discussion INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND dis_id=$1 AND lnk_stu_id=$2 GROUP BY dis_id, id;`, [parseInt(req.query.dis_id), req.user.id]);
-    //         };
-    //         // check that discussion exists, is active, and user has permission to view it
-    //         if (discInfo.rows.length === 0) {
-    //             res.redirect("/discussions");
-    //         }
-    //         else {
-    //             const activeTopics = await pool1.query(`SELECT top_id, top_dis, dis_title, dis_owner, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, top_title, top_desc, top_datetime, COUNT(DISTINCT res_id) AS res_count FROM topic LEFT JOIN response ON top_id=res_top INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id WHERE top_dis=$1 GROUP BY top_id, dis_id, id ORDER BY top_id DESC;`, [parseInt(req.query.dis_id)]);
-    //             // console.log(String(activeTopics.rows[0].top_datetime.getHours()).padStart(2, "0") + ":" + String(activeTopics.rows[0].top_datetime.getMinutes()).padStart(2, "0") + ":" + String(activeTopics.rows[0].top_datetime.getSeconds()).padStart(2, "0") + " " + String(activeTopics.rows[0].top_datetime.getDate()).padStart(2, "0") + "/" + String(activeTopics.rows[0].top_datetime.getMonth() + 1).padStart(2, "0") + "/" + String(activeTopics.rows[0].top_datetime.getFullYear()));
-    //             res.render("topic", { user: req.user, activeTopics: activeTopics.rows, discInfo: discInfo.rows[0] });
-    //         };
-    //     }
-    //     // redirect if invalid req.query provided
-    //     else {
-    //         return res.redirect("/discussions"); 
-    //     };
-    // }
-    // catch(e) {
-    //     console.log(e);
-    //     res.redirect("/discussions");
-    // };
-});
+//     // try {
+//     //     if (req.query.dis_id && /^[0-9]+$/.test(req.query.dis_id)) {
+//     //         let discInfo = [];
+//     //         if (req.user.utype === "t") {
+//     //             discInfo = await pool1.query(`SELECT dis_id, dis_title, dis_owner FROM discussion WHERE archive=false AND dis_id=$1;`, [parseInt(req.query.dis_id)]);
+//     //         }
+//     //         else if (req.user.utype === "s") {
+//     //             discInfo = await pool1.query(`SELECT dis_id, dis_title, dis_owner FROM discussion INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND dis_id=$1 AND lnk_stu_id=$2 GROUP BY dis_id, id;`, [parseInt(req.query.dis_id), req.user.id]);
+//     //         };
+//     //         // check that discussion exists, is active, and user has permission to view it
+//     //         if (discInfo.rows.length === 0) {
+//     //             res.redirect("/discussions");
+//     //         }
+//     //         else {
+//     //             const activeTopics = await pool1.query(`SELECT top_id, top_dis, dis_title, dis_owner, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, top_title, top_desc, top_datetime, COUNT(DISTINCT res_id) AS res_count FROM topic LEFT JOIN response ON top_id=res_top INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id WHERE top_dis=$1 GROUP BY top_id, dis_id, id ORDER BY top_id DESC;`, [parseInt(req.query.dis_id)]);
+//     //             // console.log(String(activeTopics.rows[0].top_datetime.getHours()).padStart(2, "0") + ":" + String(activeTopics.rows[0].top_datetime.getMinutes()).padStart(2, "0") + ":" + String(activeTopics.rows[0].top_datetime.getSeconds()).padStart(2, "0") + " " + String(activeTopics.rows[0].top_datetime.getDate()).padStart(2, "0") + "/" + String(activeTopics.rows[0].top_datetime.getMonth() + 1).padStart(2, "0") + "/" + String(activeTopics.rows[0].top_datetime.getFullYear()));
+//     //             res.render("topic", { user: req.user, activeTopics: activeTopics.rows, discInfo: discInfo.rows[0] });
+//     //         };
+//     //     }
+//     //     // redirect if invalid req.query provided
+//     //     else {
+//     //         return res.redirect("/discussions"); 
+//     //     };
+//     // }
+//     // catch(e) {
+//     //     console.log(e);
+//     //     res.redirect("/discussions");
+//     // };
+// });
 
 // new response
 server.post("/newresponse", isLoggedIn, (req, res) => {
@@ -488,6 +520,15 @@ function isTutor(req, res, next) {
     return res.redirect("/discussions");
 };
 
+function utypeQuery(utype, tutorQuery, tutorParams, studentQuery, studentParams) {
+    if (utype === "t") {
+        return { query: tutorQuery, params: tutorParams };
+    }
+    else if (utype === "s") {
+        return { query: studentQuery, params: studentParams };
+    };
+};
+
 function isPermittedCreateDelete(queryParam, idParam, redirectParam, archiveFlag) {
     return async (req, res, next) => {
         try {
@@ -510,5 +551,21 @@ function isPermittedCreateDelete(queryParam, idParam, redirectParam, archiveFlag
         };
     };
 };
+
+// function isPermittedView(queryParamTut, queryParamStu, idParam) {
+//     return async (req, res, next) => {
+//         let discInfo = [];
+//         if (req.user.utype === "t") {
+//             discInfo = await pool1.query(`SELECT dis_id, dis_title, dis_owner FROM discussion WHERE archive=false AND dis_id=$1;`, [parseInt(req.query.dis_id)]);
+//         }
+//         else if (req.user.utype === "s") {
+//             discInfo = await pool1.query(`SELECT dis_id, dis_title, dis_owner FROM discussion INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND dis_id=$1 AND lnk_stu_id=$2 GROUP BY dis_id, id;`, [parseInt(req.query.dis_id), req.user.id]);
+//         };
+//         // check that discussion exists, is active, and user has permission to view it
+//         if (discInfo.rows.length === 0) {
+//             res.redirect("/discussions");
+//         }
+//     };
+// };
 
 server.listen(port);
