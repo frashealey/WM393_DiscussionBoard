@@ -111,7 +111,7 @@ $$
         END IF;
     END;
 $$ LANGUAGE 'plpgsql';
-CREATE TRIGGER trig_res_perm AFTER INSERT OR UPDATE OR DELETE ON response FOR EACH ROW EXECUTE PROCEDURE func_res_perm();
+CREATE TRIGGER trig_res_perm AFTER INSERT OR UPDATE ON response FOR EACH ROW EXECUTE PROCEDURE func_res_perm();
 
 -- liked
 CREATE TABLE liked (

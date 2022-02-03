@@ -1,4 +1,6 @@
 const e = require("express");
+const res = require("express/lib/response");
+const { runInNewContext } = require("vm");
 
 const { execPath } = require("process"),
       express = require("express"),
@@ -129,7 +131,7 @@ server.post("/unarchivediscussion", isLoggedIn, isTutor, async (req, res) => {
 });
 
 // delete discussion
-server.post("/deletediscussion", isLoggedIn, isTutor, isPermittedCreateDelete(`SELECT dis_id, dis_owner, archive FROM discussion WHERE dis_id=$1;`, "dis_id", "/discussions", false), async (req, res) => {
+server.post("/deletediscussion", isLoggedIn, isTutor, (req, res, next) => { isPermitted(req, res, next, `SELECT dis_id, dis_owner, archive FROM discussion WHERE dis_id=$1 AND dis_owner=$2;`, "dis_id", "/discussions"); }, async (req, res) => {
     try {
         await pool1.query(`DELETE FROM discussion WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
     }
@@ -231,7 +233,7 @@ server.get("/topics", isLoggedIn, async (req, res) => {
 });
 
 // delete topic
-server.post("/deletetopic", isLoggedIn, isTutor, isPermittedCreateDelete(`SELECT dis_id, dis_owner, archive FROM topic INNER JOIN discussion ON top_dis=dis_id WHERE top_id=$1;`, "top_id", "back", true), async (req, res) => {
+server.post("/deletetopic", isLoggedIn, isTutor, isPermitted(`SELECT dis_id, dis_owner, archive FROM topic INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND top_id=$1 AND dis_owner=$2;`, "top_id", "back"), async (req, res) => {
     try {
         await pool1.query(`DELETE FROM topic WHERE top_id=$1;`, [parseInt(req.query.top_id)]);
     }
@@ -247,10 +249,10 @@ server.post("/deletetopic", isLoggedIn, isTutor, isPermittedCreateDelete(`SELECT
 server.post("/newtopic", isLoggedIn, (req, res) => {
     res.redirect("/newtopic?dis_id=" + encodeURIComponent(req.query.dis_id));
 });
-server.get("/newtopic", isLoggedIn, isTutor, isPermittedCreateDelete(`SELECT dis_id, dis_owner, archive FROM discussion WHERE dis_id=$1;`, "dis_id", "back", true), (req, res) => {
+server.get("/newtopic", isLoggedIn, isTutor, isPermitted(`SELECT dis_id, dis_owner, archive FROM discussion WHERE archive=false AND dis_id=$1 AND dis_owner=$2;`, "dis_id", "back"), (req, res) => {
     res.render("newtopic", { user: req.user, dis_id: parseInt(req.query.dis_id), message: req.flash("createTopicError") });
 });
-server.post("/createtopic", isLoggedIn, isTutor, isPermittedCreateDelete(`SELECT dis_id, dis_owner, archive FROM discussion WHERE dis_id=$1;`, "dis_id", "back", true), async (req, res) => {
+server.post("/createtopic", isLoggedIn, isTutor, isPermitted(`SELECT dis_id, dis_owner, archive FROM discussion WHERE archive=false AND dis_id=$1 AND dis_owner=$2;`, "dis_id", "back"), async (req, res) => {
     // check that user has <=50 topics
     let createTopicSuccess = false;
     try {
@@ -313,7 +315,7 @@ server.get("/responses", isLoggedIn, async (req, res) => {
                 res.redirect("/discussions");
             }
             else {
-                const activeRes = await pool1.query(`SELECT res_id, res_user, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, res_top, top_title, top_desc, res_title, res_text, res_datetime, replyto, pinned, COUNT(lke_res) AS likes FROM response INNER JOIN uni_user on res_user=id INNER JOIN topic ON res_top=top_id LEFT JOIN liked ON res_id=lke_res WHERE res_top=$1 GROUP BY res_id, id, top_id ORDER BY pinned DESC, res_datetime ASC;`, [parseInt(req.query.top_id)]),
+                const activeRes = await pool1.query(`SELECT res_id, res_user, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, res_top, top_title, top_desc, res_title, res_text, res_datetime, replyto, pinned, COUNT(lke_res) AS likes FROM response INNER JOIN uni_user ON res_user=id INNER JOIN topic ON res_top=top_id LEFT JOIN liked ON res_id=lke_res WHERE res_top=$1 GROUP BY res_id, id, top_id ORDER BY pinned DESC, res_datetime ASC;`, [parseInt(req.query.top_id)]),
                       activeLike = await pool1.query(`SELECT lke_user, lke_res FROM liked;`);
                 res.render("response", { user: req.user, activeRes: activeRes.rows, activeLike: activeLike.rows, topInfo: topInfo.rows[0] });
             };
@@ -329,6 +331,17 @@ server.get("/responses", isLoggedIn, async (req, res) => {
 });
 
 // like response
+// server.post("/likeresponse", isLoggedIn, isPermittedCreateLikeRes(`SELECT top_id, top_dis, dis_owner, lnk_stu_id FROM topic INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND top_id=$1 AND lnk_stu_id=$2;`, "top_id", "back"), (req, res) => {
+server.post("/likeresponse", isLoggedIn, isPermittedCreateLikeRes, (req, res) => {
+
+
+    // SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND res_id=$1 AND lnk_stu_id=$2;
+
+    // finds user post...
+    // SELECT res_id, res_user, top_id, dis_id, dis_owner, lnk_stu_id FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND res_id=$1 AND res_user=$2 AND lnk_stu_id=$2;
+    console.log(req.query);
+    res.redirect("/discussions");
+});
 
 // delete response
 
@@ -474,31 +487,100 @@ function isTutor(req, res, next) {
     return res.redirect("/discussions");
 };
 
-function isPermittedCreateDelete(queryParam, idParam, redirectTo, archiveFlag) {
-    return async (req, res, next) => {
-        try {
-            if (req.query[idParam] && /^[0-9]+$/.test(req.query[idParam])) {
-                const permitQuery = await pool1.query(queryParam, [parseInt(req.query[idParam])])
-                // exists, is owned by user, and is not archived (if archiveFlag is true)
-                if ((permitQuery.rows.length > 0 && permitQuery.rows[0].dis_owner === req.user.id) && (!archiveFlag || (archiveFlag && !permitQuery.rows[0].archive))) {
-                    return next();
-                }
-                // discussion does not exist, is not owned by user, or is archived (if archiveFlag is true)
-                return res.redirect(redirectTo);
-        
-            };
-            // redirect if invalid req.query provided (deliberate malform)
-            return res.redirect("/discussions");
-        }
-        catch(e) {
-            console.log(e);
-            return res.redirect("/discussions");
+// function isPermitted(queryText, idParam, redirectTo) {
+//     return async (req, res, next) => {
+//         try {
+//             if (req.query[idParam] && /^[0-9]+$/.test(req.query[idParam])) {
+//                 const permitQuery = await pool1.query(queryText, [parseInt(req.query[idParam]), req.user.id]);
+//                 // exists, owned by user/belonging to owner
+//                 if (permitQuery.rows.length > 0) {
+//                     console.log("next");
+//                     return next();
+//                 }
+//                 // does not exist, is not owned by user/belonging to owner
+//                 console.log("not permitted");
+//                 return res.redirect(redirectTo);
+//             };
+//             // redirect if invalid req.query provided (deliberate malform)
+//             console.log("invalid");
+//             console.log(req.query);
+//             return res.redirect("/discussions");
+//         }
+//         catch(e) {
+//             console.log(e);
+//             return res.redirect("/discussions");
+//         };
+//     };
+// };
+
+
+// Route.post() requires a callback function
+async function isPermitted(req, res, next, queryText, idParam, redirectTo) {
+    try {
+        if (req.query[idParam] && /^[0-9]+$/.test(req.query[idParam])) {
+            const permitQuery = await pool1.query(queryText, [parseInt(req.query[idParam]), req.user.id]);
+            // exists, owned by user/belonging to owner
+            if (permitQuery.rows.length > 0) {
+                console.log("next");
+                return next();
+            }
+            // does not exist, is not owned by user/belonging to owner
+            console.log("not permitted");
+            return res.redirect(redirectTo);
         };
+        // redirect if invalid req.query provided (deliberate malform)
+        console.log("invalid");
+        console.log(req.query);
+        return res.redirect("/discussions");
+    }
+    catch(e) {
+        console.log(e);
+        return res.redirect("/discussions");
     };
 };
 
-function isPermittedCreateDeleteRes(stuQuery, stuValues, tutQuery, tutValues, redirectTo, archiveFlag) {
+// function isPermittedCreateLikeRes(req, res, next) {
+//     if (req.user.utype === "t") {
+//         console.log("TUTOR");
+//         return next();
+//     }
+//     else if (req.user.utype === "s") {
+//         console.log("STUDENT");
+//         return next();
+//     };
+// };
 
+function isPermittedCreateLikeRes(param) {
+    return function(req, res, next){
+        isPermitted(req, res, function(){
+            // middleware2 code
+            if (req.utype === "t") {
+                console.log("tutor");
+                return next();
+            }
+            else if (req.utype === "s") {
+                // SELECT res_id, top_id, top_dis, dis_owner, lnk_stu_id FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discusison ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND top_id=$1 AND lnk_stu_id=$2;
+                console.log("student");
+                return next();
+            };
+        });
+    };
 };
+
+// function isPermittedCreateLikeRes(queryText, idParam, redirectTo) {
+//     return (req, res, next) => {
+//         if (req.utype === "t") {
+//             console.log("test");
+//             return next();
+//         }
+//         else if (req.utype === "s") {
+//             console.log("test");
+//             // query to find if user can like/create a response from a certain topic
+//             isPermitted(queryText, idParam, redirectTo);
+//             // select top_id, top_dis, dis_owner, lnk_stu_id from topic inner join discussion on top_dis=dis_id inner join uni_user on dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND lnk_stu_id='u1928899' and top_id=1;
+//             // SELECT res_id, top_id, top_dis, dis_owner, lnk_stu_id FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discusison ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND top_id=$1 AND lnk_stu_id=$2;
+//         };
+//     };
+// };
 
 server.listen(port);
