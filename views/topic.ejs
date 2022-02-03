@@ -20,11 +20,7 @@
 
     <div class="screencontent">
 
-      <%if (typeof(message) != "undefined") { %>
-        <p class="invalid mainscreen"><%=message%></p>
-      <% } %>
-
-      <% activeTopics.forEach(function(activeTopic) { %>
+      <% activeTopic.forEach(function(activeTopic) { %>
         <div class="screenpanel">
           <div class="screenpanelcontents">
             <h3 class="screenpanel topic"><%=activeTopic.top_title%></h3>
@@ -51,7 +47,7 @@
           </div>
 
           <form class="selectnext" action="/responses?top_id=<%=activeTopic.top_id%>" method="POST">
-            <button class="screenpanelnext" type="submit"><img src="/resources/next.png" class="screenpanelnext"></button>
+            <button class="screenpanelnext" type="submit"><img src="/resources/next.png"></button>
           </form>
 
         </div>

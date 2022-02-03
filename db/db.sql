@@ -87,7 +87,7 @@ CREATE TABLE response (
     res_user CHAR(8) NOT NULL REFERENCES uni_user(id),
     res_top INTEGER NOT NULL REFERENCES topic(top_id) ON DELETE CASCADE,
     res_title VARCHAR(100) NOT NULL,
-    res_text VARCHAR(3000) NOT NULL,
+    res_text VARCHAR(2000) NOT NULL,
     res_datetime TIMESTAMP NOT NULL DEFAULT Now(),
     replyto INTEGER REFERENCES response(res_id) ON DELETE SET NULL,
     pinned BOOLEAN NOT NULL DEFAULT false
@@ -101,8 +101,6 @@ $$
     BEGIN
         topic_count = (SELECT COUNT(top_id) FROM topic INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE lnk_stu_id=NEW.res_user AND top_id=NEW.res_top);
         user_type = (SELECT Encode(Decrypt(utype, 'discussKey192192', 'aes'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.res_user);
-        RAISE NOTICE '%', topic_count;
-        RAISE NOTICE '%', user_type;
 
         IF (user_type = 't')
             THEN RETURN NEW;

@@ -82,6 +82,9 @@ input[type=text], input[type=password], textarea {
 input[type=text].loginput, input[type=password].loginput {
     font-size: 18px;
     padding: 8px;
+    border: none;
+    border-radius: 3px;
+    margin-top: 3px;
 }
 label.logincontent {
     display: block;
@@ -257,7 +260,23 @@ div.screencontent {
 div.screenpanel {
     background-color: #ffffff;
     border: 1px solid #262626;
+    border-radius: 3px;
     margin: 0px 0px 10px 0px;
+}
+div.screenpanelactions {
+    min-width: 66px;
+    display: table-cell;
+    position: relative;
+}
+form.screenpanelactions.like {
+    position: absolute;
+    top: 0;
+    padding: 15px 0px 0px 20px;
+}
+form.screenpanelactions.delete {
+    position: absolute;
+    bottom: 0;
+    padding: 0px 0px 5px 20px;
 }
 div.screenpanelcontents {
     width: 100%;
@@ -302,17 +321,24 @@ div.statdiv.nonselect {
 form.statform {
     display: inline-block;
 }
-button.statdiv, button.screenpanelnext {
+button.screenpanelactions {
+    padding: 5px;
+}
+button.statdiv, button.screenpanelnext, button.screenpanelactions {
     background-color: transparent;
     border: none;
     -webkit-transition: 0.2s;
     transition: 0.2s;
 }
-button.statdiv:hover, button.screenpanelnext:hover {
+button.statdiv:hover, button.screenpanelnext:hover, button.screenpanelactions:hover {
     opacity: 0.4;
 }
 img.screenpanelnext {
     vertical-align: middle;
+}
+img.screenpanelactions {
+    height: 36px;
+    width: 36px;
 }
 @media (max-width: 299px) {
 	img.screenpanelnext {
@@ -346,6 +372,7 @@ input[type=text].createscreen, textarea.createscreen {
     font-size: 16px;
     padding: 8px;
     margin: 5px 0px 10px 0px;
+    border-radius: 3px;
 }
 div.switchdiv.createscreen {
     margin-top: 20px;
@@ -399,6 +426,7 @@ input:focus, select:focus, textarea:focus, button:focus {
 }
 button {
     cursor: pointer;
+    border-radius: 3px;
 }
 
 p, h1, h2, h3, a, button, label, li {
