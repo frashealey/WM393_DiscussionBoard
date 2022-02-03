@@ -10,7 +10,7 @@
   <div class="subheader">
     <h1 class="pagetitle"><%=topInfo.top_title%></h1>
     <div class="pagetitlebut">
-    <form class="pagetitlebut" action="/newtopic" method="POST"><button class="pagetitlebut newcontent">New response &#43;</button></form>
+    <form class="pagetitlebut" action="/newresponse?top_id=<%=topInfo.top_id%>" method="POST"><button class="pagetitlebut newcontent">New response &#43;</button></form>
     </div>
   </div>
   <main>
@@ -22,13 +22,18 @@
         <div class="screenpanel">
 
           <div class="screenpanelactions">
-            <form class="screenpanelactions like" action="/likeresponse?res_id=<%=activeRes.res_id%>" method="POST">
-              <button class="screenpanelactions" type="submit"><% if(activeLike.some(like => like.lke_user === user.id && like.lke_res === activeRes.res_id)){ %><img src="/resources/thumbfill.png" class="screenpanelactions"><% } else{ %><img src="/resources/thumbline.png" class="screenpanelactions"><% } %></button>
-            </form>
-            <% if(user.id == activeRes.res_user || (user.utype == "t" && topInfo.dis_owner == user.id)){ %>
-              <form class="screenpanelactions delete" action="/deleteresponse?res_id=<%=activeRes.res_id%>" method="POST">
-                <button class="screenpanelactions" type="submit"><img src="/resources/delete.png" class="screenpanelactions"></button>
+            <div class="screenpanelactsub like">
+              <form action="/likeresponse?res_id=<%=activeRes.res_id%>" method="POST">
+                <button class="screenpanelactions" type="submit"><% if(activeLike.some(like => like.lke_user === user.id && like.lke_res === activeRes.res_id)){ %><img src="/resources/thumbfill.png" class="screenpanelactions"><% } else{ %><img src="/resources/thumbline.png" class="screenpanelactions"><% } %></button>
+                <p class="screenpanelactsub"><%=activeRes.likes%></p>
               </form>
+            </div>
+            <% if(user.id == activeRes.res_user || (user.utype == "t" && topInfo.dis_owner == user.id)){ %>
+              <div class="screenpanelactsub delete">
+                <form action="/deleteresponse?res_id=<%=activeRes.res_id%>" method="POST">
+                  <button class="screenpanelactions" type="submit"><img src="/resources/delete.png" class="screenpanelactions"></button>
+                </form>
+              </div>
             <% } %>
           </div>
   

@@ -264,16 +264,21 @@ div.screenpanel {
     margin: 0px 0px 10px 0px;
 }
 div.screenpanelactions {
-    min-width: 66px;
+    min-width: 54px;
     display: table-cell;
     position: relative;
 }
-form.screenpanelactions.like {
+p.screenpanelactsub {
+    text-align: center;
+    font-size: 14px;
+    padding: 0px 0px 0px 0px;
+}
+div.screenpanelactsub.like {
     position: absolute;
     top: 0;
     padding: 15px 0px 0px 20px;
 }
-form.screenpanelactions.delete {
+div.screenpanelactsub.delete {
     position: absolute;
     bottom: 0;
     padding: 0px 0px 5px 20px;
@@ -322,7 +327,7 @@ form.statform {
     display: inline-block;
 }
 button.screenpanelactions {
-    padding: 5px;
+    padding: 2px;
 }
 button.statdiv, button.screenpanelnext, button.screenpanelactions {
     background-color: transparent;
@@ -337,8 +342,8 @@ img.screenpanelnext {
     vertical-align: middle;
 }
 img.screenpanelactions {
-    height: 36px;
-    width: 36px;
+    height: 30px;
+    width: 30px;
 }
 @media (max-width: 299px) {
 	img.screenpanelnext {

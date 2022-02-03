@@ -313,12 +313,8 @@ server.get("/responses", isLoggedIn, async (req, res) => {
                 res.redirect("/discussions");
             }
             else {
-                const activeRes = await pool1.query(`SELECT res_id, res_user, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, res_top, top_title, top_desc, res_title, res_text, res_datetime, replyto, pinned FROM response INNER JOIN uni_user on res_user=id INNER JOIN topic ON res_top=top_id WHERE res_top=$1 ORDER BY pinned DESC, res_datetime ASC;`, [parseInt(req.query.top_id)]),
+                const activeRes = await pool1.query(`SELECT res_id, res_user, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, res_top, top_title, top_desc, res_title, res_text, res_datetime, replyto, pinned, COUNT(lke_res) AS likes FROM response INNER JOIN uni_user on res_user=id INNER JOIN topic ON res_top=top_id LEFT JOIN liked ON res_id=lke_res WHERE res_top=$1 GROUP BY res_id, id, top_id ORDER BY pinned DESC, res_datetime ASC;`, [parseInt(req.query.top_id)]),
                       activeLike = await pool1.query(`SELECT lke_user, lke_res FROM liked;`);
-                // if user has liked a response
-                if (activeLike.rows.some(like => like.lke_user === "u9999999" && like.lke_res === 5)) {
-                    console.log(activeLike.rows);
-                };
                 res.render("response", { user: req.user, activeRes: activeRes.rows, activeLike: activeLike.rows, topInfo: topInfo.rows[0] });
             };
         }
@@ -331,6 +327,10 @@ server.get("/responses", isLoggedIn, async (req, res) => {
         res.redirect("/discussions");
     };
 });
+
+// like response
+
+// delete response
 
 // new response
 server.post("/newresponse", isLoggedIn, (req, res) => {
@@ -474,7 +474,7 @@ function isTutor(req, res, next) {
     return res.redirect("/discussions");
 };
 
-function isPermittedCreateDelete(queryParam, idParam, redirectParam, archiveFlag) {
+function isPermittedCreateDelete(queryParam, idParam, redirectTo, archiveFlag) {
     return async (req, res, next) => {
         try {
             if (req.query[idParam] && /^[0-9]+$/.test(req.query[idParam])) {
@@ -484,7 +484,7 @@ function isPermittedCreateDelete(queryParam, idParam, redirectParam, archiveFlag
                     return next();
                 }
                 // discussion does not exist, is not owned by user, or is archived (if archiveFlag is true)
-                return res.redirect(redirectParam);
+                return res.redirect(redirectTo);
         
             };
             // redirect if invalid req.query provided (deliberate malform)
@@ -495,6 +495,10 @@ function isPermittedCreateDelete(queryParam, idParam, redirectParam, archiveFlag
             return res.redirect("/discussions");
         };
     };
+};
+
+function isPermittedCreateDeleteRes(stuQuery, stuValues, tutQuery, tutValues, redirectTo, archiveFlag) {
+
 };
 
 server.listen(port);
