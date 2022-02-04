@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%- include("head"); %>
+  </head>
+  <body>
+  <header>
+    <%- include("header"); %>
+  </header>
+  <div class="subheader">
+    <h1 class="pagetitle"><%=topInfo.top_title%></h1>
+  </div>
+  <main>
+    <hr class="pagetitle">
+
+    <div class="screencontent">
+
+      <form action="/createresponse?top_id=<%=topInfo.top_id%>" method="POST">
+        <label class="createscreen" for="res_title">Title:</label>
+        <textarea class="createscreen" rows="2" name="res_title"></textarea>
+
+        <label class="createscreen" for="res_text">Response:</label>
+        <textarea class="createscreen" rows="10" name="res_text"></textarea>
+
+        <%if (typeof(message) != "undefined") { %>
+          <p class="invalid mainscreen"><%=message%></p>
+        <% } %>
+
+        <div class="createbuttoncontainer">
+          <a href="/responses?top_id=<%=topInfo.top_id%>"><button class="createbutton cancel" type="button">&#60; Cancel</button></a>
+          <button class="createbutton create" type="submit">Create &#62;</button>
+        </div>
+      </form>
+
+    </div>
+
+  </main>
+  <footer>
+    <%- include("footer"); %>
+  </footer>
+  </body>
+</html>

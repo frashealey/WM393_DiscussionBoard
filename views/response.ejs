@@ -18,30 +18,64 @@
 
     <div class="screencontent">
 
-      <% activeRes.forEach(function(activeRes) { %>
-        <div class="screenpanel">
+      <% activeRes.forEach(function(activeResp) { %>
+        <% if(activeResp.pinned){ %>
+          <div class="pinlabel">
+            <img src="/resources/pin.png" class="pinlabel">
+            <p class="pinlabel">Pinned by tutor</p>
+          </div>
+          <div class="screenpanel pinned">
+        <% } else{ %>
+          <div class="screenpanel">
+        <% } %>
+        <!-- <div class="screenpanel"> -->
 
           <div class="screenpanelactions">
             <div class="screenpanelactsub like">
-              <form action="/likeresponse?res_id=<%=activeRes.res_id%>" method="POST">
-                <button class="screenpanelactions" type="submit"><% if(activeLike.some(like => like.lke_user === user.id && like.lke_res === activeRes.res_id)){ %><img src="/resources/thumbfill.png" class="screenpanelactions"><% } else{ %><img src="/resources/thumbline.png" class="screenpanelactions"><% } %></button>
-                <p class="screenpanelactsub"><%=activeRes.likes%></p>
+              <form action="/likeresponse?res_id=<%=activeResp.res_id%>" method="POST">
+                <button class="screenpanelactions" type="submit"><% if(activeLike.some(like => like.lke_user === user.id && like.lke_res === activeResp.res_id)){ %><img src="/resources/thumbfill.png" class="screenpanelactions"><% } else{ %><img src="/resources/thumbline.png" class="screenpanelactions"><% } %></button>
+                <p class="screenpanelactsub"><%=activeResp.likes%></p>
               </form>
             </div>
-            <% if(user.id == activeRes.res_user || (user.utype == "t" && topInfo.dis_owner == user.id)){ %>
+            <% if(user.id == activeResp.res_user || (user.utype == "t" && topInfo.dis_owner == user.id)){ %>
               <div class="screenpanelactsub delete">
-                <form action="/deleteresponse?res_id=<%=activeRes.res_id%>" method="POST">
-                  <button class="screenpanelactions" type="submit"><img src="/resources/delete.png" class="screenpanelactions"></button>
+                <form action="/deleteresponse?res_id=<%=activeResp.res_id%>" method="POST">
+                  <button class="screenpanelactions" type="submit" onclick="return deleteConfirm()"><img src="/resources/delete.png" class="screenpanelactions"></button>
                 </form>
               </div>
             <% } %>
           </div>
-  
-          <div class="screenpanelcontents">
-            <h3 class="screenpanel topic"><%=activeRes.res_title%></h3>
 
-            <p class="screenpanel created"><%=activeRes.fname%> <%=activeRes.lname%> responded <%=activeRes.res_datetime.toISOString()%></p>
-            <p class="screenpanel topic"><%=activeRes.res_text%></p>
+          <div class="screenpanelcontents">
+            <!-- <% if(activeResp.pinned){ %><p class="screenpanel created">Pinned</p><% } %> -->
+            <h3 class="screenpanel topic"><%=activeResp.res_title%></h3>
+
+            <p class="screenpanel created"><%=activeResp.fname%> <%=activeResp.lname%> responded <%=activeResp.res_datetime.toISOString()%></p>
+
+            <% if(activeResp.replyto) {%>
+              <div class="replyarea">
+                <p class="screenpanel replytitle"><%=activeRes.find(resp => resp.res_id === activeResp.replyto).fname%> <%=activeRes.find(resp => resp.res_id === activeResp.replyto).lname%> said:</p>
+                <p class="screenpanel reply"><%=activeRes.find(resp => resp.res_id === activeResp.replyto).res_text%></p>
+              </div>
+            <% } %>
+
+            <p class="screenpanel topic"><%=activeResp.res_text%></p>
+
+            <form class="statform reply" action="/newresponse?top_id=<%=topInfo.top_id%>&replyto=<%=activeResp.res_id%>" method="POST">
+              <button class="statdiv" type="submit">
+                <img src="/resources/reply.png" class="staticon">
+                <p class="stattext">Reply</p>
+              </button>
+            </form>
+
+            <% if(user.utype == "t" && topInfo.dis_owner == user.id) {%>
+              <form class="statform pin" action="/pinresponse?res_id=<%=activeResp.res_id%>" method="POST">
+                <button class="statdiv" type="submit">
+                  <img src="/resources/pin.png" class="staticon">
+                  <% if(activeResp.pinned){ %><p class="stattext">Unpin</p><% } else{ %><p class="stattext">Pin</p><% } %>
+                </button>
+              </form>
+            <% } %>
           </div>
 
         </div>
