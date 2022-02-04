@@ -7,6 +7,7 @@ INSERT INTO uni_user (id, pw, fname, lname, email, utype)
 VALUES
     ('u2139948', Crypt('testPass123', gen_salt('md5')), Encrypt('John', 'discussKey192192', 'aes'), Encrypt('Smith', 'discussKey192192', 'aes'), Encrypt('john.smith@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes')),
     ('u9999999', Crypt('testPass123', gen_salt('md5')), Encrypt('Young', 'discussKey192192', 'aes'), Encrypt('Park', 'discussKey192192', 'aes'), Encrypt('y.s.park@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes')),
+    ('u8888888', Crypt('testPass123', gen_salt('md5')), Encrypt('Barry', 'discussKey192192', 'aes'), Encrypt('Scott', 'discussKey192192', 'aes'), Encrypt('barry.scott@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes')),
     ('u1827746', Crypt('testPass123', gen_salt('md5')), Encrypt('Jerry', 'discussKey192192', 'aes'), Encrypt('Seinfeld', 'discussKey192192', 'aes'), Encrypt('jerry.seinfeld@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('s', 'discussKey192192', 'aes')),
     ('u1928899', Crypt('testPass123', gen_salt('md5')), Encrypt('Mitch', 'discussKey192192', 'aes'), Encrypt('Evans', 'discussKey192192', 'aes'), Encrypt('mitch.evans@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('s', 'discussKey192192', 'aes'));
 -- link_user
