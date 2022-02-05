@@ -112,6 +112,22 @@ $$
     END;
 $$ LANGUAGE 'plpgsql';
 CREATE TRIGGER trig_res_perm AFTER INSERT OR UPDATE ON response FOR EACH ROW EXECUTE PROCEDURE func_res_perm();
+-- trigger to prevent replying to a response not in the same topic
+CREATE OR REPLACE FUNCTION func_replyto_valid() RETURNS trigger AS
+$$
+    DECLARE
+        replyto_topic INTEGER;
+    BEGIN
+        replyto_topic = (SELECT res_top FROM response WHERE res_id=NEW.replyto);
+
+        IF (replyto_topic != NEW.res_top)
+            THEN RAISE EXCEPTION 'Replying to post not in topic';
+        ELSE
+            RETURN NEW;
+        END IF;
+    END;
+$$ LANGUAGE 'plpgsql';
+CREATE TRIGGER trig_replyto_valid AFTER INSERT OR UPDATE ON response FOR EACH ROW EXECUTE PROCEDURE func_replyto_valid();
 
 -- liked
 CREATE TABLE liked (

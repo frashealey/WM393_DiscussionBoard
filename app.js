@@ -380,22 +380,10 @@ server.post("/deleteresponse", isLoggedIn, isPermittedResDelete(`SELECT res_id, 
 });
 
 // new response
-// server.post("/newresponse", isLoggedIn, (req, res) => {
-//     if (req.query.replyto) {
-//         // isPermittedResCreateLike(`SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND res_id=$1 AND lnk_stu_id=$2;`, `SELECT res_id from response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1;`, "replyto", "back");
-//         // res.redirect("/newresponse?top_id=" + encodeURIComponent(req.query.top_id) + "&replyto=" + encodeURIComponent(req.query.replyto));
-//     }
-//     else {
-//         res.redirect("/newresponse?top_id=" + encodeURIComponent(req.query.top_id));
-//     };
-// });
-
-// this isPermitted does not work
 server.get("/newreply", isLoggedIn, isPermittedResCreateLike(`SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND res_id=$1 AND lnk_stu_id=$2;`, `SELECT res_id from response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1;`, "replyto", "back"), (req, res) => {
-    res.redirect("newresponse?top_id=" + encodeURIComponent(req.query.top_id) + "&replyto=" + encodeURIComponent(req.query.replyto));
+    res.redirect("/newresponse?top_id=" + encodeURIComponent(req.query.top_id) + "&replyto=" + encodeURIComponent(req.query.replyto));
 });
 server.get("/newresponse", isLoggedIn, isPermittedResCreateLike(`SELECT top_id FROM topic INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND top_id=$1 AND lnk_stu_id=$2;`, `SELECT top_id from topic INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND top_id=$1;`, "top_id", "back"), async (req, res) => {
-    console.log(req.query);
     try {
         const topInfo = await pool1.query(`SELECT top_id, top_dis, top_title, top_desc, top_datetime FROM topic WHERE top_id=$1;`, [req.query.top_id]);
         if (req.query.replyto) {
@@ -410,11 +398,7 @@ server.get("/newresponse", isLoggedIn, isPermittedResCreateLike(`SELECT top_id F
         res.redirect("back");
     };
 });
-// server.post("/createreply", isLoggedIn, isPermittedResCreateLike(`SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND res_id=$1 AND lnk_stu_id=$2;`, `SELECT res_id from response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1;`, "replyto", "back"), (req, res) => {
-//     res.post("/createresponse?top_id=" + encodeURIComponent(req.query.top_id) + "&replyto=" + encodeURIComponent(req.query.replyto));
-// });
 server.post("/createresponse", isLoggedIn, isPermittedResCreateLike(`SELECT top_id FROM topic INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND top_id=$1 AND lnk_stu_id=$2;`, `SELECT top_id from topic INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND top_id=$1;`, "top_id", "back"), async (req, res) => {
-    console.log(req.query);
     let createResponseSuccess = false;
     try {
         const newResponseCreds = {
@@ -426,20 +410,22 @@ server.post("/createresponse", isLoggedIn, isPermittedResCreateLike(`SELECT top_
             req.flash("createResponseError", "Please fill all fields");
         }
         else {
-            // if (req.query.replyto) {
-            //     isPermittedResCreateLike(`SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND res_id=$1 AND lnk_stu_id=$2;`, `SELECT res_id from response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1;`, "replyto", "back");
-            //     await pool1.query(`INSERT INTO response (res_user, res_top, res_title, res_text, replyto) VALUES ($1, $2, $3, $4, $5)`, [req.user.id, parseInt(req.query.top_id), newResponseCreds.res_title, newResponseCreds.res_text, parseInt(req.query.replyto)]);
-            //     createResponseSuccess = true;
-            // }
-            // else {
-            //     await pool1.query(`INSERT INTO response (res_user, res_top, res_title, res_text) VALUES ($1, $2, $3, $4)`, [req.user.id, parseInt(req.query.top_id), newResponseCreds.res_title, newResponseCreds.res_text]);
-            //     createResponseSuccess = true;
-            // };
+            if (req.query.replyto) {
+                await pool1.query(`INSERT INTO response (res_user, res_top, res_title, res_text, replyto) VALUES ($1, $2, $3, $4, $5)`, [req.user.id, parseInt(req.query.top_id), newResponseCreds.res_title, newResponseCreds.res_text, parseInt(req.query.replyto)]);
+                createResponseSuccess = true;
+            }
+            else {
+                await pool1.query(`INSERT INTO response (res_user, res_top, res_title, res_text) VALUES ($1, $2, $3, $4)`, [req.user.id, parseInt(req.query.top_id), newResponseCreds.res_title, newResponseCreds.res_text]);
+                createResponseSuccess = true;
+            };
         };
     }
     catch(e) {
         if (e.code === "22001") {
             req.flash("createResponseError", "Response title/text too long - please limit to 100/2000 characters respectively");
+        }
+        else if (e.code === "P0001") {
+            req.flash("createResponseError", "Replying to response not in topic - please try again");
         }
         else {
             console.log(e);
@@ -619,7 +605,7 @@ function isPermittedTut(queryText, idParam, redirectTo) {
 
 // refactor this to a common function with above
 // async (req, res, next) => { function that uses parameters as opposed to req/etc.? }
-// do a for loop with a list of however many IDs to check
+// do a for loop with a list of however many IDs to check?
 function isPermittedResCreateLike(queryTextStu, queryTextTut, idParam, redirectTo) {
     return async (req, res, next) => {
         try {
@@ -629,15 +615,12 @@ function isPermittedResCreateLike(queryTextStu, queryTextTut, idParam, redirectT
                     const permitQuery = await pool1.query(queryTextTut, [parseInt(req.query[idParam])]);
                     // exists, owned by user/belonging to owner
                     if (permitQuery.rows.length > 0) {
-                        console.log("next");
                         return next();
                     }
                     // does not exist, is not owned by user/belonging to owner
-                    console.log("not permitted");
                     return res.redirect(redirectTo);
                 };
                 // redirect if invalid req.query provided (deliberate malform)
-                console.log("invalid");
                 return res.redirect("/discussions");
             }
             else if (req.user.utype === "s") {
@@ -645,15 +628,12 @@ function isPermittedResCreateLike(queryTextStu, queryTextTut, idParam, redirectT
                     const permitQuery = await pool1.query(queryTextStu, [parseInt(req.query[idParam]), req.user.id]);
                     // exists, owned by user/belonging to owner
                     if (permitQuery.rows.length > 0) {
-                        console.log("next");
                         return next();
                     }
                     // does not exist, is not owned by user/belonging to owner
-                    console.log("not permitted");
                     return res.redirect(redirectTo);
                 };
                 // redirect if invalid req.query provided (deliberate malform)
-                console.log("invalid");
                 return res.redirect("/discussions");
             };
         }
