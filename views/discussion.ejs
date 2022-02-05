@@ -11,8 +11,12 @@
     <h1 class="pagetitle">Discussion boards</h1>
     <% if(user.utype == "t"){ %>
       <div class="pagetitlebut">
-        <form class="pagetitlebut" action="/newdiscussion" method="POST"><button class="pagetitlebut newcontent">New board &#43;</button></form>
-        <form class="pagetitlebut" action="/archive" method="POST"><button class="pagetitlebut archive">Archived boards</button></form>
+        <form class="pagetitlebut" action="/newdiscussion" method="GET">
+          <button class="pagetitlebut newcontent" type="submit">New board &#43;</button>
+        </form>
+        <form class="pagetitlebut" action="/archive" method="GET">
+          <button class="pagetitlebut archive" type="submit">Archived boards</button>
+        </form>
       </div>
     <% } %>
   </div>
@@ -60,8 +64,8 @@
             </div>
           </div>
 
-          <form class="selectnext" action="/topics?dis_id=<%=activeDisc.dis_id%>" method="POST">
-            <button class="screenpanelnext" type="submit"><img src="/resources/next.png" class="screenpanelnext"></button>
+          <form class="selectnext" action="/topics" method="GET">
+            <button class="screenpanelnext" type="submit" name="dis_id" value=<%=activeDisc.dis_id%>><img src="/resources/next.png" class="screenpanelnext"></button>
           </form>
 
         </div>

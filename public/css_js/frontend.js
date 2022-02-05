@@ -27,3 +27,8 @@ function deleteConfirm() {
         return false;
     };
 };
+
+function cancelForm(redirect) {
+    window.location = redirect;
+    return false;
+};

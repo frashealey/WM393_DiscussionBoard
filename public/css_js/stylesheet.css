@@ -24,7 +24,6 @@ footer {
     flex-shrink: 0;
 }
 
-/* changes text highlight colour */
 ::selection {
     background: #886C91;
 }
@@ -280,6 +279,7 @@ div.pinlabel {
     margin: 0px 5px 5px 5px;
 }
 div.screenpanelactions {
+    padding-right: 20px;
     min-width: 54px;
     display: table-cell;
     position: relative;
@@ -318,6 +318,9 @@ h2.screenpanel.discussion {
 h3.screenpanel.topic {
     padding: 20px 20px 10px 20px;
 }
+h3.screenpanel.response {
+    padding: 20px 20px 10px 0px;
+}
 p.screenpanel {
     font-size: 16px;
 }
@@ -325,9 +328,17 @@ p.screenpanel.topic {
     color: #000000;
     padding: 0px 20px 20px 20px;
 }
+p.screenpanel.response {
+    color: #000000;
+    padding: 0px 20px 20px 0px;
+}
 p.screenpanel.created {
     color: #5c5c5c;
     padding: 0px 20px 10px 20px;
+}
+p.screenpanel.createdresponse {
+    color: #5c5c5c;
+    padding: 0px 20px 10px 0px;
 }
 p.screenpanel.reply, p.screenpanel.replytitle {
     padding: 5px 10px 5px 10px;
@@ -351,14 +362,17 @@ div.statdiv, button.statdiv {
     display: inline-block;
     margin: 0px 10px 0px 10px;
 }
+button.statdiv.response {
+    margin: 0px 20px 0px 0px;
+}
 div.statdiv.nonselect {
     cursor: default;
 }
 form.statform {
     display: inline-block;
 }
-form.statform.reply {
-    padding: 0px 10px 10px 10px;
+form.statform.response {
+    padding: 0px 0px 10px 0px;
 }
 button.screenpanelactions {
     padding: 2px;

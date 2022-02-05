@@ -11,7 +11,9 @@
     <h1 class="pagetitle">Archived discussion boards</h1>
     <% if(user.utype == "t"){ %>
       <div class="pagetitlebut">
-        <form class="pagetitlebut" action="/discussions" method="POST"><button class="pagetitlebut archive">Active boards</button></form>
+        <form class="pagetitlebut" action="/discussions" method="GET">
+          <button class="pagetitlebut archive">Active boards</button>
+        </form>
       </div>
     <% } %>
   </div>

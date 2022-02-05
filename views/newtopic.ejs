@@ -27,7 +27,7 @@
         <% } %>
 
         <div class="createbuttoncontainer">
-          <a href="/topics?dis_id=<%=String(dis_id)%>"><button class="createbutton cancel" type="button">&#60; Cancel</button></a>
+          <button class="createbutton cancel" type="button" onclick="return cancelForm('/topics?dis_id=<%=String(dis_id)%>')">&#60; Cancel</button>
           <button class="createbutton create" type="submit">Create &#62;</button>
         </div>
       </form>

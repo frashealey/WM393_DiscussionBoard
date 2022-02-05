@@ -50,9 +50,6 @@ server.use((req, res, next) => {
 server.get("/", isLoggedIn, (req, res) => {
     res.redirect("/discussions");
 });
-server.post("/discussions", isLoggedIn, (req, res) => {
-    res.redirect("/discussions");
-});
 server.get("/discussions", isLoggedIn, async (req, res) => {
     try {
         let activeDisc = [];
@@ -71,9 +68,6 @@ server.get("/discussions", isLoggedIn, async (req, res) => {
 });
 
 // archive
-server.post("/archive", isLoggedIn, (req, res) => {
-    res.redirect("/archive");
-});
 server.get("/archive", isLoggedIn, isTutor, async (req, res) => {
     try {
         const archiveDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE dis_owner=$1 AND archive=true GROUP BY dis_id ORDER BY dis_id DESC;`, [req.user.id]);
@@ -139,9 +133,6 @@ server.post("/deletediscussion", isLoggedIn, isTutor, isPermittedTut(`SELECT dis
 });
 
 // new discussion
-server.post("/newdiscussion", isLoggedIn, (req, res) => {
-    res.redirect("/newdiscussion");
-});
 server.get("/newdiscussion", isLoggedIn, isTutor, (req, res) => {
     res.render("newdiscussion", { user: req.user, message: req.flash("createDiscError") });
 });
@@ -192,9 +183,6 @@ server.post("/creatediscussion", isLoggedIn, isTutor, async (req, res) => {
 });
 
 // topic
-server.post("/topics", isLoggedIn, (req, res) => {
-    res.redirect("/topics?dis_id=" + encodeURIComponent(req.query.dis_id));
-});
 server.get("/topics", isLoggedIn, async (req, res) => {
     try {
         // create middleware to check below
@@ -240,9 +228,6 @@ server.post("/deletetopic", isLoggedIn, isTutor, isPermittedTut(`SELECT dis_id, 
 });
 
 // new topic
-server.post("/newtopic", isLoggedIn, (req, res) => {
-    res.redirect("/newtopic?dis_id=" + encodeURIComponent(req.query.dis_id));
-});
 server.get("/newtopic", isLoggedIn, isTutor, isPermittedTut(`SELECT dis_id, dis_owner, archive FROM discussion WHERE archive=false AND dis_id=$1 AND dis_owner=$2;`, "dis_id", "back"), (req, res) => {
     res.render("newtopic", { user: req.user, dis_id: parseInt(req.query.dis_id), message: req.flash("createTopicError") });
 });
@@ -290,9 +275,6 @@ server.post("/createtopic", isLoggedIn, isTutor, isPermittedTut(`SELECT dis_id, 
 });
 
 // response
-server.post("/responses", isLoggedIn, (req, res) => {
-    res.redirect("/responses?top_id=" + encodeURIComponent(req.query.top_id));
-});
 server.get("/responses", isLoggedIn, async (req, res) => {
     try {
         // create middleware to check below
@@ -398,18 +380,20 @@ server.post("/deleteresponse", isLoggedIn, isPermittedResDelete(`SELECT res_id, 
 });
 
 // new response
-server.post("/newresponse", isLoggedIn, (req, res) => {
-    if (req.query.replyto) {
-        // isPermittedResCreateLike(`SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND res_id=$1 AND lnk_stu_id=$2;`, `SELECT res_id from response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1;`, "replyto", "back");
-        // res.redirect("/newresponse?top_id=" + encodeURIComponent(req.query.top_id) + "&replyto=" + encodeURIComponent(req.query.replyto));
-    }
-    else {
-        res.redirect("/newresponse?top_id=" + encodeURIComponent(req.query.top_id));
-    };
-});
-// server.post("/reply", isLoggedIn, isPermittedResCreateLike(`SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND res_id=$1 AND lnk_stu_id=$2;`, `SELECT res_id from response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1;`, "replyto", "back"), (req, res) => {
-//     res.redirect("/newresponse?top_id=" + encodeURIComponent(req.query.top_id) + "&replyto=" + encodeURIComponent(req.query.replyto));
+// server.post("/newresponse", isLoggedIn, (req, res) => {
+//     if (req.query.replyto) {
+//         // isPermittedResCreateLike(`SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND res_id=$1 AND lnk_stu_id=$2;`, `SELECT res_id from response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1;`, "replyto", "back");
+//         // res.redirect("/newresponse?top_id=" + encodeURIComponent(req.query.top_id) + "&replyto=" + encodeURIComponent(req.query.replyto));
+//     }
+//     else {
+//         res.redirect("/newresponse?top_id=" + encodeURIComponent(req.query.top_id));
+//     };
 // });
+
+// this isPermitted does not work
+server.get("/newreply", isLoggedIn, isPermittedResCreateLike(`SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND res_id=$1 AND lnk_stu_id=$2;`, `SELECT res_id from response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1;`, "replyto", "back"), (req, res) => {
+    res.redirect("newresponse?top_id=" + encodeURIComponent(req.query.top_id) + "&replyto=" + encodeURIComponent(req.query.replyto));
+});
 server.get("/newresponse", isLoggedIn, isPermittedResCreateLike(`SELECT top_id FROM topic INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND top_id=$1 AND lnk_stu_id=$2;`, `SELECT top_id from topic INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND top_id=$1;`, "top_id", "back"), async (req, res) => {
     console.log(req.query);
     try {
@@ -547,8 +531,11 @@ server.post("/logout", (req, res) => {
     res.redirect("/login");
 });
 
-// redirect undefined pages
+// redirect undefined requests
 server.get("*", (req, res) => {
+    res.redirect("/discussions");
+});
+server.post("*", (req, res) => {
     res.redirect("/discussions");
 });
 

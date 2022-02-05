@@ -10,8 +10,10 @@
   <div class="subheader">
     <h1 class="pagetitle"><%=topInfo.top_title%></h1>
     <div class="pagetitlebut">
-    <form class="pagetitlebut" action="/newresponse?top_id=<%=topInfo.top_id%>" method="POST"><button class="pagetitlebut newcontent">New response &#43;</button></form>
-    </div>
+    <form class="pagetitlebut" action="/newresponse" method="GET">
+      <button class="pagetitlebut newcontent" type="submit" name="top_id" value=<%=topInfo.top_id%>>New response &#43;</button>
+    </form>
+  </div>
   </div>
   <main>
     <hr class="pagetitle">
@@ -48,9 +50,9 @@
 
           <div class="screenpanelcontents">
             <!-- <% if(activeResp.pinned){ %><p class="screenpanel created">Pinned</p><% } %> -->
-            <h3 class="screenpanel topic"><%=activeResp.res_title%></h3>
+            <h3 class="screenpanel response"><%=activeResp.res_title%></h3>
 
-            <p class="screenpanel created"><%=activeResp.fname%> <%=activeResp.lname%> responded <%=activeResp.res_datetime.toISOString()%></p>
+            <p class="screenpanel createdresponse"><%=activeResp.fname%> <%=activeResp.lname%> responded <%=activeResp.res_datetime.toISOString()%></p>
 
             <% if(activeResp.replyto) {%>
               <div class="replyarea">
@@ -59,18 +61,26 @@
               </div>
             <% } %>
 
-            <p class="screenpanel topic"><%=activeResp.res_text%></p>
+            <p class="screenpanel response"><%=activeResp.res_text%></p>
 
-            <form class="statform reply" action="/newresponse?top_id=<%=topInfo.top_id%>&replyto=<%=activeResp.res_id%>" method="POST">
+            <!-- <form class="statform reply" action="/newresponse?top_id=<%=topInfo.top_id%>&replyto=<%=activeResp.res_id%>" method="POST">
               <button class="statdiv" type="submit">
+                <img src="/resources/reply.png" class="staticon">
+                <p class="stattext">Reply</p>
+              </button>
+            </form> -->
+            <form class="statform response action="/newresponse" method="GET">
+              <input type="hidden" name="top_id" value=<%=topInfo.top_id%>>
+              <input type="hidden" name="replyto" value=<%=activeResp.res_id%>>
+              <button class="statdiv response" type="submit">
                 <img src="/resources/reply.png" class="staticon">
                 <p class="stattext">Reply</p>
               </button>
             </form>
 
             <% if(user.utype == "t" && topInfo.dis_owner == user.id) {%>
-              <form class="statform pin" action="/pinresponse?res_id=<%=activeResp.res_id%>" method="POST">
-                <button class="statdiv" type="submit">
+              <form class="statform response" action="/pinresponse?res_id=<%=activeResp.res_id%>" method="POST">
+                <button class="statdiv response" type="submit">
                   <img src="/resources/pin.png" class="staticon">
                   <% if(activeResp.pinned){ %><p class="stattext">Unpin</p><% } else{ %><p class="stattext">Pin</p><% } %>
                 </button>
