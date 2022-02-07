@@ -241,7 +241,7 @@ server.post("/createtopic", isLoggedIn, isTutor, isPermittedTut(`SELECT dis_id, 
     try {
         const newTopicCreds = {
             topicname: req.body.topicname,
-            ...(req.body.topicdesc === "" ? { topicdesc: null } : { topicdesc: req.body.topicdesc })
+            topicdesc: (req.body.topicdesc === "" ? null : req.body.topicdesc)
         },
               topicLimit = await pool1.query(`SELECT COUNT(top_id) FROM topic WHERE top_dis=$1;`, [req.query.dis_id]);
 
@@ -331,7 +331,7 @@ server.post("/likeresponse", isLoggedIn, isPermittedStuTut(`SELECT res_id, res_u
 
     try {
         // check if user has/has not liked post
-        const isLiked = await pool1.query(`SELECT lke_user, lke_res FROM liked WHERE lke_user=$1 AND lke_res=$2;`, [req.user.id, req.query.res_id]);
+        const isLiked = await pool1.query(`SELECT lke_user, lke_res FROM liked WHERE lke_user=$1 AND lke_res=$2;`, [req.user.id, parseInt(req.query.res_id)]);
         if (isLiked.rows.length === 0) {
             await pool1.query(`INSERT INTO liked (lke_user, lke_res) VALUES ($1, $2);`, [req.user.id, parseInt(req.query.res_id)]);
         }
@@ -415,12 +415,7 @@ server.get("/newreply", isLoggedIn, isPermittedStuTut(`SELECT res_id, res_user, 
 server.get("/newresponse", isLoggedIn, isPermittedStuTut(`SELECT top_id FROM topic INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND top_id=$1 AND lnk_stu_id=$2;`, `SELECT top_id from topic INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND top_id=$1 AND $2=$2;`, "top_id", "back"), async (req, res) => {
     try {
         const topInfo = await pool1.query(`SELECT top_id, top_dis, top_title, top_desc, top_datetime FROM topic WHERE top_id=$1;`, [req.query.top_id]);
-        if (req.query.replyto) {
-            res.render("newresponse", { user: req.user, topInfo: topInfo.rows[0], replyto: parseInt(req.query.replyto), message: req.flash("createResponseError") });
-        }
-        else {
-            res.render("newresponse", { user: req.user, topInfo: topInfo.rows[0], message: req.flash("createResponseError") });
-        }
+        res.render("newresponse", { user: req.user, topInfo: topInfo.rows[0], replyto: (req.query.replyto ? parseInt(req.query.replyto) : null), message: req.flash("createResponseError") });
     }
     catch(e) {
         console.log(e);
@@ -439,14 +434,8 @@ server.post("/createresponse", isLoggedIn, isPermittedStuTut(`SELECT top_id FROM
             req.flash("createResponseError", "Please fill all fields");
         }
         else {
-            if (req.query.replyto) {
-                await pool1.query(`INSERT INTO response (res_user, res_top, res_title, res_text, replyto) VALUES ($1, $2, $3, $4, $5)`, [req.user.id, parseInt(req.query.top_id), newResponseCreds.res_title, newResponseCreds.res_text, parseInt(req.query.replyto)]);
-                createResponseSuccess = true;
-            }
-            else {
-                await pool1.query(`INSERT INTO response (res_user, res_top, res_title, res_text) VALUES ($1, $2, $3, $4)`, [req.user.id, parseInt(req.query.top_id), newResponseCreds.res_title, newResponseCreds.res_text]);
-                createResponseSuccess = true;
-            };
+            await pool1.query(`INSERT INTO response (res_user, res_top, res_title, res_text, replyto) VALUES ($1, $2, $3, $4, $5)`, [req.user.id, parseInt(req.query.top_id), newResponseCreds.res_title, newResponseCreds.res_text, (req.query.replyto ? parseInt(req.query.replyto) : null)]);
+            createResponseSuccess = true;
         };
     }
     catch(e) {
@@ -501,7 +490,7 @@ server.post("/register", async (req, res) => {
             email: req.body.email,
             pw: req.body.pw,
             confpw: req.body.confpw,
-            ...(Boolean(req.body.utype) ? { utype: "s" } : { utype: "t" })
+            utype: (Boolean(req.body.utype) ? "s" : "t")
         },
               regExists = await pool1.query(`SELECT id, email, pw FROM uni_user WHERE id=$1 OR email=Encrypt($2, 'discussKey192192', 'aes');`, [regCreds.id, regCreds.email]);
 
