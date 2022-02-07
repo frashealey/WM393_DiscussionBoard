@@ -27,7 +27,7 @@
           <div class="screenpanelcontents">
             <h3 class="screenpanel topic"><%=activeTopic.top_title%></h3>
 
-            <p class="screenpanel created"><%=activeTopic.fname%> <%=activeTopic.lname%> created <%=activeTopic.top_datetime.toISOString()%></p>
+            <p class="screenpanel created"><% if(activeTopic.dis_owner == user.id){ %>You<% } else { %><%=activeTopic.fname%> <%=activeTopic.lname%><% } %> created <%=activeTopic.top_datetime.toISOString()%></p>
             <p class="screenpanel topic"><%=activeTopic.top_desc%></p>
 
             <div class="statcontainer">

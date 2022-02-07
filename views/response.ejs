@@ -20,6 +20,10 @@
 
     <div class="screencontent">
 
+      <%if (typeof(message) != "undefined") { %>
+        <p class="invalid mainscreen"><%=message%></p>
+      <% } %>
+
       <% activeRes.forEach(function(activeResp) { %>
         <% if(activeResp.pinned){ %>
           <div class="pinlabel">
@@ -30,7 +34,6 @@
         <% } else{ %>
           <div class="screenpanel">
         <% } %>
-        <!-- <div class="screenpanel"> -->
 
           <div class="screenpanelactions">
             <div class="screenpanelactsub like">
@@ -39,7 +42,7 @@
                 <p class="screenpanelactsub"><%=activeResp.likes%></p>
               </form>
             </div>
-            <% if(user.id == activeResp.res_user || (user.utype == "t" && topInfo.dis_owner == user.id)){ %>
+            <% if(activeResp.res_user == user.id || (user.utype == "t" && topInfo.dis_owner == user.id)){ %>
               <div class="screenpanelactsub delete">
                 <form action="/deleteresponse?res_id=<%=activeResp.res_id%>" method="POST">
                   <button class="screenpanelactions" type="submit" onclick="return deleteConfirm()"><img src="/resources/delete.png" class="screenpanelactions"></button>
@@ -49,10 +52,9 @@
           </div>
 
           <div class="screenpanelcontents">
-            <!-- <% if(activeResp.pinned){ %><p class="screenpanel created">Pinned</p><% } %> -->
             <h3 class="screenpanel response"><%=activeResp.res_title%></h3>
 
-            <p class="screenpanel createdresponse"><%=activeResp.fname%> <%=activeResp.lname%> responded <%=activeResp.res_datetime.toISOString()%></p>
+            <p class="screenpanel createdresponse"><% if(activeResp.res_user == user.id){ %>You<% } else { %><%=activeResp.fname%> <%=activeResp.lname%><% } %> responded <%=activeResp.res_datetime.toISOString()%></p>
 
             <% if(activeResp.replyto) {%>
               <div class="replyarea">
@@ -63,12 +65,6 @@
 
             <p class="screenpanel response"><%=activeResp.res_text%></p>
 
-            <!-- <form class="statform reply" action="/newresponse?top_id=<%=topInfo.top_id%>&replyto=<%=activeResp.res_id%>" method="POST">
-              <button class="statdiv" type="submit">
-                <img src="/resources/reply.png" class="staticon">
-                <p class="stattext">Reply</p>
-              </button>
-            </form> -->
             <form class="statform response" action="/newreply" method="GET">
               <input type="hidden" name="top_id" value=<%=topInfo.top_id%>>
               <input type="hidden" name="replyto" value=<%=activeResp.res_id%>>
