@@ -10,6 +10,13 @@ function textAreaInput() {
     this.style.height = (this.scrollHeight) + "px";
 };
 
+// prevents context menu on images
+const images = document.getElementsByTagName("img");
+for (let i = 0; i < images.length; i++) {
+    images[i].addEventListener("contextmenu", event => event.preventDefault(), false);
+};
+
+// navigation menu open/close
 function navOpen() {
     document.getElementById("navpanel").style.width = "280px";
 };
@@ -18,6 +25,7 @@ function navClose() {
     document.getElementById("navpanel").style.width = "0";
 };
 
+// displays confirmation box when deleting an item
 function deleteConfirm() {
     let confirmBox = confirm("Confirm deletion?");
     if (confirmBox) {
@@ -28,6 +36,7 @@ function deleteConfirm() {
     };
 };
 
+// redirects when user presses cancel on item creation screen
 function cancelForm(redirect) {
     window.location = redirect;
     return false;
