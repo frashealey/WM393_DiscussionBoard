@@ -120,7 +120,7 @@ server.post("/unarchivediscussion", isLoggedIn, isTutor, async (req, res) => {
 });
 
 // delete discussion
-server.post("/deletediscussion", isLoggedIn, isTutor, isPermittedTut(`SELECT dis_id, dis_owner, archive FROM discussion WHERE dis_id=$1 AND dis_owner=$2;`, "dis_id", "/discussions"), async (req, res) => {
+server.post("/deletediscussion", isLoggedIn, isTutor, isPermittedMiddleware(null, `SELECT dis_id, dis_owner, archive FROM discussion WHERE dis_id=$1 AND dis_owner=$2;`, "dis_id", "/discussions", 2), async (req, res) => {
     try {
         await pool1.query(`DELETE FROM discussion WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
     }
@@ -219,7 +219,7 @@ server.get("/topics", isLoggedIn, async (req, res) => {
 });
 
 // delete topic
-server.post("/deletetopic", isLoggedIn, isTutor, isPermittedTut(`SELECT dis_id, dis_owner, archive FROM topic INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND top_id=$1 AND dis_owner=$2;`, "top_id", "back"), async (req, res) => {
+server.post("/deletetopic", isLoggedIn, isTutor, isPermittedMiddleware(null, `SELECT dis_id, dis_owner, archive FROM topic INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND top_id=$1 AND dis_owner=$2;`, "top_id", "back", 2), async (req, res) => {
     try {
         await pool1.query(`DELETE FROM topic WHERE top_id=$1;`, [parseInt(req.query.top_id)]);
     }
@@ -232,10 +232,10 @@ server.post("/deletetopic", isLoggedIn, isTutor, isPermittedTut(`SELECT dis_id, 
 });
 
 // new topic
-server.get("/newtopic", isLoggedIn, isTutor, isPermittedTut(`SELECT dis_id, dis_owner, archive FROM discussion WHERE archive=false AND dis_id=$1 AND dis_owner=$2;`, "dis_id", "back"), (req, res) => {
+server.get("/newtopic", isLoggedIn, isTutor, isPermittedMiddleware(null, `SELECT dis_id, dis_owner, archive FROM discussion WHERE archive=false AND dis_id=$1 AND dis_owner=$2;`, "dis_id", "back", 2), (req, res) => {
     res.render("newtopic", { user: req.user, dis_id: parseInt(req.query.dis_id), message: req.flash("createTopicError") });
 });
-server.post("/createtopic", isLoggedIn, isTutor, isPermittedTut(`SELECT dis_id, dis_owner, archive FROM discussion WHERE archive=false AND dis_id=$1 AND dis_owner=$2;`, "dis_id", "back"), async (req, res) => {
+server.post("/createtopic", isLoggedIn, isTutor, isPermittedMiddleware(null, `SELECT dis_id, dis_owner, archive FROM discussion WHERE archive=false AND dis_id=$1 AND dis_owner=$2;`, "dis_id", "back", 2), async (req, res) => {
     // check that user has <=50 topics
     let createTopicSuccess = false;
     try {
@@ -283,7 +283,7 @@ server.get("/responses", isLoggedIn, async (req, res) => {
     try {
         // create middleware to check below
 
-
+        // topInfo - top_id, top_title, dis_owner
 
 
         if (req.query.top_id && /^[0-9]+$/.test(req.query.top_id)) {
@@ -315,20 +315,7 @@ server.get("/responses", isLoggedIn, async (req, res) => {
 });
 
 // like/unlike response
-server.post("/likeresponse", isLoggedIn, isPermittedStuTut(`SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND res_id=$1 AND lnk_stu_id=$2;`, `SELECT res_id from response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1 AND $2=$2;`, "res_id", "back"), async (req, res) => {
-    // do isPermitted in a single query
-    // returns IDs of students' tutors or ID if tutor
-    // SELECT id FROM uni_user LEFT JOIN link_user ON id=lnk_tut_id WHERE (id='u8888888' AND Encode(Decrypt(utype, 'discussKey192192', 'aes'), 'escape')::CHAR(1)='t') OR (lnk_stu_id='u8888888');
-    // SELECT id, dis_id, top_id, res_id, res_user FROM uni_user LEFT JOIN link_user ON id=lnk_tut_id LEFT JOIN discussion ON id=dis_owner LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE (id='u8888888' AND Encode(Decrypt(utype, 'discussKey192192', 'aes'), 'escape')::CHAR(1)='t') OR (lnk_stu_id='u8888888');
-
-    // gets tutor
-    // SELECT id, res_id, res_user FROM response RIGHT JOIN uni_user ON res_user=id WHERE Encode(Decrypt(utype, 'discussKey192192', 'aes'), 'escape')::CHAR(1)='t';
-    // SELECT id FROM uni_user WHERE Encode(Decrypt(utype, 'discussKey192192', 'aes'), 'escape')::CHAR(1)='t';
-
-    // gets whether student permitted
-    // SELECT lnk_stu_id, res_id, top_id, res_user FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE lnk_stu_id='u1827746';
-
-
+server.post("/likeresponse", isLoggedIn, isPermittedMiddleware(`SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND res_id=$1 AND lnk_stu_id=$2;`, `SELECT res_id from response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1;`, "res_id", "back", 1), async (req, res) => {
     try {
         // check if user has/has not liked post
         const isLiked = await pool1.query(`SELECT lke_user, lke_res FROM liked WHERE lke_user=$1 AND lke_res=$2;`, [req.user.id, parseInt(req.query.res_id)]);
@@ -348,7 +335,7 @@ server.post("/likeresponse", isLoggedIn, isPermittedStuTut(`SELECT res_id, res_u
 });
 
 // pin response
-server.post("/pinresponse", isLoggedIn, isTutor, isPermittedTut(`SELECT res_id, res_top, dis_id, dis_owner, archive FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1 AND dis_owner=$2;`, "res_id", "back"), async (req, res) => {
+server.post("/pinresponse", isLoggedIn, isTutor, isPermittedMiddleware(null, `SELECT res_id, res_top, dis_id, dis_owner, archive FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1 AND dis_owner=$2;`, "res_id", "back", 2), async (req, res) => {
     // creates a client as transactions are needed here
     const client = await pool1.connect();
     try {
@@ -382,7 +369,7 @@ server.post("/pinresponse", isLoggedIn, isTutor, isPermittedTut(`SELECT res_id, 
 });
 
 // delete response
-server.post("/deleteresponse", isLoggedIn, isPermittedStuTut(`SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND res_id=$1 AND lnk_stu_id=$2;`, `SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1 AND dis_owner=$2;`, "res_id", "back"), async (req, res) => {
+server.post("/deleteresponse", isLoggedIn, isPermittedMiddleware(`SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND res_id=$1 AND lnk_stu_id=$2;`, `SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1 AND dis_owner=$2;`, "res_id", "back", 2), async (req, res) => {
     // do isPermitted in a single query
     try {
         const resDatetime = await pool1.query(`SELECT res_id, res_user, res_datetime FROM response WHERE res_id=$1;`, [parseInt(req.query.res_id)]);
@@ -391,7 +378,7 @@ server.post("/deleteresponse", isLoggedIn, isPermittedStuTut(`SELECT res_id, res
             await pool1.query(`DELETE FROM response WHERE res_id=$1;`, [parseInt(req.query.res_id)]);
         }
         else if (req.user.utype === "s") {
-            // checks if > 10 mins (in ms) have passed since response created
+            // checks if >10mins (600000ms) have passed since response created
             if (Date.now() - resDatetime.rows[0].res_datetime.getTime() > 600000) {
                 req.flash("viewResponseError", "10 minute delete window has elapsed - please contact tutor");
             }
@@ -409,10 +396,10 @@ server.post("/deleteresponse", isLoggedIn, isPermittedStuTut(`SELECT res_id, res
 });
 
 // new response
-server.get("/newreply", isLoggedIn, isPermittedStuTut(`SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND res_id=$1 AND lnk_stu_id=$2;`, `SELECT res_id from response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1 AND $2=$2;`, "replyto", "back"), (req, res) => {
+server.get("/newreply", isLoggedIn, isPermittedMiddleware(`SELECT res_id, res_user, top_id, dis_id, dis_owner FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND res_id=$1 AND lnk_stu_id=$2;`, `SELECT res_id from response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1;`, "replyto", "back", 1), (req, res) => {
     res.redirect("/newresponse?top_id=" + encodeURIComponent(req.query.top_id) + "&replyto=" + encodeURIComponent(req.query.replyto));
 });
-server.get("/newresponse", isLoggedIn, isPermittedStuTut(`SELECT top_id FROM topic INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND top_id=$1 AND lnk_stu_id=$2;`, `SELECT top_id from topic INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND top_id=$1 AND $2=$2;`, "top_id", "back"), async (req, res) => {
+server.get("/newresponse", isLoggedIn, isPermittedMiddleware(`SELECT top_id FROM topic INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND top_id=$1 AND lnk_stu_id=$2;`, `SELECT top_id from topic INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND top_id=$1;`, "top_id", "back", 1), async (req, res) => {
     try {
         const topInfo = await pool1.query(`SELECT top_id, top_dis, top_title, top_desc, top_datetime FROM topic WHERE top_id=$1;`, [req.query.top_id]);
         res.render("newresponse", { user: req.user, topInfo: topInfo.rows[0], replyto: (req.query.replyto ? parseInt(req.query.replyto) : null), message: req.flash("createResponseError") });
@@ -422,7 +409,7 @@ server.get("/newresponse", isLoggedIn, isPermittedStuTut(`SELECT top_id FROM top
         res.redirect("back");
     };
 });
-server.post("/createresponse", isLoggedIn, isPermittedStuTut(`SELECT top_id FROM topic INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND top_id=$1 AND lnk_stu_id=$2;`, `SELECT top_id from topic INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND top_id=$1 AND $2=$2;`, "top_id", "back"), async (req, res) => {
+server.post("/createresponse", isLoggedIn, isPermittedMiddleware(`SELECT top_id FROM topic INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND top_id=$1 AND lnk_stu_id=$2;`, `SELECT top_id from topic INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND top_id=$1;`, "top_id", "back", 1), async (req, res) => {
     let createResponseSuccess = false;
     try {
         const newResponseCreds = {
@@ -614,9 +601,8 @@ async function isPermitted(idQuery, queryText, queryValues) {
             }
             // does not exist, is not owned by user/belonging to owner
             return false;
-
         };
-         // redirect if invalid req.query provided (deliberate malform)
+        // redirect if invalid req.query provided (deliberate malform)
         return false;
     }
     catch(e) {
@@ -625,28 +611,33 @@ async function isPermitted(idQuery, queryText, queryValues) {
     };
 };
 
-function isPermittedTut(queryText, idParam, redirectTo) {
+function isPermittedMiddleware(queryTextStu, queryTextTut, idParam, redirectTo, valueLen) {
     return async (req, res, next) => {
-        if (await isPermitted(req.query[idParam], queryText, [parseInt(req.query[idParam]), req.user.id])) {
-            return next();
-        };
-        return res.redirect(redirectTo);
-    };
-};
+        // // calls tutor query if student query is null or user is tutor, calls student query otherwise
+        // if (await isPermitted(req.query[idParam], (queryTextStu === null || (queryTextStu !== null && req.user.utype === "t")) ? queryTextTut : queryTextStu, (valueLen === 2) ? [parseInt(req.query[idParam]), req.user.id] : [parseInt(req.query[idParam])])) {
+        //     return next();
+        // };
+        // return res.redirect(redirectTo);
 
-// refactor queries so not using $2=$2?
-function isPermittedStuTut(queryTextStu, queryTextTut, idParam, redirectTo) {
-    return async (req, res, next) => {
-        if (req.user.utype === "t") {
-            if (await isPermitted(req.query[idParam], queryTextTut, [parseInt(req.query[idParam]), req.user.id])) {
-                return next();
+        try {
+            if(req.query[idParam] && /^[0-9]+$/.test(req.query[idParam])) {
+                const permitQuery = await pool1.query((queryTextStu === null || (queryTextStu !== null && req.user.utype === "t")) ? queryTextTut : queryTextStu,
+                                                      (valueLen === 2) ? [parseInt(req.query[idParam]), req.user.id] : [parseInt(req.query[idParam])]);
+                // exists, owned by user/belonging to owner
+                if (permitQuery.rows.length > 0) {
+                    console.log("next");
+                    return next();
+                }
+                // does not exist, is not owned by user/belonging to owner
+                console.log("not permitted");
+                return res.redirect(redirectTo);
             };
+            // redirect if invalid req.query provided (deliberate malform)
+            console.log("invalid");
             return res.redirect(redirectTo);
         }
-        else if (req.user.utype === "s") {
-            if (await isPermitted(req.query[idParam], queryTextStu, [parseInt(req.query[idParam]), req.user.id])) {
-                return next();
-            };
+        catch(e) {
+            console.log(e);
             return res.redirect(redirectTo);
         };
     };
