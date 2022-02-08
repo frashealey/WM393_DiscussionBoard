@@ -17,7 +17,7 @@
 
       <form action="/creatediscussion" method="POST">
         <label class="createscreen" for="discussionname">Name:</label>
-        <input class="createscreen" type="text" name="discussionname">
+        <textarea class="createscreen" rows="2" name="discussionname"></textarea>
 
         <div class="switchdiv createscreen">
           <label class="switch">
@@ -32,7 +32,7 @@
         <% } %>
 
         <div class="createbuttoncontainer">
-          <a href="/discussions"><button class="createbutton cancel" type="button">&#60; Cancel</button></a>
+          <button class="createbutton cancel" type="button" onclick="return cancelForm('/discussions')">&#60; Cancel</button>
           <button class="createbutton create" type="submit">Create &#62;</button>
         </div>
       </form>

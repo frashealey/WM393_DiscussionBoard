@@ -38,7 +38,7 @@ $$
 
         IF (tutor_type != 't')
             THEN RAISE EXCEPTION 'Tutor user must be type tutor';
-        ELSEIF (student_type != 's')
+        ELSIF (student_type != 's')
             THEN RAISE EXCEPTION 'Student user must be type student';
         END IF;
 
@@ -77,7 +77,7 @@ CREATE TABLE topic (
     top_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     top_dis INTEGER NOT NULL REFERENCES discussion(dis_id) ON DELETE CASCADE,
     top_title VARCHAR(100) NOT NULL,
-    top_desc VARCHAR(200) NOT NULL,
+    top_desc VARCHAR(200),
     top_datetime TIMESTAMP NOT NULL DEFAULT Now()
 );
 
@@ -87,11 +87,47 @@ CREATE TABLE response (
     res_user CHAR(8) NOT NULL REFERENCES uni_user(id),
     res_top INTEGER NOT NULL REFERENCES topic(top_id) ON DELETE CASCADE,
     res_title VARCHAR(100) NOT NULL,
-    res_text VARCHAR(3000) NOT NULL,
+    res_text VARCHAR(2000) NOT NULL,
     res_datetime TIMESTAMP NOT NULL DEFAULT Now(),
     replyto INTEGER REFERENCES response(res_id) ON DELETE SET NULL,
     pinned BOOLEAN NOT NULL DEFAULT false
 );
+-- trigger to prevent students inserting response for a topic from a tutor not linked to them
+CREATE OR REPLACE FUNCTION func_res_perm() RETURNS trigger AS
+$$
+    DECLARE
+        topic_count INTEGER;
+        user_type CHAR(1);
+    BEGIN
+        topic_count = (SELECT COUNT(top_id) FROM topic INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE lnk_stu_id=NEW.res_user AND top_id=NEW.res_top);
+        user_type = (SELECT Encode(Decrypt(utype, 'discussKey192192', 'aes'), 'escape')::CHAR(1) as utype FROM uni_user WHERE id=NEW.res_user);
+
+        IF (user_type = 't')
+            THEN RETURN NEW;
+        ELSIF (topic_count = 0)
+            THEN RAISE EXCEPTION 'Student cannot insert into topic from tutor they do not belong to';
+        ELSE
+            RETURN NEW;
+        END IF;
+    END;
+$$ LANGUAGE 'plpgsql';
+CREATE TRIGGER trig_res_perm AFTER INSERT OR UPDATE ON response FOR EACH ROW EXECUTE PROCEDURE func_res_perm();
+-- trigger to prevent replying to a response not in the same topic
+CREATE OR REPLACE FUNCTION func_replyto_valid() RETURNS trigger AS
+$$
+    DECLARE
+        replyto_topic INTEGER;
+    BEGIN
+        replyto_topic = (SELECT res_top FROM response WHERE res_id=NEW.replyto);
+
+        IF (replyto_topic != NEW.res_top)
+            THEN RAISE EXCEPTION 'Replying to post not in topic';
+        ELSE
+            RETURN NEW;
+        END IF;
+    END;
+$$ LANGUAGE 'plpgsql';
+CREATE TRIGGER trig_replyto_valid AFTER INSERT OR UPDATE ON response FOR EACH ROW EXECUTE PROCEDURE func_replyto_valid();
 
 -- liked
 CREATE TABLE liked (

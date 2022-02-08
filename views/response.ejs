@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%- include("head"); %>
+  </head>
+  <body>
+  <header>
+    <%- include("header"); %>
+  </header>
+  <div class="subheader">
+    <h1 class="pagetitle"><%=topInfo.top_title%></h1>
+    <div class="pagetitlebut">
+    <form class="pagetitlebut" action="/newresponse" method="GET">
+      <button class="pagetitlebut newcontent" type="submit" name="top_id" value=<%=topInfo.top_id%>>New response &#43;</button>
+    </form>
+  </div>
+  </div>
+  <main>
+    <hr class="pagetitle">
+
+    <div class="screencontent">
+
+      <%if (typeof(message) != "undefined") { %>
+        <p class="invalid mainscreen"><%=message%></p>
+      <% } %>
+
+      <% activeRes.forEach(function(activeResp) { %>
+        <% if(activeResp.pinned){ %>
+          <div class="pinlabel">
+            <img src="/resources/pin.png" class="pinlabel">
+            <p class="pinlabel">Pinned by tutor</p>
+          </div>
+          <div class="screenpanel pinned">
+        <% } else{ %>
+          <div class="screenpanel">
+        <% } %>
+
+          <div class="screenpanelactions">
+            <div class="screenpanelactsub like">
+              <form action="/likeresponse?res_id=<%=activeResp.res_id%>" method="POST">
+                <button class="screenpanelactions" type="submit"><% if(activeLike.some(like => like.lke_user === user.id && like.lke_res === activeResp.res_id)){ %><img src="/resources/thumbfill.png" class="screenpanelactions"><% } else{ %><img src="/resources/thumbline.png" class="screenpanelactions"><% } %></button>
+                <p class="screenpanelactsub"><%=activeResp.likes%></p>
+              </form>
+            </div>
+            <% if(activeResp.res_user == user.id || (user.utype == "t" && topInfo.dis_owner == user.id)){ %>
+              <div class="screenpanelactsub delete">
+                <form action="/deleteresponse?res_id=<%=activeResp.res_id%>" method="POST">
+                  <button class="screenpanelactions" type="submit" onclick="return deleteConfirm()"><img src="/resources/delete.png" class="screenpanelactions"></button>
+                </form>
+              </div>
+            <% } %>
+          </div>
+
+          <div class="screenpanelcontents">
+            <h3 class="screenpanel response"><%=activeResp.res_title%></h3>
+
+            <p class="screenpanel createdresponse"><% if(activeResp.res_user == user.id){ %>You<% } else { %><%=activeResp.fname%> <%=activeResp.lname%><% } %> responded <%=activeResp.res_datetime.toISOString()%></p>
+
+            <% if(activeResp.replyto) {%>
+              <div class="replyarea">
+                <p class="screenpanel replytitle"><%=activeRes.find(resp => resp.res_id === activeResp.replyto).fname%> <%=activeRes.find(resp => resp.res_id === activeResp.replyto).lname%> said:</p>
+                <p class="screenpanel reply"><%=activeRes.find(resp => resp.res_id === activeResp.replyto).res_text%></p>
+              </div>
+            <% } %>
+
+            <p class="screenpanel response"><%=activeResp.res_text%></p>
+
+            <form class="statform response" action="/newreply" method="GET">
+              <input type="hidden" name="top_id" value=<%=topInfo.top_id%>>
+              <input type="hidden" name="replyto" value=<%=activeResp.res_id%>>
+              <button class="statdiv response" type="submit">
+                <img src="/resources/reply.png" class="staticon">
+                <p class="stattext">Reply</p>
+              </button>
+            </form>
+
+            <% if(user.utype == "t" && topInfo.dis_owner == user.id) {%>
+              <form class="statform response" action="/pinresponse?res_id=<%=activeResp.res_id%>" method="POST">
+                <button class="statdiv response" type="submit">
+                  <img src="/resources/pin.png" class="staticon">
+                  <% if(activeResp.pinned){ %><p class="stattext">Unpin</p><% } else{ %><p class="stattext">Pin</p><% } %>
+                </button>
+              </form>
+            <% } %>
+          </div>
+
+        </div>
+      <% })%>
+
+    </div>
+
+  </main>
+  <footer>
+    <%- include("footer"); %>
+  </footer>
+  </body>
+</html>

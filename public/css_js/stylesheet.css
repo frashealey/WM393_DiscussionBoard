@@ -24,6 +24,13 @@ footer {
     flex-shrink: 0;
 }
 
+::selection {
+    background: #886C91;
+}
+::-moz-selection {
+    background: #886C91;
+}
+
 .headertext {
     color: #ffffff;
 }
@@ -73,13 +80,18 @@ ul.invalid {
     display: inline-block;
     margin-bottom: 20px;
 }
-input[type=text], input[type=password] {
+input[type=text], input[type=password], textarea {
     font-family: "Lato", Arial, sans-serif;
-    font-size: 18px;
-    padding: 5px;
     display: block;
     box-sizing: border-box;
     width: 100%;
+}
+input[type=text].loginput, input[type=password].loginput {
+    font-size: 18px;
+    padding: 8px;
+    border: none;
+    border-radius: 3px;
+    margin-top: 3px;
 }
 label.logincontent {
     display: block;
@@ -199,6 +211,7 @@ div.subheader {
 h1.pagetitle {
     color: #000000;
     margin: 20px 30px 0px 30px;
+    font-size: 28px;
     font-weight: normal;
     display: inline-block;
 }
@@ -207,12 +220,12 @@ div.pagetitlebut {
     margin: 15px 30px 0px 30px;
 }
 form.pagetitlebut {
-    display: inline-block;
+    float: right;
 }
 button.pagetitlebut, button.createbutton {
     border: none;
-    font-size: 20px;
-    padding: 5px 10px 5px 10px;
+    font-size: 18px;
+    padding: 6px 10px 6px 10px;
     min-width: 180px;
     -webkit-transition: 0.2s;
     transition: 0.2s;
@@ -225,19 +238,19 @@ button.pagetitlebut.archive, button.createbutton.cancel {
     background-color: #262626;
 }
 button.pagetitlebut.archive {
-    margin: 5px 10px 0px 0px;
+    margin: 5px 0px 0px 0px;
 }
 button.pagetitlebut.archive:hover, button.createbutton.cancel:hover {
     background-color: #999999;
 }
-button.pagetitlebut.newboard, button.createbutton.create {
+button.pagetitlebut.newcontent, button.createbutton.create {
     color: #ffffff;
     background-color: #552D62;
 }
-button.pagetitlebut.newboard {
-    margin: 5px 0px 0px 0px;
+button.pagetitlebut.newcontent {
+    margin: 5px 0px 0px 10px;
 }
-button.pagetitlebut.newboard:hover, button.createbutton.create:hover {
+button.pagetitlebut.newcontent:hover, button.createbutton.create:hover {
     background-color: #886C91;
 }
 
@@ -249,18 +262,99 @@ hr.pagetitle {
 }
 
 div.screencontent {
-    margin: 10px 40px 10px 40px;
+    margin: 20px 40px 10px 40px;
 }
-div.discusspanel {
+div.screenpanel, div.screenpanel.pinned {
     background-color: #ffffff;
     border: 1px solid #262626;
+    border-radius: 3px;
+}
+div.screenpanel {
     margin: 0px 0px 10px 0px;
 }
-h2.discusspanel.text {
+div.screenpanel.pinned {
+    margin: 0px 0px 30px 0px;
+}
+div.pinlabel {
+    margin: 0px 5px 5px 5px;
+}
+div.screenpanelactions {
+    padding-right: 20px;
+    min-width: 54px;
+    display: table-cell;
+    position: relative;
+}
+p.screenpanelactsub {
+    text-align: center;
+    font-size: 14px;
+    padding: 0px 0px 0px 0px;
+}
+div.screenpanelactsub.like {
+    position: absolute;
+    top: 0;
+    padding: 15px 0px 0px 20px;
+}
+div.screenpanelactsub.delete {
+    position: absolute;
+    bottom: 0;
+    padding: 0px 0px 5px 20px;
+}
+div.screenpanelcontents {
+    width: 100%;
+    display: table-cell;
+}
+form.selectnext {
+    display: table-cell;
+    vertical-align: middle;
+}
+h2.screenpanel, h3.screenpanel {
     color: #000000;
     font-weight: normal;
+}
+h2.screenpanel.discussion {
+    font-size: 22px;
     padding: 20px 20px 20px 20px;
 }
+h3.screenpanel.topic {
+    padding: 20px 20px 10px 20px;
+}
+h3.screenpanel.response {
+    padding: 20px 20px 10px 0px;
+}
+p.screenpanel {
+    font-size: 16px;
+}
+p.screenpanel.topic {
+    color: #000000;
+    padding: 0px 20px 20px 20px;
+}
+p.screenpanel.response {
+    color: #000000;
+    padding: 0px 20px 20px 0px;
+}
+p.screenpanel.created {
+    color: #5c5c5c;
+    padding: 0px 20px 10px 20px;
+}
+p.screenpanel.createdresponse {
+    color: #5c5c5c;
+    padding: 0px 20px 10px 0px;
+}
+p.screenpanel.reply, p.screenpanel.replytitle {
+    padding: 5px 10px 5px 10px;
+}
+p.screenpanel.reply {
+    color: #000000;
+}
+p.screenpanel.replytitle {
+    color: #552D62;
+}
+div.replyarea {
+    margin: 0px 20px 10px 0px;
+    background-color: #cccccc;
+    border-left: 5px solid #552D62;
+}
+
 div.statcontainer {
     margin: 0px 10px 10px 10px;
 }
@@ -268,15 +362,48 @@ div.statdiv, button.statdiv {
     display: inline-block;
     margin: 0px 10px 0px 10px;
 }
+button.statdiv.response {
+    margin: 0px 20px 0px 0px;
+}
 div.statdiv.nonselect {
     cursor: default;
 }
 form.statform {
     display: inline-block;
 }
-button.statdiv {
-    background-color: #ffffff;
+form.statform.response {
+    padding: 0px 0px 10px 0px;
+}
+button.screenpanelactions {
+    padding: 2px;
+}
+button.statdiv, button.screenpanelnext, button.screenpanelactions {
+    background-color: transparent;
     border: none;
+    -webkit-transition: 0.2s;
+    transition: 0.2s;
+}
+button.statdiv:hover, button.screenpanelnext:hover, button.screenpanelactions:hover {
+    opacity: 0.4;
+}
+img.screenpanelnext {
+    vertical-align: middle;
+}
+img.screenpanelactions {
+    height: 30px;
+    width: 30px;
+}
+@media (max-width: 299px) {
+	img.screenpanelnext {
+        width: 45px;
+        height: 45px;
+	}
+}
+@media (min-width: 300px) {
+	img.screenpanelnext {
+        width: 60px;
+        height: 60px;
+	}
 }
 p.stattext {
     color: #000000;
@@ -284,24 +411,37 @@ p.stattext {
     display: inline;
     vertical-align: top;
 }
-img.staticon {
+img.staticon, img.pinlabel {
     display: inline;
     height: 24px;
     width: 24px;
+}
+p.pinlabel {
+    display: inline;
+    font-size: 16px;
+    color: #000000;
+    vertical-align: top;
 }
 
 label.createscreen, p.switchtext.right.createscreen {
     font-size: 18px;
     color: #000000;
 }
-input.createscreen[type=text] {
-    margin-top: 5px;
+input[type=text].createscreen, textarea.createscreen {
+    font-size: 16px;
+    padding: 8px;
+    margin: 5px 0px 10px 0px;
+    border-radius: 3px;
 }
 div.switchdiv.createscreen {
     margin-top: 20px;
 }
 div.createbuttoncontainer {
     margin: 35px 0px 0px 0px;
+}
+
+textarea {
+    resize: none;
 }
 
 #logout {
@@ -326,8 +466,8 @@ button.loginbutton {
     color: #ffffff;
     background-color: #262626;
     border: none;
-    font-size: 20px;
-    padding: 5px;
+    font-size: 18px;
+    padding: 8px;
     margin: 10px 0px 20px 0px;
     width: 100%;
     -webkit-transition: 0.2s;
@@ -345,10 +485,19 @@ input:focus, select:focus, textarea:focus, button:focus {
 }
 button {
     cursor: pointer;
+    border-radius: 3px;
 }
 
-p, h1, h2, a, button, label, li {
+p, h1, h2, h3, a, button, label, li {
     font-family: "Lato", Arial, sans-serif;
+}
+p {
+    -ms-word-break: break-all;
+    word-break: break-all;
+    word-break: break-word;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    hyphens: auto;
 }
 p.footertext, a.footerlink {
     color: #ffffff;
