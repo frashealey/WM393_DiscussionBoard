@@ -212,14 +212,14 @@ server.post("/createtopic", isLoggedIn, isTutor, isPermitted(null, `SELECT dis_i
     let createTopicSuccess = false;
     try {
         const newTopicCreds = {
-            topicname: req.body.topicname,
+            topictitle: req.body.topictitle,
             topicdesc: (req.body.topicdesc === "" ? null : req.body.topicdesc)
         },
               topicLimit = await pool1.query(`SELECT COUNT(top_id) FROM topic WHERE top_dis=$1;`, [req.query.dis_id]);
 
         // ensure fields filled (topic desc. is not mandatory)
-        if (!newTopicCreds.topicname) {
-            req.flash("createTopicError", "Please fill topic name field");
+        if (!newTopicCreds.topictitle) {
+            req.flash("createTopicError", "Please fill topic title field");
         }
         // ensure discussion board is within 50 topics limit
         else if (parseInt(topicLimit.rows[0].count) >= 50) {
@@ -227,14 +227,14 @@ server.post("/createtopic", isLoggedIn, isTutor, isPermitted(null, `SELECT dis_i
         }
         else {
             // top_datetime default is Now()
-            await pool1.query(`INSERT INTO topic (top_dis, top_title, top_desc) VALUES ($1, $2, $3)`, [parseInt(req.query.dis_id), newTopicCreds.topicname, newTopicCreds.topicdesc]);
+            await pool1.query(`INSERT INTO topic (top_dis, top_title, top_desc) VALUES ($1, $2, $3)`, [parseInt(req.query.dis_id), newTopicCreds.topictitle, newTopicCreds.topicdesc]);
             createTopicSuccess = true;
         };
     }
     catch(e) {
         // exceeds VARCHAR(100)/VARCHAR(200)
         if (e.code === "22001") {
-            req.flash("createTopicError", "Topic name/description too long - please limit to 100/200 characters respectively");
+            req.flash("createTopicError", "Topic title/description too long - please limit to 100/200 characters respectively");
         }
         else {
             console.log(e);
