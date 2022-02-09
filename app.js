@@ -77,7 +77,7 @@ server.get("/archive", isLoggedIn, isTutor, async (req, res) => {
 // archive discussion
 server.post("/archivediscussion", isLoggedIn, isTutor, async (req, res) => {
     try {
-        // check that user has <=50 archived boards
+        // check that user is with 50 archived boards limit
         const archiveLimit = await pool1.query(`SELECT COUNT(dis_id) FROM discussion WHERE dis_owner=$1 AND archive=true;`, [req.user.id]);
         if (parseInt(archiveLimit.rows[0].count) < 50) {
             await pool1.query(`UPDATE discussion SET archive=true WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
@@ -149,7 +149,7 @@ server.post("/creatediscussion", isLoggedIn, isTutor, async (req, res) => {
         else if (!newDiscCreds.createasarchived && parseInt(activeLimit.rows[0].count) > 0) {
             req.flash("createDiscError", "A discussion board is already active - please archive or delete it to create another");
         }
-        // ensure user has <=50 archived boards
+        // ensure user is within 50 archived boards limit
         else if (newDiscCreds.createasarchived && parseInt(archiveLimit.rows[0].count) >= 50) {
             req.flash("createDiscError", "Archived discussion limit reached - please delete archived discussion boards to create more");
         }
@@ -221,7 +221,7 @@ server.post("/createtopic", isLoggedIn, isTutor, isPermitted(null, `SELECT dis_i
         if (!newTopicCreds.topicname) {
             req.flash("createTopicError", "Please fill topic name field");
         }
-        // ensure discussion board has <=50 topics
+        // ensure discussion board is within 50 topics limit
         else if (parseInt(topicLimit.rows[0].count) >= 50) {
             req.flash("createTopicError", "Topic limit reached - please delete topics to create more");
         }
