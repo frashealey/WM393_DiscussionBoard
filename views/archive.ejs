@@ -49,6 +49,13 @@
                 </button>
               </form>
 
+              <form class="statform" action="/editdiscussion" method="GET">
+                <button class="statdiv" type="submit" name="dis_id" value=<%=archiveDisc.dis_id%>>
+                  <img src="/resources/edit.png" class="staticon">
+                  <p class="stattext">Edit</p>
+                </button>
+              </form>
+
               <form class="statform" action="/deletediscussion?dis_id=<%=archiveDisc.dis_id%>" method="POST">
                 <button class="statdiv" type="submit" onclick="return deleteConfirm()">
                   <img src="/resources/delete.png" class="staticon">

@@ -53,6 +53,13 @@
                   </button>
                 </form>
 
+                <form class="statform" action="/editdiscussion" method="GET">
+                  <button class="statdiv" type="submit" name="dis_id" value=<%=activeDisc.dis_id%>>
+                    <img src="/resources/edit.png" class="staticon">
+                    <p class="stattext">Edit</p>
+                  </button>
+                </form>
+
                 <form class="statform" action="/deletediscussion?dis_id=<%=activeDisc.dis_id%>" method="POST">
                   <button class="statdiv" type="submit" onclick="return deleteConfirm()">
                     <img src="/resources/delete.png" class="staticon">
@@ -65,7 +72,7 @@
           </div>
 
           <form class="selectnext" action="/topics" method="GET">
-            <button class="screenpanelnext" type="submit" name="dis_id" value=<%=activeDisc.dis_id%>><img src="/resources/next.png" class="screenpanelnext"></button>
+            <button class="screenpanelnext" type="submit" name="dis_id" value=<%=activeDisc.dis_id%>><img src="/resources/next.png"></button>
           </form>
 
         </div>

@@ -124,6 +124,51 @@ server.post("/deletediscussion", isLoggedIn, isTutor, isPermitted(null, `SELECT 
     };
 });
 
+// edit discussion
+server.get("/editdiscussion", isLoggedIn, isTutor, isPermitted(null, `SELECT dis_id, dis_owner, archive FROM discussion WHERE dis_id=$1 AND dis_owner=$2;`, "dis_id", "/discussions", 2), async (req, res) => {
+    try {
+        const editDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title FROM discussion WHERE dis_id=$1`, [req.query.dis_id]);
+        res.render("editdiscussion", { user: req.user, editDisc: editDisc.rows[0], message: req.flash("editDiscError") });
+    }
+    catch(e) {
+        console.log(e);
+        res.redirect("/discussions");
+    };
+});
+server.post("/editdiscussion", isLoggedIn, isTutor, isPermitted(null, `SELECT dis_id, dis_owner, archive FROM discussion WHERE dis_id=$1 AND dis_owner=$2;`, "dis_id", "/discussions", 2), async (req, res) => {
+    let editDiscSuccess = false;
+    try {
+        let newName = req.body.discussionname
+
+        // ensure fields filled
+        if (!newName) {
+            req.flash("editDiscError", "Please fill all fields");
+        }
+        else {
+            await pool1.query(`UPDATE discussion SET dis_title=$1 WHERE dis_id=$2;`, [newName, parseInt(req.query.dis_id)]);
+            editDiscSuccess = true;
+        };
+    }
+    catch(e) {
+        // exceeds VARCHAR(50)
+        if (e.code === "22001") {
+            req.flash("editDiscError", "Discussion board name too long - please limit to 50 characters");
+        }
+        else {
+            console.log(e);
+            req.flash("editDiscError", "Unknown error - please try again");
+        };
+    }
+    finally {
+        if (editDiscSuccess) {
+            res.redirect("/discussions");
+        }
+        else if (!editDiscSuccess) {
+            res.redirect("/editdiscussion?dis_id=" + encodeURIComponent(req.query.dis_id));
+        };
+    };
+});
+
 // new discussion
 server.get("/newdiscussion", isLoggedIn, isTutor, (req, res) => {
     res.render("newdiscussion", { user: req.user, message: req.flash("createDiscError") });

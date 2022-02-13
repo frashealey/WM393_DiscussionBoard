@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%- include("head"); %>
+  </head>
+  <body>
+  <header>
+    <%- include("header"); %>
+  </header>
+  <div class="subheader">
+    <h1 class="pagetitle">Edit discussion board</h1>
+  </div>
+  <main>
+    <hr class="pagetitle">
+
+    <div class="screencontent">
+
+      <form action="/editdiscussion?dis_id=<%=editDisc.dis_id%>" method="POST">
+        <label class="createscreen" for="discussionname">Name:</label>
+        <textarea class="createscreen" rows="2" name="discussionname"><%=editDisc.dis_title%></textarea>
+
+        <%if (typeof(message) != "undefined") { %>
+          <p class="invalid mainscreen"><%=message%></p>
+        <% } %>
+
+        <div class="createbuttoncontainer">
+          <button class="createbutton cancel" type="button" onclick="return cancelForm('/discussions')">&#60; Cancel</button>
+          <button class="createbutton create" type="submit">Submit &#62;</button>
+        </div>
+      </form>
+
+    </div>
+
+  </main>
+  <footer>
+    <%- include("footer"); %>
+  </footer>
+  </body>
+</html>
