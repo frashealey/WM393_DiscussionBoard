@@ -272,6 +272,7 @@ server.post("/edittopic", isLoggedIn, isTutor, isPermitted(null, `SELECT dis_id,
         if (!editTopicCreds.topictitle) {
             req.flash("editTopicError", "Please fill topic title fields");
         }
+        // ensure topic is within the correct discussion
         else if (editTopicExist.rows.length === 0) {
             req.flash("editTopicError", "Editing topic not in the same discussion - please try again");
         }
