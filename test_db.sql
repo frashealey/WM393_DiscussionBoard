@@ -2,7 +2,7 @@
 -- (please first initialise the database using db.sql)
 -- developed by 1928864
 
--- unit test 1 - verifying uni_user constraints Encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'aes')
+-- unit test 1 - verifying uni_user constraints
 -- 1.1 - null id
 INSERT INTO uni_user (id, pw, fname, lname, email, utype) VALUES (NULL, Crypt('testPass123', gen_salt('md5')), Encrypt('George', 'discussKey192192', 'aes'), Encrypt('Jones', 'discussKey192192', 'aes'), Encrypt('george.jones@warwick.ac.uk', 'discussKey192192', 'aes'), Encrypt('t', 'discussKey192192', 'aes'));
 -- 1.2 - invalid id
