@@ -40,4 +40,5 @@ node app.js
 ```
 - The application can then be accessed in your browser at: http://localhost:3000/
 
+# <img src="public/resources/warwicklogo.png" width="68" height="34">
 ##### © 2021-2022 Fras Healey | Developed by Fras Healey (1928864)
