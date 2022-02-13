@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%- include("head"); %>
+  </head>
+  <body>
+  <header>
+    <%- include("header"); %>
+  </header>
+  <div class="subheader">
+    <h1 class="pagetitle">Edit topic</h1>
+  </div>
+  <main>
+    <hr class="pagetitle">
+
+    <div class="screencontent">
+
+      <form action="/edittopic?top_id=<%=editTopic.top_id%>&top_dis=<%=editTopic.top_dis%>" method="POST">
+        <label class="createscreen" for="topictitle">Title:</label>
+        <textarea class="createscreen" rows="2" name="topictitle"><%=editTopic.top_title%></textarea>
+
+        <label class="createscreen" for="topicdesc">Description:</label>
+        <textarea class="createscreen" rows="5" name="topicdesc"><%=editTopic.top_desc%></textarea>
+
+        <%if (typeof(message) != "undefined") { %>
+          <p class="invalid mainscreen"><%=message%></p>
+        <% } %>
+
+        <div class="createbuttoncontainer">
+          <button class="createbutton cancel" type="button" onclick="return cancelForm('/topics?dis_id=<%=editTopic.top_dis%>')">&#60; Cancel</button>
+          <button class="createbutton create" type="submit">Submit &#62;</button>
+        </div>
+      </form>
+
+    </div>
+
+  </main>
+  <footer>
+    <%- include("footer"); %>
+  </footer>
+  </body>
+</html>

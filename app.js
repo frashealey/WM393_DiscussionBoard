@@ -124,6 +124,51 @@ server.post("/deletediscussion", isLoggedIn, isTutor, isPermitted(null, `SELECT 
     };
 });
 
+// edit discussion
+server.get("/editdiscussion", isLoggedIn, isTutor, isPermitted(null, `SELECT dis_id, dis_owner, archive FROM discussion WHERE dis_id=$1 AND dis_owner=$2;`, "dis_id", "/discussions", 2), async (req, res) => {
+    try {
+        const editDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title FROM discussion WHERE dis_id=$1`, [req.query.dis_id]);
+        res.render("editdiscussion", { user: req.user, editDisc: editDisc.rows[0], message: req.flash("editDiscError") });
+    }
+    catch(e) {
+        console.log(e);
+        res.redirect("/discussions");
+    };
+});
+server.post("/editdiscussion", isLoggedIn, isTutor, isPermitted(null, `SELECT dis_id, dis_owner, archive FROM discussion WHERE dis_id=$1 AND dis_owner=$2;`, "dis_id", "/discussions", 2), async (req, res) => {
+    let editDiscSuccess = false;
+    try {
+        const newName = req.body.discussionname;
+
+        // ensure fields filled
+        if (!newName) {
+            req.flash("editDiscError", "Please fill all fields");
+        }
+        else {
+            await pool1.query(`UPDATE discussion SET dis_title=$1 WHERE dis_id=$2;`, [newName, parseInt(req.query.dis_id)]);
+            editDiscSuccess = true;
+        };
+    }
+    catch(e) {
+        // exceeds VARCHAR(50)
+        if (e.code === "22001") {
+            req.flash("editDiscError", "Discussion board name too long - please limit to 50 characters");
+        }
+        else {
+            console.log(e);
+            req.flash("editDiscError", "Unknown error - please try again");
+        };
+    }
+    finally {
+        if (editDiscSuccess) {
+            res.redirect("/discussions");
+        }
+        else if (!editDiscSuccess) {
+            res.redirect("/editdiscussion?dis_id=" + encodeURIComponent(req.query.dis_id));
+        };
+    };
+});
+
 // new discussion
 server.get("/newdiscussion", isLoggedIn, isTutor, (req, res) => {
     res.render("newdiscussion", { user: req.user, message: req.flash("createDiscError") });
@@ -200,6 +245,59 @@ server.post("/deletetopic", isLoggedIn, isTutor, isPermitted(null, `SELECT dis_i
     }
     finally {
         res.redirect("back");
+    };
+});
+
+// edit topic
+server.get("/edittopic", isLoggedIn, isTutor, isPermitted(null, `SELECT dis_id, dis_owner, archive FROM topic INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND top_id=$1 AND dis_owner=$2;`, "top_id", "back", 2), async (req, res) => {
+    try {
+        const editTopic = await pool1.query(`SELECT top_id, top_dis, top_title, top_desc FROM topic WHERE top_id=$1`, [req.query.top_id]);
+        res.render("edittopic", { user: req.user, editTopic: editTopic.rows[0], message: req.flash("editTopicError") });
+    }
+    catch(e) {
+        console.log(e);
+        res.redirect("back");
+    };
+});
+server.post("/edittopic", isLoggedIn, isTutor, isPermitted(null, `SELECT dis_id, dis_owner, archive FROM topic INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND top_id=$1 AND dis_owner=$2;`, "top_id", "/discussions", 2), async (req, res) => {
+    let editTopicSuccess = false;
+    try {
+        const editTopicCreds = {
+            topictitle: req.body.topictitle,
+            topicdesc: (req.body.topicdesc === "" ? null : req.body.topicdesc)
+        },
+              editTopicExist = await pool1.query(`SELECT top_id, dis_id FROM topic INNER JOIN discussion ON top_dis=dis_id WHERE top_id=$1 AND dis_id=$2;`, [parseInt(req.query.top_id), parseInt(req.query.top_dis)]);
+
+        // ensure fields filled (topic desc. is not mandatory)
+        if (!editTopicCreds.topictitle) {
+            req.flash("editTopicError", "Please fill topic title fields");
+        }
+        // ensure topic is within the correct discussion
+        else if (editTopicExist.rows.length === 0) {
+            req.flash("editTopicError", "Editing topic not in the same discussion - please try again");
+        }
+        else {
+            await pool1.query(`UPDATE topic SET top_title=$1, top_desc=$2 WHERE top_id=$3;`, [editTopicCreds.topictitle, editTopicCreds.topicdesc, parseInt(req.query.top_id)]);
+            editTopicSuccess = true;
+        };
+    }
+    catch(e) {
+        // exceeds VARCHAR(100)/VARCHAR(200)
+        if (e.code === "22001") {
+            req.flash("editTopicError", "Topic title/description too long - please limit to 100/200 characters respectively");
+        }
+        else {
+            console.log(e);
+            req.flash("editTopicError", "Unknown error - please try again");
+        };
+    }
+    finally {
+        if (editTopicSuccess) {
+            res.redirect("/topics?dis_id=" + encodeURIComponent(req.query.top_dis));
+        }
+        else if (!editTopicSuccess) {
+            res.redirect("/edittopic?top_id=" + encodeURIComponent(req.query.top_id) + "&top_dis=" + encodeURIComponent(req.query.top_dis));
+        };
     };
 });
 
