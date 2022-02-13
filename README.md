@@ -1,5 +1,7 @@
 # WMGTSS Discussion Board - 1928864
 
+### Accessing online
+
 The discussion board application can be accessed online at: https://discussion1928864.herokuapp.com/
 
 Please use the pre-created (Young Park) user login:
@@ -8,6 +10,7 @@ ID: u9999999
 
 Password: testPass123
 
+### Hosting locally
 
 Alternatively, if you would like to host the application locally, please follow the instructions below.
 
