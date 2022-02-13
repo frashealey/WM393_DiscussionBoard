@@ -1,9 +1,13 @@
 # WMGTSS Discussion Board - 1928864
 
 The discussion board application can be accessed online at: https://discussion1928864.herokuapp.com/
+
 Please use the pre-created (Young Park) user login:
+
 ID: u9999999
+
 Password: testPass123
+
 
 Alternatively, if you would like to host the application locally, please follow the instructions below.
 
@@ -14,7 +18,7 @@ Alternatively, if you would like to host the application locally, please follow 
 ```console
 git clone https://github.com/frashealey/WM393_DiscussionBoard.git
 ```
-- Install all NodeJS dependencies (if node-modules not already present) by navigating to the project directory and running in the terminal:
+- Install all NodeJS dependencies in package.json (if node-modules not already present) by navigating to the project directory and running in the terminal:
 ```console
 npm install
 ```
@@ -24,7 +28,7 @@ npm install
 - (Optional) paste the contents of [db/exampledata_db.sql](https://github.com/frashealey/WM393_DiscussionBoard/blob/master/db/exampledata_db.sql) to terminal
 
 #### Testing
-- The PostgreSQL database can be tested by logging into PostgreSQL and pasting the contents of [db/test_db.sql](https://github.com/frashealey/WM393_DiscussionBoard/blob/master/db/test_db.sql)
+- The PostgreSQL database can be tested by logging into PostgreSQL and pasting the contents of [test_db.sql](https://github.com/frashealey/WM393_DiscussionBoard/blob/master/db/test_db.sql)
 - The NodeJS application can be tested by navigating to the project directory and running in the terminal:
 ```console
 npm run test
@@ -37,5 +41,7 @@ node app.js
 ```
 - The application can then be accessed in your browser at: http://localhost:3000/
 
+
+
 # <img src="public/resources/warwicklogo.png" width="68" height="34">
-##### © 2021-2022 Fras Healey | Developed by Fras Healey (1928864) | fras.healey@warwick.ac.uk
+##### © 2021-2022 Fras Healey | Developed by Fras Healey (1928864)
