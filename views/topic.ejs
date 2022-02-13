@@ -37,6 +37,13 @@
               </div>
 
               <% if(user.utype == "t" && activeTopic.dis_owner == user.id){ %>
+                <form class="statform" action="/edittopic" method="GET">
+                  <button class="statdiv" type="submit" name="top_id" value=<%=activeTopic.top_id%>>
+                    <img src="/resources/edit.png" class="staticon">
+                    <p class="stattext">Edit</p>
+                  </button>
+                </form>
+
                 <form class="statform" action="/deletetopic?top_id=<%=activeTopic.top_id%>" method="POST">
                   <button class="statdiv" type="submit" onclick="return deleteConfirm()">
                     <img src="/resources/delete.png" class="staticon">
