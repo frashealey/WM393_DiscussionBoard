@@ -4,7 +4,10 @@ const { execPath } = require("process"),
       bodyParser = require("body-parser"),
       path = require("path"),
       { Pool } = require("pg"),
-      pool1 = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { require: true, rejectUnauthorized: false } } || { host: "localhost", port: 5432, user: "postgres", password: "postgres192", database: "discussionboard" , ssl: { require: true, rejectUnauthorized: false }}),
+      pool1 = new Pool((process.env.DATABASE_URL) ?
+                       { connectionString: process.env.DATABASE_URL, ssl: { require: true, rejectUnauthorized: false } } :
+                       { host: "localhost", port: 5432, user: "postgres", password: "postgres192", database: "discussionboard" }
+                      ),
       passport = require("passport"),
       LocalStrategy = require("passport-local").Strategy,
       flash = require("express-flash"),
@@ -58,8 +61,6 @@ server.get("/archive", isLoggedIn, isTutor, async (req, res) => {
     try {
         // queries and renders all archived discussion boards if user is tutor (isTutor middleware)
         const archiveDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE dis_owner=$1 AND archive=true GROUP BY dis_id ORDER BY dis_id DESC;`, [req.user.id]);
-        console.log("Archived boards:");
-        console.log(archiveDisc.rows);
         res.render("archive", { user: req.user, archiveDiscs: archiveDisc.rows, message: req.flash("activeLimit")[0] });
     }
     catch(e) {
