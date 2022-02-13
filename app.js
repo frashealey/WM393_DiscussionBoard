@@ -4,7 +4,18 @@ const { execPath } = require("process"),
       bodyParser = require("body-parser"),
       path = require("path"),
       { Pool } = require("pg"),
-      pool1 = new Pool(process.env.DATABASE_URL || { host: "localhost", port: 5432, user: "postgres", password: "postgres192", database: "discussionboard" }),
+    //   pool1 = new Pool({
+    //     host: "ec2-54-220-14-54.eu-west-1.compute.amazonaws.com",
+    //     port: 5432,
+    //     user: "ncwvkhbstisnwb",
+    //     password: "709e09497df536b208f5fddd1f105e5b7aa05c5555e46d6fc4b0bfb2fa1e9098",
+    //     database: "dvj5v33apq5oj",
+    //     ssl: {
+    //         require: true,
+    //         rejectUnauthorized: false
+    //     }
+    //   }),
+      pool1 = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { require: true, rejectUnauthorized: false } } || { host: "localhost", port: 5432, user: "postgres", password: "postgres192", database: "discussionboard" , ssl: { require: true, rejectUnauthorized: false }}),
       passport = require("passport"),
       LocalStrategy = require("passport-local").Strategy,
       flash = require("express-flash"),
