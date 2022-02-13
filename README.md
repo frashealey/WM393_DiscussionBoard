@@ -31,7 +31,7 @@ npm install
 - (Optional) paste the contents of [db/exampledata_db.sql](https://github.com/frashealey/WM393_DiscussionBoard/blob/master/db/exampledata_db.sql) to terminal
 
 #### Testing
-- The PostgreSQL database can be tested by logging into PostgreSQL and pasting the contents of [test_db.sql](https://github.com/frashealey/WM393_DiscussionBoard/blob/master/db/test_db.sql)
+- The PostgreSQL database can be tested by logging into PostgreSQL and pasting the contents of [test_db.sql](https://github.com/frashealey/WM393_DiscussionBoard/blob/master/test_db.sql)
 - The NodeJS application can be tested by navigating to the project directory and running in the terminal:
 ```console
 npm run test
@@ -46,5 +46,5 @@ node app.js
 
 
 
-# <img src="public/resources/warwicklogo.png" width="68" height="34">
+##### <img src="public/resources/warwicklogo.png" width="68" height="34">
 ##### © 2021-2022 Fras Healey | Developed by Fras Healey (1928864)
