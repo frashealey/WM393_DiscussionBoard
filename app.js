@@ -139,7 +139,6 @@ server.post("/editdiscussion", isLoggedIn, isTutor, isPermitted(null, `SELECT di
     let editDiscSuccess = false;
     try {
         const newName = req.body.discussionname;
-
         // ensure fields filled
         if (!newName) {
             req.flash("editDiscError", "Please fill all fields");
