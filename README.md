@@ -4,11 +4,7 @@
 
 The discussion board application can be accessed online at: https://discussion1928864.herokuapp.com/
 
-Please use the pre-created (Young Park) user login:
-
-ID: u9999999
-
-Password: testPass123
+Please use the pre-created (Young Park) user login (ID: u9999999, password: testPass123) or [register your own](https://discussion1928864.herokuapp.com/register)
 
 ### Hosting locally
 
@@ -45,6 +41,5 @@ node app.js
 - The application can then be accessed in your browser at: http://localhost:3000/
 
 
-
-##### <img src="public/resources/warwicklogo.png" width="68" height="34">
 ##### © 2021-2022 Fras Healey | Developed by Fras Healey (1928864)
+# <img src="public/resources/warwicklogo.png" width="68" height="34">
