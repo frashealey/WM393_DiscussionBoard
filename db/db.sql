@@ -48,7 +48,7 @@ $$ LANGUAGE 'plpgsql';
 CREATE TRIGGER trig_link_user_type AFTER INSERT OR UPDATE OR DELETE ON link_user FOR EACH ROW EXECUTE PROCEDURE func_link_user_type();
 
 -- discussion
--- (enforcement of 1 non-archived board per tutor to be outlined in js)
+-- (enforcement of 1 non-archived board per tutor outlined in js)
 CREATE TABLE discussion (
     dis_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     dis_owner CHAR(8) NOT NULL REFERENCES uni_user(id),

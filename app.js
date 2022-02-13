@@ -52,7 +52,8 @@ server.get("/", isLoggedIn, (req, res) => {
 });
 server.get("/discussions", isLoggedIn, async (req, res) => {
     try {
-        // queries and renders all discussion boards if user is tutor or discussion boards owned by linked tutor(s) if user is student
+        // queries and renders all discussion boards if user is tutor or
+        // discussion boards owned by linked tutor(s) if user is student
         const activeDisc = await pool1.query((req.user.utype === "t" ? `SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE archive=false GROUP BY dis_id ORDER BY CASE WHEN dis_owner=$1 THEN 1 ELSE 2 END, dis_owner, dis_id DESC;` : `SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND lnk_stu_id=$1 GROUP BY dis_id, id ORDER BY dis_id DESC;`), [req.user.id]);
         res.render("discussion", { user: req.user, activeDiscs: activeDisc.rows, message: req.flash("archiveLimit")[0] });
     }
@@ -65,7 +66,10 @@ server.get("/discussions", isLoggedIn, async (req, res) => {
 // archive
 server.get("/archive", isLoggedIn, isTutor, async (req, res) => {
     try {
+        // queries and renders all archived discussion boards if user is tutor (isTutor middleware)
         const archiveDisc = await pool1.query(`SELECT dis_id, dis_owner, dis_title, archive, COUNT(DISTINCT top_id) AS top_count, COUNT(DISTINCT res_id) AS res_count FROM discussion LEFT JOIN topic ON dis_id=top_dis LEFT JOIN response ON top_id=res_top WHERE dis_owner=$1 AND archive=true GROUP BY dis_id ORDER BY dis_id DESC;`, [req.user.id]);
+        console.log("Archived boards:");
+        console.log(archiveDisc.rows);
         res.render("archive", { user: req.user, archiveDiscs: archiveDisc.rows, message: req.flash("activeLimit")[0] });
     }
     catch(e) {
@@ -77,9 +81,10 @@ server.get("/archive", isLoggedIn, isTutor, async (req, res) => {
 // archive discussion
 server.post("/archivediscussion", isLoggedIn, isTutor, async (req, res) => {
     try {
-        // check that user is with 50 archived boards limit
+        // check that user is within 50 archived boards limit
         const archiveLimit = await pool1.query(`SELECT COUNT(dis_id) FROM discussion WHERE dis_owner=$1 AND archive=true;`, [req.user.id]);
         if (parseInt(archiveLimit.rows[0].count) < 50) {
+            // archive discussion (set archive attribute to true)
             await pool1.query(`UPDATE discussion SET archive=true WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
         }
         else {
@@ -100,6 +105,7 @@ server.post("/unarchivediscussion", isLoggedIn, isTutor, async (req, res) => {
         // check that user has 0 active discussion boards
         const activeLimit = await pool1.query(`SELECT COUNT(dis_id) FROM discussion WHERE dis_owner=$1 AND archive=false;`, [req.user.id]);
         if (parseInt(activeLimit.rows[0].count) === 0) {
+            // unarchive discussion (set archive attribute to false)
             await pool1.query(`UPDATE discussion SET archive=false WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]);
         }
         else {
@@ -134,6 +140,7 @@ server.get("/newdiscussion", isLoggedIn, isTutor, (req, res) => {
 server.post("/creatediscussion", isLoggedIn, isTutor, async (req, res) => {
     let createDiscSuccess = false;
     try {
+        // retrieves inputted values from form, and number of active and archived discussions
         const newDiscCreds = {
             discussionname: req.body.discussionname,
             createasarchived: Boolean(req.body.createasarchived)
@@ -141,7 +148,7 @@ server.post("/creatediscussion", isLoggedIn, isTutor, async (req, res) => {
               activeLimit = await pool1.query(`SELECT COUNT(dis_id) FROM discussion WHERE dis_owner=$1 AND archive=false;`, [req.user.id]),
               archiveLimit = await pool1.query(`SELECT COUNT(dis_id) FROM discussion WHERE dis_owner=$1 AND archive=true;`, [req.user.id]);
 
-        // ensure fields filled (do not need to check createasarchived, as a value for this will always be selected)
+        // ensure fields filled (do not need to check createasarchived, as a value will always be selected)
         if (!newDiscCreds.discussionname) {
             req.flash("createDiscError", "Please fill all fields");
         }
@@ -181,6 +188,7 @@ server.post("/creatediscussion", isLoggedIn, isTutor, async (req, res) => {
 // topic
 server.get("/topics", isLoggedIn, isPermitted(`SELECT dis_id, dis_title, dis_owner FROM discussion INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND dis_id=$1 AND lnk_stu_id=$2 GROUP BY dis_id, id;`, `SELECT dis_id, dis_title, dis_owner FROM discussion WHERE archive=false AND dis_id=$1;`, "dis_id", "/discussions", 1), async (req, res) => {
     try {
+        // queries and renders all topics for selected discussion board
         const discInfo = await pool1.query(`SELECT dis_id, dis_title, dis_owner FROM discussion WHERE dis_id=$1;`, [parseInt(req.query.dis_id)]),
               activeTopic = await pool1.query(`SELECT top_id, top_dis, dis_title, dis_owner, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, top_title, top_desc, top_datetime, COUNT(DISTINCT res_id) AS res_count FROM topic LEFT JOIN response ON top_id=res_top INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id WHERE top_dis=$1 GROUP BY top_id, dis_id, id ORDER BY top_id DESC;`, [parseInt(req.query.dis_id)]);
         res.render("topic", { user: req.user, activeTopic: activeTopic.rows, discInfo: discInfo.rows[0] });
@@ -211,6 +219,7 @@ server.get("/newtopic", isLoggedIn, isTutor, isPermitted(null, `SELECT dis_id, d
 server.post("/createtopic", isLoggedIn, isTutor, isPermitted(null, `SELECT dis_id, dis_owner, archive FROM discussion WHERE archive=false AND dis_id=$1 AND dis_owner=$2;`, "dis_id", "back", 2), async (req, res) => {
     let createTopicSuccess = false;
     try {
+        // retrieves inputted values from form, and number of topics
         const newTopicCreds = {
             topictitle: req.body.topictitle,
             topicdesc: (req.body.topicdesc === "" ? null : req.body.topicdesc)
@@ -254,6 +263,7 @@ server.post("/createtopic", isLoggedIn, isTutor, isPermitted(null, `SELECT dis_i
 // response
 server.get("/responses", isLoggedIn, isPermitted(`SELECT top_id, top_dis, dis_owner, top_title, top_desc, top_datetime FROM topic INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND top_id=$1 AND lnk_stu_id=$2;`, `SELECT top_id, top_dis, dis_owner, top_title, top_desc, top_datetime FROM topic INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND top_id=$1;`, "top_id", "back", 1), async (req, res) => {
     try {
+        // queries and renders topic info, all responses, and likes for selected topic
         const topInfo = await pool1.query(`SELECT top_id, top_title, dis_owner FROM topic INNER JOIN discussion ON top_dis=dis_id WHERE top_id=$1;`, [req.query.top_id]),
               activeRes = await pool1.query(`SELECT res_id, res_user, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, res_top, top_title, top_desc, res_title, res_text, res_datetime, replyto, pinned, COUNT(lke_res) AS likes FROM response INNER JOIN uni_user ON res_user=id INNER JOIN topic ON res_top=top_id LEFT JOIN liked ON res_id=lke_res WHERE res_top=$1 GROUP BY res_id, id, top_id ORDER BY pinned DESC, res_datetime ASC;`, [parseInt(req.query.top_id)]),
               activeLike = await pool1.query(`SELECT lke_user, lke_res FROM liked;`);
@@ -274,7 +284,7 @@ server.post("/likeresponse", isLoggedIn, isPermitted(`SELECT res_id, res_user, t
         if (isLiked.rows.length === 0) {
             await pool1.query(`INSERT INTO liked (lke_user, lke_res) VALUES ($1, $2);`, [req.user.id, parseInt(req.query.res_id)]);
         }
-        // un-like response if user has already liked
+        // unlike response if user has already liked
         else {
             await pool1.query(`DELETE FROM liked WHERE lke_user=$1 AND lke_res=$2;`, [req.user.id, parseInt(req.query.res_id)]);
         };
@@ -289,7 +299,7 @@ server.post("/likeresponse", isLoggedIn, isPermitted(`SELECT res_id, res_user, t
 
 // pin response
 server.post("/pinresponse", isLoggedIn, isTutor, isPermitted(null, `SELECT res_id, res_top, dis_id, dis_owner, archive FROM response INNER JOIN topic ON res_top=top_id INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND res_id=$1 AND dis_owner=$2;`, "res_id", "back", 2), async (req, res) => {
-    // creates a client (as transactions are needed here)
+    // creates a client (as transactions are needed)
     const client = await pool1.connect();
     try {
         // check if given response is pinned and if another response in its topic is pinned
@@ -364,15 +374,17 @@ server.get("/newresponse", isLoggedIn, isPermitted(`SELECT top_id FROM topic INN
 server.post("/createresponse", isLoggedIn, isPermitted(`SELECT top_id FROM topic INNER JOIN discussion ON top_dis=dis_id INNER JOIN uni_user ON dis_owner=id INNER JOIN link_user ON id=lnk_tut_id WHERE archive=false AND top_id=$1 AND lnk_stu_id=$2;`, `SELECT top_id from topic INNER JOIN discussion ON top_dis=dis_id WHERE archive=false AND top_id=$1;`, "top_id", "back", 1), async (req, res) => {
     let createResponseSuccess = false;
     try {
+        // retrieves inputted values from form
         const newResponseCreds = {
             res_title: req.body.res_title,
             res_text: req.body.res_text
         };
-        // ensure fields filled
+        // ensure title and text fields are filled
         if (!newResponseCreds.res_title || !newResponseCreds.res_text) {
             req.flash("createResponseError", "Please fill all fields");
         }
         else {
+            // insert reponse with/without replyto attribute depending on if reply selected
             await pool1.query(`INSERT INTO response (res_user, res_top, res_title, res_text, replyto) VALUES ($1, $2, $3, $4, $5)`,
                               [req.user.id, parseInt(req.query.top_id), newResponseCreds.res_title, newResponseCreds.res_text, (req.query.replyto ? parseInt(req.query.replyto) : null)]);
             createResponseSuccess = true;
@@ -393,11 +405,12 @@ server.post("/createresponse", isLoggedIn, isPermitted(`SELECT top_id FROM topic
         };
     }
     finally {
+        // redirect to responses page if success
         if (createResponseSuccess) {
             res.redirect("/responses?top_id=" + encodeURIComponent(req.query.top_id));
         }
         else if (!createResponseSuccess) {
-            // redirect to reply page if replying to repsonse
+            // redirect with replyto param if replying to repsonse
             if (req.query.replyto) {
                 res.redirect("/newresponse?top_id=" + encodeURIComponent(req.query.top_id) + "&replyto=" + encodeURIComponent(req.query.replyto));
             }
@@ -426,6 +439,7 @@ server.get("/register", isNotLoggedIn, (req, res) => {
 server.post("/register", async (req, res) => {
     let regSuccess = false;
     try {
+        // retrieves inputted values from form, and queries existing registration
         const regCreds = {
             id: req.body.id,
             fname: req.body.fname,
@@ -437,7 +451,7 @@ server.post("/register", async (req, res) => {
         },
               regExists = await pool1.query(`SELECT id, email, pw FROM uni_user WHERE id=$1 OR email=Encrypt($2, 'discussKey192192', 'aes');`, [regCreds.id, regCreds.email]);
 
-        // ensure fields filled (do not need to check utype, as a value for this will always be selected)
+        // ensure fields filled (do not need to check utype, as a value will always be selected)
         if (!regCreds.id || !regCreds.fname || !regCreds.lname || !regCreds.email || !regCreds.pw || !regCreds.confpw) {
             req.flash("registerError", "Please fill all fields");
         }
@@ -499,14 +513,18 @@ function passportInit(passport) {
         try {
             const idCheck = await pool1.query(`SELECT id FROM uni_user WHERE id=$1`, [id]);
             if (idCheck.rows.length) {
+                // query username and password
                 const pwCheck = await pool1.query(`SELECT id, pw FROM uni_user WHERE id=$1 AND pw=Crypt($2, pw);`, [id, pw]);
+                // correct username and password
                 if (pwCheck.rows.length === 1) {
                     return done(null, pwCheck.rows[0]);
                 }
+                // incorrect password
                 else {
                     return done(null, false, { message: "Incorrect username/password" });
                 };
             }
+            // no user with that ID
             else {
                 return done(null, false, { message: "Incorrect username/password" }); 
             };
@@ -516,8 +534,9 @@ function passportInit(passport) {
             return done(e, false, { message: "Unknown error - please try again" });
         };
     }));
-
+    // serialize user on login
     passport.serializeUser((user, done) => done(null, user.id));
+    // deserialize user on logout
     passport.deserializeUser(async (id, done) => {
         try {
             const findUser = await pool1.query(`SELECT id, pw, Encode(Decrypt(fname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS fname, Encode(Decrypt(lname, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS lname, Encode(Decrypt(email, 'discussKey192192', 'aes'), 'escape')::VARCHAR AS email, Encode(Decrypt(utype, 'discussKey192192', 'aes'), 'escape')::CHAR(1) AS utype FROM uni_user WHERE id=$1;`, [id]);
@@ -573,5 +592,8 @@ function isPermitted(queryTextStu, queryTextTut, idParam, redirectTo, tutValues)
         };
     };
 };
+
+// export for unit testing
+module.exports = server;
 
 server.listen(process.env.PORT || 3000);
